@@ -21,7 +21,7 @@ public partial class CpuUsageResources
 	static CpuUsageResources()
 	{
 		PerformanceCounter = new PerformanceCounter("Processor Information", "% Processor Utility", "_Total");
-		PrivateFontCollection.AddFontFile("Fonts/Pretendard/Pretendard-ExtraLight.ttf");
+		PrivateFontCollection.AddFontFile("Fonts/Pretendard-ExtraLight.ttf");
 	}
 
 	public CpuUsageResources()

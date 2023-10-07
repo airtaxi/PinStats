@@ -19,13 +19,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Cpu.png" />
-    <None Remove="Fonts\Pretendard-ExtraLight.ttf" />
     <None Remove="Fonts\Pretendard-Thin.ttf" />
     <None Remove="ReportWindow.xaml" />
     <None Remove="Resources\CpuUsageResources.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Fonts\Pretendard\Pretendard-ExtraLight.ttf">
+    <Content Include="Fonts\Pretendard-ExtraLight.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="icon.ico" />
