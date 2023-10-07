@@ -52,7 +52,7 @@ public class CpuUsageViewModel : ObservableObject
 		};
 	}
 
-	public void InitializeSync() => Sync = new object();
+	public void RefreshSync() => Sync = new object();
 
 	private double[] GetSeparators()
 	{

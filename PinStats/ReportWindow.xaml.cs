@@ -24,7 +24,6 @@ public sealed partial class ReportWindow
 	private static partial int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, ref uint pvAttribute, uint cbAttribute);
 
 	public readonly static CpuUsageViewModel CpuUsageViewModel = new();
-
 	public ReportWindow()
 	{
 		InitializeComponent();
@@ -39,7 +38,7 @@ public sealed partial class ReportWindow
 		DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref attribute, sizeof(uint));
 
 		Activated += OnActivated;
-		CpuUsageViewModel.InitializeSync(); // Renew the "sync" of the CpuUsageViewModel to prevent the chart from not being properly displayed.
+		CpuUsageViewModel.RefreshSync(); // Renew the "sync" of the CpuUsageViewModel to prevent the chart from not being properly displayed.
 		CartesianChartCpuUsage.DataContext = CpuUsageViewModel;
 	}
 

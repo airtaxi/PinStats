@@ -90,10 +90,7 @@ public partial class CpuUsageResources
 		reportWindow.BringToFront();
 	}
 
-	private void OnCloseProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
-	{
-		Environment.Exit(0);
-	}
+	private void OnCloseProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args) => Environment.Exit(0);
 
 	private void OnSetupStartupProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
