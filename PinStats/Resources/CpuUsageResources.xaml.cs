@@ -21,9 +21,7 @@ public partial class CpuUsageResources
 	static CpuUsageResources()
 	{
 		PerformanceCounter = new PerformanceCounter("Processor Information", "% Processor Utility", "_Total");
-		PrivateFontCollection.AddFontFile("Fonts/Pretendard/Pretendard-Regular.ttf");
 		PrivateFontCollection.AddFontFile("Fonts/Pretendard/Pretendard-ExtraLight.ttf");
-		PrivateFontCollection.AddFontFile("Fonts/Pretendard/Pretendard-Thin.ttf");
 	}
 
 	public CpuUsageResources()
@@ -62,7 +60,7 @@ public partial class CpuUsageResources
 
 			await Task.Run(() =>
 			{
-				var font = new Font(PrivateFontCollection.Families[1], 12);
+				var font = new Font(PrivateFontCollection.Families[0], 12);
 				var stringFormat = new StringFormat
 				{
 					Alignment = StringAlignment.Center,
