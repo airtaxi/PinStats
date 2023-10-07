@@ -36,11 +36,20 @@ namespace PinStats.Resources
 		public CpuUsageResources()
 		{
 			InitializeComponent();
+			UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
+
 			_timer = new() { Interval = 250 };
 			_timer.Elapsed += OnCpuUsageTimerTick;
 			_timer.Start();
 			_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
 			TaskbarIconCpuUsage.ForceCreate();
+		}
+
+		private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
+		{
+			var isStartupProgram = StartupHelper.IsStartupProgram;
+			if (isStartupProgram) MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
+			else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 		}
 
 		private void OnCpuUsageTimerTick(object sender, object e)
@@ -92,5 +101,11 @@ namespace PinStats.Resources
 		{
 			Environment.Exit(0);
 		}
-	}
+
+		private void OnSetupStartupProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+		{
+			StartupHelper.SetupStartupProgram();
+			UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
+		}
+    }
 }

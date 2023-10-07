@@ -9,6 +9,11 @@
         NoLeftClickDelay="True">
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
+                <MenuFlyoutItem x:Name="MenuFlyoutItemSetupStartupProgram">
+                    <MenuFlyoutItem.Command>
+                        <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
+                    </MenuFlyoutItem.Command>
+                </MenuFlyoutItem>
                 <MenuFlyoutItem Text="Close">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnCloseProgramMenuFlyoutItemClicked"/>

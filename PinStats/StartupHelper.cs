@@ -1,0 +1,34 @@
+﻿using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PinStats
+{
+    public static class StartupHelper
+	{
+		private const string ProgramName = "PinStats";
+		private const string StartupRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+
+		public static bool IsStartupProgram {
+			get
+			{
+				using RegistryKey key = Registry.CurrentUser.OpenSubKey(StartupRegistryKey);
+				return key.GetValue(ProgramName) != null;
+			}
+		}
+
+		public static void SetupStartupProgram()
+		{
+			using RegistryKey key = Registry.CurrentUser.OpenSubKey(StartupRegistryKey, true);
+
+			if (!IsStartupProgram) key.SetValue(ProgramName, Process.GetCurrentProcess().MainModule.FileName);
+			else key.DeleteValue(ProgramName, false);
+
+			key.Close();
+		}
+	}
+}
