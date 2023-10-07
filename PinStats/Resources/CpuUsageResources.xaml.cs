@@ -29,9 +29,11 @@ public partial class CpuUsageResources
 		InitializeComponent();
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 
+		// TODO: add a setting to change the interval of the timer.
 		_timer = new() { Interval = 250 };
 		_timer.Elapsed += OnCpuUsageTimerTick;
 		_timer.Start();
+
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
 		TaskbarIconCpuUsage.ForceCreate();
 	}
@@ -50,7 +52,7 @@ public partial class CpuUsageResources
 		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
 
 		var cpuUsageText = cpuUsage.ToString("N0");
-		if(cpuUsage >= 100) cpuUsageText = "M";
+		if(cpuUsage >= 100) cpuUsageText = "M"; // CPU usage got occasionally 100% or more. So, I decided to use "M" instead of "100".
 
 		DispatcherQueue.TryEnqueue(async () =>
 		{
@@ -78,7 +80,7 @@ public partial class CpuUsageResources
 	private void OnCpuTaskbarIconLeftClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
 		var reportWindow = new ReportWindow();
-		var scale = (double)reportWindow.GetDpiForWindow() / 96;
+		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
 		var offsetX = (reportWindow.Width / 2) * scale;
 		var positionY = TaskBarHelper.GetTaskBarTop() - (reportWindow.Height * scale);
 
