@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    x:Class="PinStats.Resources.CpuUsageResources"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tb="using:H.NotifyIcon">
+    <tb:TaskbarIcon
+        x:Name="TaskbarIconCpuUsage"
+        NoLeftClickDelay="True">
+        <tb:TaskbarIcon.ContextFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Text="Close">
+                    <MenuFlyoutItem.Command>
+                        <XamlUICommand ExecuteRequested="OnCloseProgramMenuFlyoutItemClicked"/>
+                    </MenuFlyoutItem.Command>
+                </MenuFlyoutItem>
+            </MenuFlyout>
+        </tb:TaskbarIcon.ContextFlyout>
+        <tb:TaskbarIcon.LeftClickCommand>
+            <XamlUICommand ExecuteRequested="OnCpuTaskbarIconLeftClicked"/>
+        </tb:TaskbarIcon.LeftClickCommand>
+    </tb:TaskbarIcon>
+</ResourceDictionary>
