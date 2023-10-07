@@ -6,37 +6,36 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PinStats.Helpers
+namespace PinStats.Helpers;
+
+public static class TaskBarHelper
 {
-	public static class TaskBarHelper
+	private const int ABM_GETTASKBARPOS = 5;
+
+	[System.Runtime.InteropServices.DllImport("shell32.dll")]
+	private static extern IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
+
+	private struct APPBARDATA
 	{
-		private const int ABM_GETTASKBARPOS = 5;
+		public int cbSize;
+		public IntPtr hWnd;
+		public int uCallbackMessage;
+		public int uEdge;
+		public RECT rc;
+		public IntPtr lParam;
+	}
 
-		[System.Runtime.InteropServices.DllImport("shell32.dll")]
-		private static extern IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
+	private struct RECT
+	{
+		public int left, top, right, bottom;
+	}
 
-		private struct APPBARDATA
-		{
-			public int cbSize;
-			public IntPtr hWnd;
-			public int uCallbackMessage;
-			public int uEdge;
-			public RECT rc;
-			public IntPtr lParam;
-		}
+	public static int GetTaskBarTop()
+	{
+		APPBARDATA data = new APPBARDATA();
+		data.cbSize = Marshal.SizeOf(data);
+		SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
 
-		private struct RECT
-		{
-			public int left, top, right, bottom;
-		}
-
-		public static int GetTaskBarTop()
-		{
-			APPBARDATA data = new APPBARDATA();
-			data.cbSize = Marshal.SizeOf(data);
-			SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
-
-			return data.rc.top;
-		}
+		return data.rc.top;
 	}
 }

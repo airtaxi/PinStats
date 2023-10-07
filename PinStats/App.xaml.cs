@@ -5,23 +5,22 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
-namespace PinStats
+namespace PinStats;
+
+public partial class App : Application
 {
-	public partial class App : Application
+	private static Window s_tempWindow;
+
+	public App()
 	{
-		private static Window s_tempWindow;
+		InitializeComponent();
+	}
 
-		public App()
-		{
-			InitializeComponent();
-		}
-
-		protected override void OnLaunched(LaunchActivatedEventArgs args)
-		{
-			s_tempWindow = new();
-			s_tempWindow.AppWindow.IsShownInSwitchers = false;
-			s_tempWindow.Activate();
-			s_tempWindow.Hide();
-		}
+	protected override void OnLaunched(LaunchActivatedEventArgs args)
+	{
+		s_tempWindow = new();
+		s_tempWindow.AppWindow.IsShownInSwitchers = false;
+		s_tempWindow.Activate();
+		s_tempWindow.Hide();
 	}
 }
