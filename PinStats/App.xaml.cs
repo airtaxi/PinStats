@@ -45,9 +45,10 @@ public partial class App : Application
 
 	protected override void OnLaunched(LaunchActivatedEventArgs args)
 	{
+		// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
 		s_tempWindow = new();
-		s_tempWindow.AppWindow.IsShownInSwitchers = false;
+		s_tempWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the taskbar.
 		s_tempWindow.Activate();
-		s_tempWindow.Hide();
+		s_tempWindow.Hide(); // Hide the window so it doesn't appear on the screen.
 	}
 }

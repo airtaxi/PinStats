@@ -33,17 +33,19 @@ public sealed partial class ReportWindow
 		AppWindow.IsShownInSwitchers = false;
 		(AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
 
+		// AppWindow that manually set the border and title bar is not rounded.
 		IntPtr hwnd = this.GetWindowHandle();
 		uint attribute = (uint)DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
 		DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref attribute, sizeof(uint));
 
 		Activated += OnActivated;
-		CpuUsageViewModel.InitializeSync();
+		CpuUsageViewModel.InitializeSync(); // Renew the "sync" of the CpuUsageViewModel to prevent the chart from not being properly displayed.
 		CartesianChartCpuUsage.DataContext = CpuUsageViewModel;
 	}
 
 	private void OnActivated(object sender, WindowActivatedEventArgs args)
 	{
+		// Close the window when the window lost its focus.
 		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
 	}
 }
