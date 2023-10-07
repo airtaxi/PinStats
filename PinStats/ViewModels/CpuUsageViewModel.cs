@@ -82,7 +82,7 @@ public class CpuUsageViewModel : ObservableObject
 		lock (Sync)
 		{
 			_values.Add(new DateTimePoint(DateTime.Now, percent));
-			if (_values.Count > 50) _values.RemoveAt(0);
+			if (_values.Count > 100) _values.RemoveAt(0);
 
 			// we need to update the separators every time we add a new point 
 			_customAxis.CustomSeparators = GetSeparators();
