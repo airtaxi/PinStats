@@ -100,4 +100,4 @@ public partial class CpuUsageResources
 		StartupHelper.SetupStartupProgram();
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 	}
-    }
+}
