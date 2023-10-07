@@ -1,19 +1,11 @@
-﻿using H.NotifyIcon;
-using Microsoft.UI;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
+﻿using Microsoft.UI.Xaml.Input;
 using PinStats.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using Windows.Devices.Display;
 using WinUIEx;
 
 namespace PinStats.Resources;

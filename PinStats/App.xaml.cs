@@ -1,10 +1,5 @@
 ﻿using H.NotifyIcon;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Input;
-using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Text;
 namespace PinStats;
 
 public partial class App : Application
