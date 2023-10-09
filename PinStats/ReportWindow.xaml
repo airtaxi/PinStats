@@ -19,7 +19,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Padding="10,10,10,0">
+        <Grid Grid.Row="0" Padding="10,10,10,0" Margin="0,0,0,-10">
             <StackPanel>
                 <Grid>
                     <TextBlock x:Name="TextBlockCpuName"/>
@@ -60,8 +60,8 @@
                     <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="RadioButtonCpu" Content="CPU" Click="OnRadioButtonClicked"/>
-                    <RadioButton x:Name="RadioButtonGpu" Content="GPU" Click="OnRadioButtonClicked"/>
+                    <RadioButton x:Name="RadioButtonCpu" Content="CPU Usage" Click="OnRadioButtonClicked"/>
+                    <RadioButton x:Name="RadioButtonGpu" Content="GPU Usage" Click="OnRadioButtonClicked"/>
                 </StackPanel>
             </StackPanel>
         </Grid>
@@ -72,7 +72,7 @@
                 Series="{Binding Series}"
                 XAxes="{Binding XAxes}"
                 YAxes="{Binding YAxes}"
-                Margin="15,0,0,0"/>
+                Margin="0,0,0,0"/>
         </Grid>
     </Grid>
 </winuiex:WindowEx>

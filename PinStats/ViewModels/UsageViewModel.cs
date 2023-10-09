@@ -44,8 +44,6 @@ public class UsageViewModel : ObservableObject
 		XAxes = new Axis[] { _customAxis };
 		YAxes = new Axis[] {
 			new Axis {
-				Name = "Usage (%)",
-				NameTextSize = 15,
 				MaxLimit = 100,
 				MinLimit = 0
 			}
