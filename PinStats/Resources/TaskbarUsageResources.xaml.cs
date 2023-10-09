@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using WinUIEx;
 using Timer = System.Timers.Timer;
@@ -35,6 +36,9 @@ public partial class TaskbarUsageResources
 
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
 		TaskbarIconCpuUsage.ForceCreate();
+
+		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
+		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
 	}
 
 	private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
