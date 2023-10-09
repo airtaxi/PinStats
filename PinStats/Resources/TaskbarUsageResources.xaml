@@ -18,6 +18,11 @@
                         <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
                     </MenuFlyoutItem.Command>
                 </MenuFlyoutItem>
+                <MenuFlyoutItem Text="Author: Howon Lee" IsEnabled="False">
+                    <MenuFlyoutItem.Command>
+                        <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
+                    </MenuFlyoutItem.Command>
+                </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemSetupStartupProgram">
                     <MenuFlyoutItem.Command>
