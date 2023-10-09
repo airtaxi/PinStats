@@ -112,11 +112,10 @@ public partial class TaskbarUsageResources
 	{
 		var reportWindow = new ReportWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
-		var offsetX = (reportWindow.Width / 2) * scale;
+		var positionX = TaskBarHelper.GetTaskBarRight() - (reportWindow.Width + 220) * scale;
 		var positionY = TaskBarHelper.GetTaskBarTop() - (reportWindow.Height * scale);
 
-		var cursorPosition = CursorHelper.GetCursorPosition();
-		reportWindow.Move((int)(cursorPosition.X - offsetX), (int)(positionY));
+		reportWindow.Move((int)positionX, (int)positionY);
 		reportWindow.Activate();
 		reportWindow.BringToFront();
 	}

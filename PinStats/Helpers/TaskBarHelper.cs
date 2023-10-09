@@ -33,4 +33,13 @@ public static class TaskBarHelper
 
 		return data.rc.top;
 	}
+
+	public static int GetTaskBarRight()
+	{
+		APPBARDATA data = new APPBARDATA();
+		data.cbSize = Marshal.SizeOf(data);
+		SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
+
+		return data.rc.right;
+	}
 }
