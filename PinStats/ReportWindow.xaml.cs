@@ -39,7 +39,7 @@ public sealed partial class ReportWindow
 
 		Activated += OnActivated;
 		CpuUsageViewModel.RefreshSync(); // Renew the "sync" of the CpuUsageViewModel to prevent the chart from not being properly displayed.
-		CartesianChartCpuUsage.DataContext = CpuUsageViewModel;
+		CartesianChartUsage.DataContext = CpuUsageViewModel;
 	}
 
 	private void OnActivated(object sender, WindowActivatedEventArgs args)

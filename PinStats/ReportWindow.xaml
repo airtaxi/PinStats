@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="1">
             <lvc:CartesianChart
-                x:Name="CartesianChartCpuUsage"
+                x:Name="CartesianChartUsage"
                 SyncContext="{Binding Sync}"
                 Series="{Binding Series}"
                 XAxes="{Binding XAxes}"
