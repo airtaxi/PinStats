@@ -16,7 +16,7 @@ public partial class TaskbarUsageResources
 {
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
-	private static readonly Timer UpdateTimer = new() { Interval = 500 };
+	private static readonly Timer UpdateTimer = new() { Interval = 250 };
 	private readonly Image _iconImage;
 
 	static TaskbarUsageResources()
