@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace PinStats.ViewModels;
 
-public class CpuUsageViewModel : ObservableObject
+public class UsageViewModel : ObservableObject
 {
 	private readonly List<DateTimePoint> _values = new();
 	private readonly DateTimeAxis _customAxis;
@@ -21,7 +21,7 @@ public class CpuUsageViewModel : ObservableObject
 	public object Sync { get; set; } = new object();
 	public bool IsReading { get; set; } = true;
 
-	public CpuUsageViewModel()
+	public UsageViewModel()
 	{
 		Series = new ObservableCollection<ISeries>
 		{

@@ -10,7 +10,7 @@ using WinUIEx;
 
 namespace PinStats.Resources;
 
-public partial class CpuUsageResources
+public partial class TaskbarUsageResources
 {
 	private readonly static PerformanceCounter PerformanceCounter;
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
@@ -18,13 +18,13 @@ public partial class CpuUsageResources
 	private readonly Timer _timer;
 	private readonly Image _iconImage;
 
-	static CpuUsageResources()
+	static TaskbarUsageResources()
 	{
 		PerformanceCounter = new PerformanceCounter("Processor Information", "% Processor Utility", "_Total");
 		PrivateFontCollection.AddFontFile("Fonts/Pretendard-ExtraLight.ttf");
 	}
 
-	public CpuUsageResources()
+	public TaskbarUsageResources()
 	{
 		InitializeComponent();
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();

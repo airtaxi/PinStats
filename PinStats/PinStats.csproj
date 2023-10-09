@@ -21,7 +21,7 @@
     <None Remove="Assets\Cpu.png" />
     <None Remove="Fonts\Pretendard-Thin.ttf" />
     <None Remove="ReportWindow.xaml" />
-    <None Remove="Resources\CpuUsageResources.xaml" />
+    <None Remove="Resources\TaskbarUsageResources.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Fonts\Pretendard-ExtraLight.ttf">
@@ -66,7 +66,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Resources\CpuUsageResources.xaml">
+    <Page Update="Resources\TaskbarUsageResources.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

@@ -23,7 +23,7 @@ public sealed partial class ReportWindow
 	[LibraryImport("dwmapi.dll")]
 	private static partial int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, ref uint pvAttribute, uint cbAttribute);
 
-	public readonly static CpuUsageViewModel CpuUsageViewModel = new();
+	public readonly static UsageViewModel CpuUsageViewModel = new();
 	public ReportWindow()
 	{
 		InitializeComponent();
