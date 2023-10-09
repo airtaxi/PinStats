@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Threading.Tasks;
-using System.Timers;
 using WinUIEx;
+using Timer = System.Timers.Timer;
 
 namespace PinStats.Resources;
 
