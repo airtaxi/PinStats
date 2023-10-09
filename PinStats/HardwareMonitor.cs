@@ -27,7 +27,7 @@ public sealed class UpdateVisitor : IVisitor
 public static class HardwareMonitor
 {
 	private readonly static Computer Computer;
-	private readonly static IHardware CpuHardware;
+	private readonly static List<IHardware> CpuHardwares = new();
 	private readonly static List<IHardware> GpuHardwares = new();
 	private readonly static List<IHardware> NetworkHardwares = new();
 	private readonly static List<IHardware> StorageHardwares = new();
@@ -49,7 +49,7 @@ public static class HardwareMonitor
 		{
 			if (hardware.HardwareType == HardwareType.Cpu)
 			{
-				CpuHardware = hardware;
+				CpuHardwares.Add(hardware);
 				continue;
 			}
 			else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel)
