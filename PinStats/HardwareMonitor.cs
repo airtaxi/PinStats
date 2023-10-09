@@ -32,6 +32,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> NetworkHardwares = new();
 	private readonly static List<IHardware> StorageHardwares = new();
 	private readonly static List<IHardware> MemoryHardwares = new();
+
 	static HardwareMonitor()
 	{
 		Computer = new Computer
@@ -75,4 +76,11 @@ public static class HardwareMonitor
 		}
 	}
 
+
+	public static float GetTotalCpuUsage()
+	{
+		CpuHardwares.ForEach(x => x.Update());
+		var cpuTotalSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
+		return cpuTotalSensors.Average(x => x.Value) ?? 0;
+	}
 }

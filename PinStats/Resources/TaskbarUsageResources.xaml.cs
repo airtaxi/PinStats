@@ -12,7 +12,6 @@ namespace PinStats.Resources;
 
 public partial class TaskbarUsageResources
 {
-	private readonly static PerformanceCounter CpuPerformanceCounter;
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
 	private readonly Timer _timer;
@@ -20,7 +19,6 @@ public partial class TaskbarUsageResources
 
 	static TaskbarUsageResources()
 	{
-		CpuPerformanceCounter = new PerformanceCounter("Processor Information", "% Processor Utility", "_Total");
 		PrivateFontCollection.AddFontFile("Fonts/Pretendard-ExtraLight.ttf");
 	}
 
@@ -48,7 +46,7 @@ public partial class TaskbarUsageResources
 	private bool _updatingImage = false;
 	private void OnCpuUsageTimerTick(object sender, object e)
 	{
-		var cpuUsage = CpuPerformanceCounter.NextValue();
+		var cpuUsage = HardwareMonitor.GetTotalCpuUsage();
 		cpuUsage = Math.Min(cpuUsage, 100);
 		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
 
