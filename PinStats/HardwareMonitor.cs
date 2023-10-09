@@ -109,9 +109,16 @@ public static class HardwareMonitor
 		var gpuHardware = GetCurrentGpuHardware();
 		gpuHardware.Update();
 
-		var gpuLoadSensors = gpuHardware.Sensors.Where(x => x.SensorType == SensorType.Load && x.Value != float.NaN);
-		var usage = gpuLoadSensors.Sum(x => x.Value);
-		return usage ?? 0;
+		if(gpuHardware.HardwareType == HardwareType.GpuIntel)
+		{
+			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
+			return gpuLoadSensor?.Value ?? 0;
+		}
+		else
+		{
+			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core");
+			return gpuLoadSensor?.Value ?? 0;
+		}
 	}
 
 	public static float? GetCurrentGpuTemperature()
