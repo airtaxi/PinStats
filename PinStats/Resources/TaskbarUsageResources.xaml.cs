@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Input;
+﻿using HidSharp.Reports;
+using Microsoft.UI.Xaml.Input;
 using PinStats.Helpers;
 using System;
 using System.Diagnostics;
@@ -29,7 +30,7 @@ public partial class TaskbarUsageResources
 
 		// TODO: add a setting to change the interval of the timer.
 		_timer = new() { Interval = 250 };
-		_timer.Elapsed += OnCpuUsageTimerTick;
+		_timer.Elapsed += OnUsageTimerTick;
 		_timer.Start();
 
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
@@ -44,14 +45,14 @@ public partial class TaskbarUsageResources
 	}
 
 	private bool _updatingImage = false;
-	private void OnCpuUsageTimerTick(object sender, object e)
+	private void OnUsageTimerTick(object sender, object e)
 	{
-		var cpuUsage = HardwareMonitor.GetTotalCpuUsage();
-		cpuUsage = Math.Min(cpuUsage, 100);
-		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
+		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
 
-		var cpuUsageText = cpuUsage.ToString("N0");
-		if(cpuUsage >= 100) cpuUsageText = "M"; // CPU usage got occasionally 100% or more. So, I decided to use "M" instead of "100".
+		float usage = 0f;
+		if (lastUsageTarget == "CPU") usage = HardwareMonitor.GetAverageCpuUsage();
+		else if (lastUsageTarget == "GPU") usage = HardwareMonitor.GetCurrentGpuUsage();
+		string usageText = GenerateUsageText(usage);
 
 		if (_updatingImage) return;
 		_updatingImage = true;
@@ -70,13 +71,28 @@ public partial class TaskbarUsageResources
 					LineAlignment = StringAlignment.Center
 				};
 				var rect = new RectangleF(0, 2, image.Width, image.Height);
-				graphics.DrawString(cpuUsageText, font, Brushes.Black, rect, stringFormat);
+				graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
 			});
 
 			TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
-			TaskbarIconCpuUsage.ToolTipText = $"CPU Usage: {cpuUsage:N0}%";
+			TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
 			_updatingImage = false;
 		});
+
+		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
+		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
+
+		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
+		ReportWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
+	}
+
+	private static string GenerateUsageText(float usage)
+	{
+		usage = Math.Min(usage, 100);
+
+		var usageText = usage.ToString("N0");
+		if (usage >= 100) usageText = "M"; // Usage can got 100% or more. So, I decided to use "M" instead of "100";
+		return usageText;
 	}
 
 	private void OnCpuTaskbarIconLeftClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)

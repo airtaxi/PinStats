@@ -10,15 +10,61 @@
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:vm="using:PinStats.ViewModels"
     mc:Ignorable="d"
-    Width="300"
-    Height="200"
+    Width="400"
+    Height="300"
     IsResizable="False">
 
-    <Grid x:Name="GdMain">
+    <Grid x:Name="GdMain" Unloaded="OnUnloaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Padding="10,10,10,0">
+            <StackPanel>
+                <Grid>
+                    <TextBlock x:Name="TextBlockCpuName"/>
+                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                        <TextBlock x:Name="TextBlockGpuName"/>
+                        <Button
+                            x:Name="ButtonSelectGpu"
+                            Margin="5,3,0,0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Height="10"
+                            Padding="0"
+                            VerticalAlignment="Center">
+                            <Button.Content>
+                                <SymbolIcon Symbol="More"/>
+                            </Button.Content>
+                            <Button.Flyout>
+                                <Flyout>
+                                    <ComboBox
+                                        Width="200"
+                                        x:Name="ComboBoxGpuList"
+                                        SelectionChanged="OnGpuListComboBoxSelectionChanged"/>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <TextBlock Text="Memory" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="TextBlockMemoryInformation" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <TextBlock Text="Network" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
+                </Grid>
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="RadioButtonCpu" Content="CPU" Click="OnRadioButtonClicked"/>
+                    <RadioButton x:Name="RadioButtonGpu" Content="GPU" Click="OnRadioButtonClicked"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
         <Grid Grid.Row="1">
             <lvc:CartesianChart
                 x:Name="CartesianChartUsage"
