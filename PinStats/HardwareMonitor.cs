@@ -31,6 +31,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> GpuHardwares = new();
 	private readonly static List<IHardware> NetworkHardwares = new();
 	private readonly static List<IHardware> StorageHardwares = new();
+	private readonly static List<IHardware> MemoryHardwares = new();
 	static HardwareMonitor()
 	{
 		Computer = new Computer
@@ -38,8 +39,6 @@ public static class HardwareMonitor
 			IsCpuEnabled = true,
 			IsGpuEnabled = true,
 			IsMemoryEnabled = true,
-			IsMotherboardEnabled = true,
-			IsControllerEnabled = true,
 			IsNetworkEnabled = true,
 			IsStorageEnabled = true
 		};
@@ -66,6 +65,11 @@ public static class HardwareMonitor
 			else if (hardware.HardwareType == HardwareType.Storage)
 			{
 				StorageHardwares.Add(hardware);
+				continue;
+			}
+			else if (hardware.HardwareType == HardwareType.Memory)
+			{
+				MemoryHardwares.Add(hardware);
 				continue;
 			}
 		}
