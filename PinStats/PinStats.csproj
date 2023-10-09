@@ -10,7 +10,6 @@
 		<PublishProfile>win10-$(Platform).pubxml</PublishProfile>
 		<WindowsPackageType>None</WindowsPackageType>
 		<UseWinUI>true</UseWinUI>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
