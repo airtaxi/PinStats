@@ -15,6 +15,7 @@ namespace PinStats.Resources;
 public partial class TaskbarUsageResources
 {
 	private const int UpdateTimerInterval = 250;
+	private const int TrayIconSize = 64;
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
 	private static Timer UpdateTimer;
@@ -33,7 +34,7 @@ public partial class TaskbarUsageResources
 		// TODO: add a setting to change the interval of the timer.
 		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 
-		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
+		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
 		Update();
 		TaskbarIconCpuUsage.ForceCreate();
 
