@@ -6,17 +6,18 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using WinUIEx;
-using Timer = System.Timers.Timer;
 
 namespace PinStats.Resources;
 
 public partial class TaskbarUsageResources
 {
+	private const int UpdateTimerInterval = 250;
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
-	private static readonly Timer UpdateTimer = new() { Interval = 250 };
+	private static Timer UpdateTimer;
 	private readonly Image _iconImage;
 
 	static TaskbarUsageResources()
@@ -30,8 +31,7 @@ public partial class TaskbarUsageResources
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 
 		// TODO: add a setting to change the interval of the timer.
-		UpdateTimer.Elapsed += OnUpdateTimerElapsed;
-		UpdateTimer.Start();
+		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
 		Update();
@@ -41,15 +41,18 @@ public partial class TaskbarUsageResources
 		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
 	}
 
+	private void UpdateTimerCallback(object state)
+	{
+		try { Update(); }
+		finally { UpdateTimer.Change(UpdateTimerInterval, Timeout.Infinite); }
+	}
+
 	private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
 	{
 		var isStartupProgram = StartupHelper.IsStartupProgram;
 		if (isStartupProgram) MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
 		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 	}
-
-	private bool _updatingImage = false;
-	private void OnUpdateTimerElapsed(object sender, object e) => Update();
 
 	private void Update()
 	{
@@ -60,29 +63,32 @@ public partial class TaskbarUsageResources
 		else if (lastUsageTarget == "GPU") usage = HardwareMonitor.GetCurrentGpuUsage();
 		string usageText = GenerateUsageText(usage);
 
-		if (_updatingImage) return;
-		_updatingImage = true;
 		DispatcherQueue.TryEnqueue(async () =>
 		{
-			var image = _iconImage;
-			using var bitmap = new Bitmap(image);
-			using var graphics = Graphics.FromImage(bitmap);
-
-			await Task.Run(() =>
+			try
 			{
-				var font = new Font(PrivateFontCollection.Families[0], 12);
-				var stringFormat = new StringFormat
-				{
-					Alignment = StringAlignment.Center,
-					LineAlignment = StringAlignment.Center
-				};
-				var rect = new RectangleF(0, 2, image.Width, image.Height);
-				graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
-			});
+				var image = _iconImage;
+				using var bitmap = new Bitmap(image);
+				using var graphics = Graphics.FromImage(bitmap);
 
-			TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
-			TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
-			_updatingImage = false;
+				await Task.Run(() =>
+				{
+					var font = new Font(PrivateFontCollection.Families[0], 12);
+					var stringFormat = new StringFormat
+					{
+						Alignment = StringAlignment.Center,
+						LineAlignment = StringAlignment.Center
+					};
+					var rect = new RectangleF(0, 2, image.Width, image.Height);
+					graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
+				});
+
+				var icon = bitmap.GetHicon();
+				TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(icon);
+				TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
+			}
+			catch (ExternalException) { } // GDP+ can throw this exception when the icon is being updated.
+			catch (InvalidOperationException) { } // H.NotifyIcon can throw this exception when the icon is being updated.
 		});
 
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
