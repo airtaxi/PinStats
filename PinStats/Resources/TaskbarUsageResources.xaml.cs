@@ -31,10 +31,11 @@ public partial class TaskbarUsageResources
 
 		// TODO: add a setting to change the interval of the timer.
 		_timer = new() { Interval = 250 };
-		_timer.Elapsed += OnUsageTimerTick;
+		_timer.Elapsed += OnUpdateTimerTick;
 		_timer.Start();
 
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
+		Update();
 		TaskbarIconCpuUsage.ForceCreate();
 
 		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
@@ -49,7 +50,9 @@ public partial class TaskbarUsageResources
 	}
 
 	private bool _updatingImage = false;
-	private void OnUsageTimerTick(object sender, object e)
+	private void OnUpdateTimerTick(object sender, object e) => Update();
+
+	private void Update()
 	{
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
 
