@@ -45,7 +45,8 @@
                             <Button.Flyout>
                                 <Flyout>
                                     <ComboBox
-                                        Width="200"
+                                        Width="auto"
+                                        MinWidth="200"
                                         x:Name="ComboBoxGpuList"
                                         SelectionChanged="OnGpuListComboBoxSelectionChanged"/>
                                 </Flyout>
