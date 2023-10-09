@@ -45,6 +45,7 @@ public partial class TaskbarUsageResources
 		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 	}
 
+	private bool _updatingImage = false;
 	private void OnCpuUsageTimerTick(object sender, object e)
 	{
 		var cpuUsage = CpuPerformanceCounter.NextValue();
@@ -54,6 +55,8 @@ public partial class TaskbarUsageResources
 		var cpuUsageText = cpuUsage.ToString("N0");
 		if(cpuUsage >= 100) cpuUsageText = "M"; // CPU usage got occasionally 100% or more. So, I decided to use "M" instead of "100".
 
+		if (_updatingImage) return;
+		_updatingImage = true;
 		DispatcherQueue.TryEnqueue(async () =>
 		{
 			var image = _iconImage;
@@ -74,6 +77,7 @@ public partial class TaskbarUsageResources
 
 			TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
 			TaskbarIconCpuUsage.ToolTipText = $"CPU Usage: {cpuUsage:N0}%";
+			_updatingImage = false;
 		});
 	}
 
