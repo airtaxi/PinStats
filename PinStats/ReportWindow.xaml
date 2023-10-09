@@ -23,7 +23,10 @@
             <StackPanel>
                 <Grid>
                     <TextBlock x:Name="TextBlockCpuName"/>
-                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right"/>
+                    <TextBlock
+                        x:Name="TextBlockCpuInformation"
+                        HorizontalAlignment="Right"
+                        ToolTipService.ToolTip="Temperature information is only available with Administrator privileges."/>
                 </Grid>
                 <Grid>
                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
