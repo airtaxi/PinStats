@@ -7,6 +7,10 @@
     <tb:TaskbarIcon
         x:Name="TaskbarIconCpuUsage"
         NoLeftClickDelay="True">
+        <tb:TaskbarIcon.IconSource>
+            <tb:GeneratedIconSource
+                BackgroundSource="ms-appx:///Assets/Cpu.png"/>
+        </tb:TaskbarIcon.IconSource>
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False">
