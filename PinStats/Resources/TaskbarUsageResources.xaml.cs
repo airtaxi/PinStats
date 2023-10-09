@@ -16,7 +16,7 @@ public partial class TaskbarUsageResources
 {
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
-	private readonly Timer _timer;
+	private static readonly Timer UpdateTimer = new() { Interval = 1000 };
 	private readonly Image _iconImage;
 
 	static TaskbarUsageResources()
@@ -30,9 +30,8 @@ public partial class TaskbarUsageResources
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 
 		// TODO: add a setting to change the interval of the timer.
-		_timer = new() { Interval = 250 };
-		_timer.Elapsed += OnUpdateTimerTick;
-		_timer.Start();
+		UpdateTimer.Elapsed += OnUpdateTimerElapsed;
+		UpdateTimer.Start();
 
 		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(64, 64, null, IntPtr.Zero);
 		Update();
@@ -50,7 +49,7 @@ public partial class TaskbarUsageResources
 	}
 
 	private bool _updatingImage = false;
-	private void OnUpdateTimerTick(object sender, object e) => Update();
+	private void OnUpdateTimerElapsed(object sender, object e) => Update();
 
 	private void Update()
 	{

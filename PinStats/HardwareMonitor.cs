@@ -112,7 +112,9 @@ public static class HardwareMonitor
 		if(gpuHardware.HardwareType == HardwareType.GpuIntel)
 		{
 			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
-			return gpuLoadSensor?.Value ?? 0;
+			var value = gpuLoadSensor?.Value ?? 0;
+			value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+			return value;
 		}
 		else
 		{
