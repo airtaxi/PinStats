@@ -55,6 +55,10 @@ public partial class TaskbarUsageResources
 		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 	}
 
+	[LibraryImport("user32.dll")]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static partial bool DestroyIcon(IntPtr handle);
+
 	private void Update()
 	{
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
@@ -81,9 +85,18 @@ public partial class TaskbarUsageResources
 				var rect = new RectangleF(0, 2, image.Width, image.Height);
 				graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
 
-				var icon = bitmap.GetHicon();
-				TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(icon);
-				TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
+				try
+				{
+					var icon = bitmap.GetHicon();
+					try
+					{
+						TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(icon);
+						TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
+					}
+					finally { DestroyIcon(icon); } // Destroying the icon handle manually since it's not automatically destroyed.
+				}
+				catch (ExternalException) { } // Handling rare GDI+ exception.
+				catch (InvalidOperationException) { } // Handling rare GDI+ exception.
 			}
 		});
 
@@ -93,6 +106,7 @@ public partial class TaskbarUsageResources
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 		ReportWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
 	}
+
 
 	private static string GenerateUsageText(float usage)
 	{
