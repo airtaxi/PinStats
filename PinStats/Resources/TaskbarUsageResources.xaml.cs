@@ -64,32 +64,27 @@ public partial class TaskbarUsageResources
 		else if (lastUsageTarget == "GPU") usage = HardwareMonitor.GetCurrentGpuUsage();
 		string usageText = GenerateUsageText(usage);
 
-		DispatcherQueue.TryEnqueue(async () =>
+		DispatcherQueue.TryEnqueue(() =>
 		{
-			try
+			lock (_iconImage)
 			{
 				var image = _iconImage;
 				using var bitmap = new Bitmap(image);
 				using var graphics = Graphics.FromImage(bitmap);
 
-				await Task.Run(() =>
+				var font = new Font(PrivateFontCollection.Families[0], 12);
+				var stringFormat = new StringFormat
 				{
-					var font = new Font(PrivateFontCollection.Families[0], 12);
-					var stringFormat = new StringFormat
-					{
-						Alignment = StringAlignment.Center,
-						LineAlignment = StringAlignment.Center
-					};
-					var rect = new RectangleF(0, 2, image.Width, image.Height);
-					graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
-				});
+					Alignment = StringAlignment.Center,
+					LineAlignment = StringAlignment.Center
+				};
+				var rect = new RectangleF(0, 2, image.Width, image.Height);
+				graphics.DrawString(usageText, font, Brushes.Black, rect, stringFormat);
 
 				var icon = bitmap.GetHicon();
 				TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(icon);
 				TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
 			}
-			catch (ExternalException) { } // GDP+ can throw this exception when the icon is being updated.
-			catch (InvalidOperationException) { } // H.NotifyIcon can throw this exception when the icon is being updated.
 		});
 
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
