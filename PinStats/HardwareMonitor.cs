@@ -21,6 +21,8 @@ public sealed class UpdateVisitor : IVisitor
 
 public static class HardwareMonitor
 {
+	private const int UsageCacheCount = 20;
+
 	private readonly static Computer Computer;
 
 	private readonly static List<IHardware> CpuHardwares = new();
@@ -203,7 +205,7 @@ public static class HardwareMonitor
 		var cpuTotalSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
 		var usage = cpuTotalSensors.Average(x => x.Value) ?? 0;
 		LastCpuUsages.Add(usage);
-		if (LastCpuUsages.Count > 5) LastCpuUsages.RemoveAt(0);
+		if (LastCpuUsages.Count > UsageCacheCount) LastCpuUsages.RemoveAt(0);
 		s_cpuUsage = LastCpuUsages.Average();
 	}
 
@@ -226,7 +228,7 @@ public static class HardwareMonitor
 			LastGpuUsages.Add(value);
 		}
 
-		if (LastGpuUsages.Count > 5) LastGpuUsages.RemoveAt(0);
+		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
 		s_gpuUsage = LastGpuUsages.Average();
 	}
 }
