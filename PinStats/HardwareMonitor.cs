@@ -1,12 +1,5 @@
 ﻿using LibreHardwareMonitor.Hardware;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Contacts.DataProvider;
-using Windows.Networking.NetworkOperators;
+using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace PinStats;
@@ -29,6 +22,7 @@ public sealed class UpdateVisitor : IVisitor
 public static class HardwareMonitor
 {
 	private readonly static Computer Computer;
+
 	private readonly static List<IHardware> CpuHardwares = new();
 	private readonly static List<IHardware> GpuHardwares = new();
 	private readonly static List<IHardware> NetworkHardwares = new();
@@ -38,6 +32,15 @@ public static class HardwareMonitor
 	private readonly static Timer NetworkTimer = new() { Interval = 1000 };
 	private static long s_downloadSpeedInBytes;
 	private static long s_uploadSpeedInBytes;
+
+	private readonly static Timer CpuUsageTimer = new() { Interval = 50 };
+	private readonly static List<float> LastCpuUsages = new();
+	private static float s_cpuUsage;
+
+	private readonly static Timer GpuUsageTimer = new() { Interval = 50 };
+	private readonly static List<float> LastGpuUsages = new();
+	private static float s_gpuUsage;
+
 
 	static HardwareMonitor()
 	{
@@ -83,19 +86,20 @@ public static class HardwareMonitor
 		GpuHardwares.Reverse();
 
 		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
-
 		NetworkTimer.Start();
+
+		CpuUsageTimer.Elapsed += OnCpuUsageTimerElapsed;
+		CpuUsageTimer.Start();
+
+		GpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
+		GpuUsageTimer.Start();
+		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
 	}
 
 	public static List<string> GetGpuHardwareNames() => GpuHardwares.Select(x => x.Name).ToList();
 
-	public static float GetAverageCpuUsage()
-	{
-		CpuHardwares.ForEach(x => x.Update());
-		var cpuTotalSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
-		return cpuTotalSensors.Average(x => x.Value) ?? 0;
-	}
-	
+	public static float GetAverageCpuUsage() => s_cpuUsage;
+
 	public static float? GetAverageCpuTemperature()
 	{
 		CpuHardwares.ForEach(x => x.Update());
@@ -104,24 +108,7 @@ public static class HardwareMonitor
 		return temperature > 0 ? temperature : null;
 	}
 
-	public static float GetCurrentGpuUsage()
-	{
-		var gpuHardware = GetCurrentGpuHardware();
-		gpuHardware.Update();
-
-		if(gpuHardware.HardwareType == HardwareType.GpuIntel)
-		{
-			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
-			var value = gpuLoadSensor?.Value ?? 0;
-			value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
-			return value;
-		}
-		else
-		{
-			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core");
-			return gpuLoadSensor?.Value ?? 0;
-		}
-	}
+	public static float GetCurrentGpuUsage() => s_gpuUsage;
 
 	public static float? GetCurrentGpuTemperature()
 	{
@@ -191,7 +178,7 @@ public static class HardwareMonitor
 
 	private static long s_bytesUploaded;
 	private static long s_bytesDownloaded;
-	private static void OnNetworkTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
 	{
 		var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
 		var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
@@ -208,5 +195,38 @@ public static class HardwareMonitor
 
 		s_bytesUploaded = totalUploadedBytes;
 		s_bytesDownloaded = totalDownloadedBytes;
+	}
+
+	private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		CpuHardwares.ForEach(x => x.Update());
+		var cpuTotalSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
+		var usage = cpuTotalSensors.Average(x => x.Value) ?? 0;
+		LastCpuUsages.Add(usage);
+		if (LastCpuUsages.Count > 5) LastCpuUsages.RemoveAt(0);
+		s_cpuUsage = LastCpuUsages.Average();
+	}
+
+	private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		var gpuHardware = GetCurrentGpuHardware();
+		gpuHardware.Update();
+
+		if (gpuHardware.HardwareType == HardwareType.GpuIntel)
+		{
+			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
+			var value = gpuLoadSensor?.Value ?? 0;
+			value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+			LastGpuUsages.Add(value);
+		}
+		else
+		{
+			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core");
+			var value = gpuLoadSensor?.Value ?? 0;
+			LastGpuUsages.Add(value);
+		}
+
+		if (LastGpuUsages.Count > 5) LastGpuUsages.RemoveAt(0);
+		s_gpuUsage = LastGpuUsages.Average();
 	}
 }
