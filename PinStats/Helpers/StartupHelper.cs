@@ -21,7 +21,8 @@ public static class StartupHelper
 		}
 	}
 
-	public static bool IsStartupProgram {
+	public static bool IsStartupProgram
+	{
 		get
 		{
 			using var taskService = new TaskService();
