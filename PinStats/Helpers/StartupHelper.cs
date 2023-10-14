@@ -42,6 +42,9 @@ public static class StartupHelper
 			taskDefinition.Principal.RunLevel = TaskRunLevel.Highest;
 		
 			taskDefinition.Triggers.Add(new LogonTrigger());
+			taskDefinition.Settings.DisallowStartIfOnBatteries = false;
+			taskDefinition.Settings.StopIfGoingOnBatteries = false;
+			taskDefinition.Settings.ExecutionTimeLimit = TimeSpan.Zero;
 
 			var programPath = Process.GetCurrentProcess().MainModule.FileName;
 			taskDefinition.Actions.Add(new ExecAction(programPath, null, null));
