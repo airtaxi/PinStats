@@ -53,6 +53,7 @@ public static class HardwareMonitor
 			IsGpuEnabled = true,
 			IsMemoryEnabled = true,
 			IsNetworkEnabled = true,
+			IsBatteryEnabled = true,
 			IsStorageEnabled = true
 		};
 		Computer.Open();
