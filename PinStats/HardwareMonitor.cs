@@ -190,7 +190,22 @@ public static class HardwareMonitor
 		var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
 		var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
 		var result = chargeRate + dischargeRate;
-		return result; ;
+		return result;
+	}
+
+	public static float? GetAverageBatteryHealthPercent(bool update = false)
+	{
+		if(BatteryHardwares == null) return null;
+		if (update) BatteryHardwares.ForEach(x => x.Update());
+
+		var designedCapacitySensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Designed Capacity");
+		var fullyChargedCapacitySensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity");
+		var designedCapacitySum = designedCapacitySensors.Sum(x => x.Value) ?? 0;
+		var fullyChargedCapacitySum = fullyChargedCapacitySensors.Sum(x => x.Value) ?? 0;
+		if (designedCapacitySum == 0 || fullyChargedCapacitySum == 0) return null;
+
+		var percent = fullyChargedCapacitySum / designedCapacitySum * 100;
+		return percent;
 	}
 
 	private static IHardware GetCurrentGpuHardware()

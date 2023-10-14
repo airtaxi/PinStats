@@ -75,7 +75,17 @@ public sealed partial class ReportWindow
 		else ButtonSelectGpu.Visibility = Visibility.Collapsed;
 
 		var hasBattery = HardwareMonitor.HasBattery();
-		if (!hasBattery) GridBattery.Visibility = Visibility.Collapsed;
+		if (!hasBattery)
+		{
+			GridBattery.Visibility = Visibility.Collapsed;
+			GridBatteryHealth.Visibility = Visibility.Collapsed;
+		}
+		else
+		{
+			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
+			var hasBatteryHealth = batteryHealthPercent != null;
+			if (!hasBatteryHealth) GridBatteryHealth.Visibility = Visibility.Collapsed;
+		}
 	}
 
 	private void RefreshHardwareInformation()
@@ -88,7 +98,7 @@ public sealed partial class ReportWindow
 			HardwareMonitor.UpdateCpuHardwares();
 			HardwareMonitor.UpdateMemoryHardwares();
 			HardwareMonitor.UpdateNetworkHardwares();
-			HardwareMonitor.UpdateBatteryHardwares ();
+			HardwareMonitor.UpdateBatteryHardwares();
 			HardwareMonitor.UpdateCurrentGpuHardware();
 
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
@@ -111,8 +121,7 @@ public sealed partial class ReportWindow
 
 
 			string batteryInformationText = null;
-			var hasBattery = HardwareMonitor.HasBattery();
-			if (hasBattery)
+			if (HardwareMonitor.HasBattery())
 			{
 				var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
@@ -120,6 +129,16 @@ public sealed partial class ReportWindow
 				batteryInformationText = $"{batteryPercentage:N0}%";
 				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + " W") : "";
 				batteryInformationText += batteryChargeRateText;
+
+			}
+
+			string batteryHealthInformationText = null;
+			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
+			var hasBatteryHealth = batteryHealthPercent != null;
+			if (hasBatteryHealth)
+			{
+				batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
+				if (batteryHealthPercent.Value > 0) batteryHealthInformationText = "+" + batteryHealthInformationText;
 			}
 
 
@@ -136,7 +155,8 @@ public sealed partial class ReportWindow
 				TextBlockGpuInformation.Text = gpuInformationText;
 				TextBlockMemoryInformation.Text = memoryInformationText;
 				TextBlockNetworkInformation.Text = networkInformationText;
-				if (hasBattery) TextBlockBatteryInformation.Text = batteryInformationText;
+				if (batteryInformationText != null) TextBlockBatteryInformation.Text = batteryInformationText;
+				if (batteryHealthInformationText != null) TextBlockBatteryHealthInformation.Text = batteryHealthInformationText;
 			});
 		});
 
