@@ -212,7 +212,8 @@ public static class HardwareMonitor
 		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
 		var memoryAvailableSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available");
 		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
-		return $"{memoryUsed:N2} GB ({memoryAvailable:N2} GB available)";
+		var totalMemory = memoryUsed + memoryAvailable;
+		return $"({memoryUsed:N2}/{totalMemory:N2}) GB ({memoryAvailable:N2} GB available)";
 	}
 
 	public static long GetNetworkTotalUploadSpeedInBytes() => s_uploadSpeedInBytes;
@@ -239,6 +240,7 @@ public static class HardwareMonitor
 	public static void UpdateNetworkHardwares() => NetworkHardwares.ForEach(x => x.Update());
 	public static void UpdateStorageHardwares() => StorageHardwares.ForEach(x => x.Update());
 	public static void UpdateMemoryHardwares() => MemoryHardwares.ForEach(x => x.Update());
+	public static void UpdateBatteryHardware() => BatteryHardware.Update();
 	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware().Update();
 
 	private static long s_bytesUploaded;

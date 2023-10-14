@@ -94,6 +94,7 @@ public sealed partial class ReportWindow
 			HardwareMonitor.UpdateCpuHardwares();
 			HardwareMonitor.UpdateMemoryHardwares();
 			HardwareMonitor.UpdateNetworkHardwares();
+			HardwareMonitor.UpdateBatteryHardware ();
 			HardwareMonitor.UpdateCurrentGpuHardware();
 
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
