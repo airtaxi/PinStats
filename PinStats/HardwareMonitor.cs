@@ -30,6 +30,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> NetworkHardwares = new();
 	private readonly static List<IHardware> StorageHardwares = new();
 	private readonly static List<IHardware> MemoryHardwares = new();
+	private readonly static IHardware BatteryHardware;
 
 	private readonly static Timer NetworkTimer = new() { Interval = 1000 };
 	private static long s_downloadSpeedInBytes;
@@ -84,6 +85,11 @@ public static class HardwareMonitor
 				MemoryHardwares.Add(hardware);
 				continue;
 			}
+			else if (hardware.HardwareType == HardwareType.Battery)
+			{
+				BatteryHardware ??= hardware;
+				continue;
+			}
 		}
 		GpuHardwares.Reverse();
 
@@ -110,7 +116,28 @@ public static class HardwareMonitor
 		return temperature > 0 ? temperature : null;
 	}
 
+	public static float GetTotalCpuPackagePower()
+	{
+		CpuHardwares.ForEach(x => x.Update());
+		var cpuPowerSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power);
+		var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value) ?? 0;
+		return cpuPackagePower;
+	}
+
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
+
+	public static float GetCurrentGpuPower()
+	{
+		var gpuHardware = GetCurrentGpuHardware();
+		gpuHardware.Update();
+
+		ISensor gpuPowerSensor = null;
+		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
+		else if (gpuHardware.HardwareType == HardwareType.GpuNvidia) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
+		else if (gpuHardware.HardwareType == HardwareType.GpuIntel) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Power");
+
+		return gpuPowerSensor?.Value ?? 0;
+	}
 
 	public static float? GetCurrentGpuTemperature()
 	{
@@ -135,6 +162,33 @@ public static class HardwareMonitor
 	{
 		var gpuHardware = GetCurrentGpuHardware();
 		return gpuHardware.Name;
+	}
+
+	public static string GetBatteryName() => BatteryHardware?.Name;
+
+	public static bool HasBattery() => BatteryHardware != null;
+
+	public static float? GetBatteryPercent()
+	{
+		if(BatteryHardware == null) return null;
+
+		var fullChargedCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity")?.Value ?? 0;
+		if (fullChargedCapacity == 0) return null;
+
+		var remainingCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity")?.Value ?? 0;
+
+		var percent = remainingCapacity / fullChargedCapacity * 100;
+		return percent;
+	}
+
+	public static float? GetBatteryChargeRate()
+	{
+		if(BatteryHardware == null) return null;
+
+		var chargeDischargeRateSensor = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power);
+		var chargeRate = chargeDischargeRateSensor?.Value ?? 0;
+		if (chargeDischargeRateSensor?.Name.StartsWith("Discharge") ?? false) chargeRate *= -1;
+		return chargeRate;
 	}
 
 	private static IHardware GetCurrentGpuHardware()
