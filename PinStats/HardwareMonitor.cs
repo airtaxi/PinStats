@@ -58,6 +58,8 @@ public static class HardwareMonitor
 		};
 		Computer.Open();
 		Computer.Accept(new UpdateVisitor());
+		Computer.HardwareRemoved += OnComputerHardwareRemoved;
+		Computer.HardwareAdded += OnComputerHardwareAdded;
 
 		foreach (var hardware in Computer.Hardware)
 		{
@@ -103,6 +105,26 @@ public static class HardwareMonitor
 		GpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
 		GpuUsageTimer.Start();
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
+	}
+
+	private static void OnComputerHardwareRemoved(IHardware hardware)
+	{
+		if (hardware.HardwareType == HardwareType.Cpu) CpuHardwares.Remove(hardware);
+		else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel) GpuHardwares.Remove(hardware);
+		else if (hardware.HardwareType == HardwareType.Network) NetworkHardwares.Remove(hardware);
+		else if (hardware.HardwareType == HardwareType.Storage) StorageHardwares.Remove(hardware);
+		else if (hardware.HardwareType == HardwareType.Memory) MemoryHardwares.Remove(hardware);
+		else if (hardware.HardwareType == HardwareType.Battery) BatteryHardwares.Remove(hardware);
+	}
+
+	private static void OnComputerHardwareAdded(IHardware hardware)
+	{
+		if (hardware.HardwareType == HardwareType.Cpu) CpuHardwares.Add(hardware);
+		else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel) GpuHardwares.Add(hardware);
+		else if (hardware.HardwareType == HardwareType.Network) NetworkHardwares.Add(hardware);
+		else if (hardware.HardwareType == HardwareType.Storage) StorageHardwares.Add(hardware);
+		else if (hardware.HardwareType == HardwareType.Memory) MemoryHardwares.Add(hardware);
+		else if (hardware.HardwareType == HardwareType.Battery) BatteryHardwares.Add(hardware);
 	}
 
 	public static List<string> GetGpuHardwareNames() => GpuHardwares.Select(x => x.Name).ToList();
