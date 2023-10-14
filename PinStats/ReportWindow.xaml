@@ -23,10 +23,7 @@
             <StackPanel>
                 <Grid>
                     <TextBlock x:Name="TextBlockCpuName"/>
-                    <TextBlock
-                        x:Name="TextBlockCpuInformation"
-                        HorizontalAlignment="Right"
-                        ToolTipService.ToolTip="Extra information is only available with Administrator privileges."/>
+                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
@@ -53,10 +50,7 @@
                             </Button.Flyout>
                         </Button>
                     </StackPanel>
-                    <TextBlock
-                        x:Name="TextBlockGpuInformation"
-                        HorizontalAlignment="Right"
-                        ToolTipService.ToolTip="Extra information is only available with Administrator privileges."/>
+                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <TextBlock Text="Memory" HorizontalAlignment="Left"/>
