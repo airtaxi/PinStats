@@ -6,6 +6,7 @@ using PinStats.ViewModels;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Windows.Security.DataProtection;
 using WinUIEx;
 
@@ -72,6 +73,15 @@ public sealed partial class ReportWindow
 			ComboBoxGpuList.SelectedIndex = Configuration.GetValue<int?>("GpuIndex") ?? 0;
 		}
 		else ButtonSelectGpu.Visibility = Visibility.Collapsed;
+
+		var hasBattery = HardwareMonitor.HasBattery();
+		if (!hasBattery) GridBattery.Visibility = Visibility.Collapsed;
+		else
+		{
+			var rawBatteryName = HardwareMonitor.GetBatteryName();
+			var batteryNameAsWord = CamelCaseToWordsRegex().Replace(rawBatteryName, " $1");
+			TextBlockBatteryName.Text = batteryNameAsWord;
+		}
 	}
 
 	private void RefreshHardwareInformation()
@@ -83,20 +93,38 @@ public sealed partial class ReportWindow
 		{
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
 			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
+
 			var cpuInformationText = $"{cpuUage:N0}%";
 			var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
 			var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + "W") : "";
 			cpuInformationText += cpuTempertureText + cpuPowerText;
 
+
 			var gpuUage = HardwareMonitor.GetCurrentGpuUsage();
 			var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
 			var gpuPower = HardwareMonitor.GetCurrentGpuPower();
+
 			var gpuInformationText = $"{gpuUage:N0}%";
 			var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
 			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + "W") : "";
 			gpuInformationText += gpuTempertureText + gpuPowerText;
 
+
+			string batteryInformationText = null;
+			var hasBattery = HardwareMonitor.HasBattery();
+			if (hasBattery)
+			{
+				var batteryPercentage = HardwareMonitor.GetBatteryPercent();
+				var batteryChargeRate = HardwareMonitor.GetBatteryChargeRate();
+
+				batteryInformationText = $"{batteryPercentage:N0}%";
+				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + "W") : "";
+				batteryInformationText += batteryChargeRateText;
+			}
+
+
 			var memoryInformationText = HardwareMonitor.GetMemoryInformationText();
+
 
 			var networkUploadSpeed = (float)HardwareMonitor.GetNetworkTotalUploadSpeedInBytes() / 1024;
 			var networkDownloadSpeed = (float)HardwareMonitor.GetNetworkTotalDownloadSpeedInBytes() / 1024;
@@ -108,6 +136,7 @@ public sealed partial class ReportWindow
 				TextBlockGpuInformation.Text = gpuInformationText;
 				TextBlockMemoryInformation.Text = memoryInformationText;
 				TextBlockNetworkInformation.Text = networkInformationText;
+				if (hasBattery) TextBlockBatteryInformation.Text = batteryInformationText;
 			});
 		});
 
@@ -155,4 +184,7 @@ public sealed partial class ReportWindow
 		Configuration.SetValue("GpuIndex", index);
 		RefreshHardwareInformation();
 	}
+
+	[GeneratedRegex("(\\B[A-Z])")]
+	private static partial Regex CamelCaseToWordsRegex();
 }

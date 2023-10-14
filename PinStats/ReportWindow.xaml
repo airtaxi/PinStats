@@ -60,6 +60,10 @@
                     <TextBlock Text="Network" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
                 </Grid>
+                <Grid x:Name="GridBattery">
+                    <TextBlock x:Name="TextBlockBatteryName"/>
+                    <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right"/>
+                </Grid>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton x:Name="RadioButtonCpu" Content="CPU Usage" Click="OnRadioButtonClicked"/>
                     <RadioButton x:Name="RadioButtonGpu" Content="GPU Usage" Click="OnRadioButtonClicked"/>
