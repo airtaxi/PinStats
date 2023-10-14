@@ -215,7 +215,7 @@ public static class HardwareMonitor
 		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
 		var totalMemory = memoryUsed + memoryAvailable;
-		return $"({memoryUsed:N2}/{totalMemory:N2}) GB";
+		return $"{memoryUsed:N2}/{totalMemory:N2} GB";
 	}
 
 	public static long GetNetworkTotalUploadSpeedInBytes() => s_uploadSpeedInBytes;
