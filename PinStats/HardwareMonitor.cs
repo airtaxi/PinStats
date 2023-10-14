@@ -181,9 +181,10 @@ public static class HardwareMonitor
 		return percent;
 	}
 
-	public static float? GetTotalBatteryChargeRate()
+	public static float? GetTotalBatteryChargeRate(bool update = false)
 	{
 		if(BatteryHardwares == null) return null;
+		if (update) BatteryHardwares.ForEach(x => x.Update());
 
 		var dischargeRateSensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Discharge"));
 		var chargeRateSensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Charge"));
