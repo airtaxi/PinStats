@@ -172,6 +172,7 @@ public static class HardwareMonitor
 	public static float? GetBatteryPercent()
 	{
 		if(BatteryHardware == null) return null;
+		BatteryHardware.Update();
 
 		var fullChargedCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity")?.Value ?? 0;
 		if (fullChargedCapacity == 0) return null;
