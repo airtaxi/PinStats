@@ -91,6 +91,11 @@ public sealed partial class ReportWindow
 
 		Task.Run(() =>
 		{
+			HardwareMonitor.UpdateCpuHardwares();
+			HardwareMonitor.UpdateMemoryHardwares();
+			HardwareMonitor.UpdateNetworkHardwares();
+			HardwareMonitor.UpdateCurrentGpuHardware();
+
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
 			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 

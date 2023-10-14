@@ -109,17 +109,17 @@ public static class HardwareMonitor
 
 	public static float GetAverageCpuUsage() => s_cpuUsage;
 
-	public static float? GetAverageCpuTemperature()
+	public static float? GetAverageCpuTemperature(bool update = false)
 	{
-		CpuHardwares.ForEach(x => x.Update());
+		if (update) CpuHardwares.ForEach(x => x.Update());
 		var cpuTemperatureSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Temperature);
 		var temperature = cpuTemperatureSensors.Where(x => x.Value != null && x.Value != float.NaN).Average(x => x.Value) ?? 0;
 		return temperature > 0 ? temperature : null;
 	}
 
-	public static float GetTotalCpuPackagePower()
+	public static float GetTotalCpuPackagePower(bool update = false)
 	{
-		CpuHardwares.ForEach(x => x.Update());
+		if (update) CpuHardwares.ForEach(x => x.Update());
 		var cpuPowerSensors = CpuHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power);
 		var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value) ?? 0;
 		return cpuPackagePower;
@@ -127,10 +127,10 @@ public static class HardwareMonitor
 
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
 
-	public static float GetCurrentGpuPower()
+	public static float GetCurrentGpuPower(bool update = false)
 	{
 		var gpuHardware = GetCurrentGpuHardware();
-		gpuHardware.Update();
+		if (update) gpuHardware.Update();
 
 		ISensor gpuPowerSensor = null;
 		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
@@ -140,10 +140,10 @@ public static class HardwareMonitor
 		return gpuPowerSensor?.Value ?? 0;
 	}
 
-	public static float? GetCurrentGpuTemperature()
+	public static float? GetCurrentGpuTemperature(bool update = false)
 	{
 		var gpuHardware = GetCurrentGpuHardware();
-		gpuHardware.Update();
+		if (update) gpuHardware.Update();
 
 		var gpuTemperatureSensors = gpuHardware.Sensors.Where(x => x.SensorType == SensorType.Temperature && x.Value != float.NaN).ToList();
 		if (gpuTemperatureSensors.Count == 0) return null;
@@ -169,10 +169,10 @@ public static class HardwareMonitor
 
 	public static bool HasBattery() => BatteryHardware != null;
 
-	public static float? GetBatteryPercent()
+	public static float? GetBatteryPercent(bool update = false)
 	{
 		if(BatteryHardware == null) return null;
-		BatteryHardware.Update();
+		if (update) BatteryHardware.Update();
 
 		var fullChargedCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity")?.Value ?? 0;
 		if (fullChargedCapacity == 0) return null;
@@ -233,6 +233,13 @@ public static class HardwareMonitor
 		var total = sensors.Sum(x => x.Value) ?? 0;
 		return (long)(total * (double)0x40000000);
 	}
+
+	public static void UpdateCpuHardwares() => CpuHardwares.ForEach(x => x.Update());
+	public static void UpdateGpuHardwares() => GpuHardwares.ForEach(x => x.Update());
+	public static void UpdateNetworkHardwares() => NetworkHardwares.ForEach(x => x.Update());
+	public static void UpdateStorageHardwares() => StorageHardwares.ForEach(x => x.Update());
+	public static void UpdateMemoryHardwares() => MemoryHardwares.ForEach(x => x.Update());
+	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware().Update();
 
 	private static long s_bytesUploaded;
 	private static long s_bytesDownloaded;
