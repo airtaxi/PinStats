@@ -26,7 +26,7 @@
                     <TextBlock
                         x:Name="TextBlockCpuInformation"
                         HorizontalAlignment="Right"
-                        ToolTipService.ToolTip="Temperature information is only available with Administrator privileges."/>
+                        ToolTipService.ToolTip="Extra information is only available with Administrator privileges."/>
                 </Grid>
                 <Grid>
                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
@@ -53,7 +53,10 @@
                             </Button.Flyout>
                         </Button>
                     </StackPanel>
-                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right"/>
+                    <TextBlock
+                        x:Name="TextBlockGpuInformation"
+                        HorizontalAlignment="Right"
+                        ToolTipService.ToolTip="Extra information is only available with Administrator privileges."/>
                 </Grid>
                 <Grid>
                     <TextBlock Text="Memory" HorizontalAlignment="Left"/>
