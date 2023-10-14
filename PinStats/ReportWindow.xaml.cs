@@ -127,7 +127,10 @@ public sealed partial class ReportWindow
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
 
 				batteryInformationText = $"{batteryPercentage:N0}%";
-				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + " W") : "";
+
+				string batteryChargeRatePrefix = string.Empty;
+				if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
+				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W") : "";
 				batteryInformationText += batteryChargeRateText;
 
 			}
@@ -135,11 +138,7 @@ public sealed partial class ReportWindow
 			string batteryHealthInformationText = null;
 			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
 			var hasBatteryHealth = batteryHealthPercent != null;
-			if (hasBatteryHealth)
-			{
-				batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
-				if (batteryHealthPercent.Value > 0) batteryHealthInformationText = "+" + batteryHealthInformationText;
-			}
+			if (hasBatteryHealth) batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
 
 
 			var memoryInformationText = HardwareMonitor.GetMemoryInformationText();
