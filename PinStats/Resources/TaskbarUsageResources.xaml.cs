@@ -16,14 +16,20 @@ public partial class TaskbarUsageResources
 {
 	private const int UpdateTimerInterval = 250;
 	private const int TrayIconSize = 64;
+	private static string BinaryDirectory;
+
 	private readonly static PrivateFontCollection PrivateFontCollection = new();
 
 	private static Timer UpdateTimer;
 	private readonly Image _iconImage;
 
+
 	static TaskbarUsageResources()
 	{
-		PrivateFontCollection.AddFontFile("Fonts/Pretendard-ExtraLight.ttf");
+		BinaryDirectory = AppContext.BaseDirectory;
+		var fontDirectory = Path.Combine(BinaryDirectory, "Fonts");
+		var fontFilePath = Path.Combine(fontDirectory, "Pretendard-ExtraLight.ttf");
+		PrivateFontCollection.AddFontFile(fontFilePath);
 	}
 
 	public TaskbarUsageResources()
@@ -34,7 +40,10 @@ public partial class TaskbarUsageResources
 		// TODO: add a setting to change the interval of the timer.
 		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 
-		_iconImage = Image.FromFile("Assets/cpu.png").GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
+		var assetsPath = Path.Combine(BinaryDirectory, "Assets");
+		var iconImagePath = Path.Combine(assetsPath, "cpu.png");
+
+		_iconImage = Image.FromFile(iconImagePath).GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
 		Update();
 		TaskbarIconCpuUsage.ForceCreate();
 

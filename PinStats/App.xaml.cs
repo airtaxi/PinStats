@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.ComponentModel.DataAnnotations;
 using PinStats.Helpers;
+using PinStats.Resources;
 
 namespace PinStats;
 
@@ -41,12 +42,25 @@ public partial class App : Application
 			return;
 		}
 
-		var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {exception?.Message ?? "UNKNOWN"}: {exception?.StackTrace ?? "UNKNOWN"}\n({baseDirectory})\n\n";
+		var exceptionName = exception.GetType().Name;
+
+		var text = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] ({exceptionName}) {exception?.Message ?? "UNKNOWN"}: {exception?.StackTrace ?? "UNKNOWN"}\n({baseDirectory})\n\n";
 		File.AppendAllText(path, text);
+
+		if (exception.InnerException is not null) WriteException(exception.InnerException);
 	}
 
 	protected override void OnLaunched(LaunchActivatedEventArgs args)
 	{
+		base.OnLaunched(args);
+		var resource = new TaskbarUsageResources();
+		Resources.Add("TaskbarUsageResources", resource);
+		App.LaunchDummyWindowIfNotExists();
+	}
+
+	public static void LaunchDummyWindowIfNotExists()
+	{
+		if (s_tempWindow is not null) return;
 		// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
 		s_tempWindow = new();
 		s_tempWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the taskbar.
