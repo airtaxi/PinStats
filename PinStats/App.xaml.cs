@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System;
 using System.IO;
 using System.ComponentModel.DataAnnotations;
+using PinStats.Helpers;
 
 namespace PinStats;
 
@@ -18,6 +19,7 @@ public partial class App : Application
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 
 		InitializeComponent();
+		StartupHelper.DummyMethod(); // Force static constructor to run.
 	}
 
 	private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);

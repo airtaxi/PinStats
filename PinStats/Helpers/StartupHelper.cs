@@ -49,4 +49,9 @@ public static class StartupHelper
 			taskService.RootFolder.RegisterTaskDefinition(ProgramName, taskDefinition);
 		}
 	}
+
+	public static void DummyMethod()
+	{
+		// Dummy method to force static constructor to run.
+	}
 }
