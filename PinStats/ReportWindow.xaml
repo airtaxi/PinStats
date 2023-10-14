@@ -61,7 +61,7 @@
                     <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid x:Name="GridBattery">
-                    <TextBlock x:Name="TextBlockBatteryName"/>
+                    <TextBlock Text="Battery" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <StackPanel Orientation="Horizontal">

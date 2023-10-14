@@ -30,7 +30,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> NetworkHardwares = new();
 	private readonly static List<IHardware> StorageHardwares = new();
 	private readonly static List<IHardware> MemoryHardwares = new();
-	private readonly static IHardware BatteryHardware;
+	private readonly static List<IHardware> BatteryHardwares = new();
 
 	private readonly static Timer NetworkTimer = new() { Interval = 1000 };
 	private static long s_downloadSpeedInBytes;
@@ -88,7 +88,7 @@ public static class HardwareMonitor
 			}
 			else if (hardware.HardwareType == HardwareType.Battery)
 			{
-				BatteryHardware ??= hardware;
+				BatteryHardwares.Add(hardware);
 				continue;
 			}
 		}
@@ -165,32 +165,32 @@ public static class HardwareMonitor
 		return gpuHardware.Name;
 	}
 
-	public static string GetBatteryName() => BatteryHardware?.Name;
+	public static bool HasBattery() => BatteryHardwares != null;
 
-	public static bool HasBattery() => BatteryHardware != null;
-
-	public static float? GetBatteryPercent(bool update = false)
+	public static float? GetTotalBatteryPercent(bool update = false)
 	{
-		if(BatteryHardware == null) return null;
-		if (update) BatteryHardware.Update();
+		if(BatteryHardwares == null) return null;
+		if (update) BatteryHardwares.ForEach(x => x.Update());
 
-		var fullChargedCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity")?.Value ?? 0;
+		var fullChargedCapacity = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity").Sum(x => x.Value) ?? 0;
 		if (fullChargedCapacity == 0) return null;
 
-		var remainingCapacity = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity")?.Value ?? 0;
+		var remainingCapacity = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity").Sum(x => x.Value) ?? 0;
 
 		var percent = remainingCapacity / fullChargedCapacity * 100;
 		return percent;
 	}
 
-	public static float? GetBatteryChargeRate()
+	public static float? GetTotalBatteryChargeRate()
 	{
-		if(BatteryHardware == null) return null;
+		if(BatteryHardwares == null) return null;
 
-		var chargeDischargeRateSensor = BatteryHardware?.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power);
-		var chargeRate = chargeDischargeRateSensor?.Value ?? 0;
-		if (chargeDischargeRateSensor?.Name.StartsWith("Discharge") ?? false) chargeRate *= -1;
-		return chargeRate;
+		var dischargeRateSensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Discharge"));
+		var chargeRateSensors = BatteryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Charge"));
+		var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
+		var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
+		var result = chargeRate + dischargeRate;
+		return result; ;
 	}
 
 	private static IHardware GetCurrentGpuHardware()
@@ -240,7 +240,7 @@ public static class HardwareMonitor
 	public static void UpdateNetworkHardwares() => NetworkHardwares.ForEach(x => x.Update());
 	public static void UpdateStorageHardwares() => StorageHardwares.ForEach(x => x.Update());
 	public static void UpdateMemoryHardwares() => MemoryHardwares.ForEach(x => x.Update());
-	public static void UpdateBatteryHardware() => BatteryHardware.Update();
+	public static void UpdateBatteryHardwares() => BatteryHardwares.ForEach(x => x.Update());
 	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware().Update();
 
 	private static long s_bytesUploaded;

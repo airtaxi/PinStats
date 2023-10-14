@@ -76,12 +76,6 @@ public sealed partial class ReportWindow
 
 		var hasBattery = HardwareMonitor.HasBattery();
 		if (!hasBattery) GridBattery.Visibility = Visibility.Collapsed;
-		else
-		{
-			var rawBatteryName = HardwareMonitor.GetBatteryName();
-			var batteryNameAsWord = CamelCaseToWordsRegex().Replace(rawBatteryName, " $1");
-			TextBlockBatteryName.Text = batteryNameAsWord;
-		}
 	}
 
 	private void RefreshHardwareInformation()
@@ -94,7 +88,7 @@ public sealed partial class ReportWindow
 			HardwareMonitor.UpdateCpuHardwares();
 			HardwareMonitor.UpdateMemoryHardwares();
 			HardwareMonitor.UpdateNetworkHardwares();
-			HardwareMonitor.UpdateBatteryHardware ();
+			HardwareMonitor.UpdateBatteryHardwares ();
 			HardwareMonitor.UpdateCurrentGpuHardware();
 
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
@@ -120,8 +114,8 @@ public sealed partial class ReportWindow
 			var hasBattery = HardwareMonitor.HasBattery();
 			if (hasBattery)
 			{
-				var batteryPercentage = HardwareMonitor.GetBatteryPercent();
-				var batteryChargeRate = HardwareMonitor.GetBatteryChargeRate();
+				var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
+				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
 
 				batteryInformationText = $"{batteryPercentage:N0}%";
 				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + "W") : "";
@@ -190,7 +184,4 @@ public sealed partial class ReportWindow
 		Configuration.SetValue("GpuIndex", index);
 		RefreshHardwareInformation();
 	}
-
-	[GeneratedRegex("(\\B[A-Z])")]
-	private static partial Regex CamelCaseToWordsRegex();
 }
