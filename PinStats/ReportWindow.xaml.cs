@@ -96,7 +96,7 @@ public sealed partial class ReportWindow
 
 			var cpuInformationText = $"{cpuUage:N0}%";
 			var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
-			var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + "W") : "";
+			var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
 			cpuInformationText += cpuTempertureText + cpuPowerText;
 
 
@@ -106,7 +106,7 @@ public sealed partial class ReportWindow
 
 			var gpuInformationText = $"{gpuUage:N0}%";
 			var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
-			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + "W") : "";
+			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 			gpuInformationText += gpuTempertureText + gpuPowerText;
 
 
@@ -118,7 +118,7 @@ public sealed partial class ReportWindow
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
 
 				batteryInformationText = $"{batteryPercentage:N0}%";
-				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + "W") : "";
+				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRate.Value.ToString("N1") + " W") : "";
 				batteryInformationText += batteryChargeRateText;
 			}
 
