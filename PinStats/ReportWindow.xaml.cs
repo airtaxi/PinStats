@@ -83,11 +83,18 @@ public sealed partial class ReportWindow
 		{
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
 			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
-			var cpuInformationText = $"{cpuUage:N0}%{(cpuTemperature != null ? " / " + (cpuTemperature.Value.ToString("N0") + "°C") : "")}";
+			var cpuInformationText = $"{cpuUage:N0}%";
+			var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
+			var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + "W") : "";
+			cpuInformationText += cpuTempertureText + cpuPowerText;
 
 			var gpuUage = HardwareMonitor.GetCurrentGpuUsage();
 			var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
-			var gpuInformationText = $"{gpuUage:N0}%{(gpuTemperature != null ? " / " + (gpuTemperature.Value.ToString("N0") + "°C") : "")}";
+			var gpuPower = HardwareMonitor.GetCurrentGpuPower();
+			var gpuInformationText = $"{gpuUage:N0}%";
+			var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
+			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + "W") : "";
+			gpuInformationText += gpuTempertureText + gpuPowerText;
 
 			var memoryInformationText = HardwareMonitor.GetMemoryInformationText();
 
