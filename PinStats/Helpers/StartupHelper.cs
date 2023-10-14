@@ -14,7 +14,11 @@ public static class StartupHelper
 	{
 		using RegistryKey key = Registry.CurrentUser.OpenSubKey(StartupRegistryKey);
 		var hasValue = key.GetValue(ProgramName) != null;
-		if (hasValue) key.DeleteValue(ProgramName, false);
+		if (hasValue)
+		{
+			key.DeleteValue(ProgramName, false);
+			SetupStartupProgram(); // Reinitialize startup program because the program now uses Task Scheduler instead of registry key.
+		}
 	}
 
 	public static bool IsStartupProgram {
