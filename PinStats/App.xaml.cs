@@ -1,26 +1,74 @@
 ﻿using H.NotifyIcon;
 using Microsoft.UI.Xaml;
-using System.Threading.Tasks;
-using System;
-using System.IO;
-using System.ComponentModel.DataAnnotations;
 using PinStats.Helpers;
 using PinStats.Resources;
+using System.Reflection;
+using Windows.UI.Notifications;
+using System.Diagnostics;
+using Microsoft.Toolkit.Uwp.Notifications;
+using HarfBuzzSharp;
 
 namespace PinStats;
 
 public partial class App : Application
 {
-	private static Window s_tempWindow;
+	private const int UpdateCheckIntervalInMinutes = 10;
+	private static readonly Timer UpdateCheckTimer;
+
+	static App()
+	{
+		UpdateCheckTimer = new(UpdateCheckTimerCallback, null, (int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite);
+	}
+
+	private const string UpdateAvailableTitle = "Update Available";
+	private static async void UpdateCheckTimerCallback(object state) => await CheckForUpdateAsync();
+
+	private static async Task CheckForUpdateAsync()
+	{
+		try
+		{
+			var url = "https://raw.githubusercontent.com/airtaxi/PinStats/master/latest";
+			var remoteVersionString = await HttpHelper.GetContentFromUrlAsync(url);
+			if (remoteVersionString is null) return;
+
+			var localVersion = Assembly.GetExecutingAssembly().GetName().Version;
+			var remoteVersion = new Version(remoteVersionString);
+			if (localVersion >= remoteVersion) return;
+
+			var configurationKey = "versionChecked" + remoteVersionString;
+			var hasNotificationShownForRemoteVersion = Configuration.GetValue<bool?>(configurationKey) ?? false;
+			if (hasNotificationShownForRemoteVersion) return;
+			Configuration.SetValue(configurationKey, true);
+
+			var builder = new ToastContentBuilder()
+			.AddText(UpdateAvailableTitle)
+			.AddText($"A new version ({remoteVersion}) is available.\nDo you want to download it?")
+			.AddArgument("versionString", remoteVersionString);
+			builder.Show();
+		}
+		finally { UpdateCheckTimer.Change((int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite); }
+	}
 
 	public App()
 	{
 		Current.UnhandledException += OnApplicationUnhandledException;
 		AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
+		ToastNotificationManagerCompat.OnActivated += OnToastNotificationActivated;
 
 		InitializeComponent();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
+	}
+
+	private static void OnToastNotificationActivated(ToastNotificationActivatedEventArgsCompat toastArgs)
+	{
+		ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
+		var versionString = args["versionString"];
+		if(versionString != null)
+		{
+			var url = "https://github.com/airtaxi/PinStats/releases/tag/" + versionString;
+			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+		}
 	}
 
 	private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
@@ -50,14 +98,16 @@ public partial class App : Application
 		if (exception.InnerException is not null) WriteException(exception.InnerException);
 	}
 
-	protected override void OnLaunched(LaunchActivatedEventArgs args)
+	protected override async void OnLaunched(LaunchActivatedEventArgs args)
 	{
 		base.OnLaunched(args);
 		var resource = new TaskbarUsageResources();
 		Resources.Add("TaskbarUsageResources", resource);
 		LaunchDummyWindowIfNotExists();
+		await CheckForUpdateAsync();
 	}
 
+	private static Window s_tempWindow;
 	public static void LaunchDummyWindowIfNotExists()
 	{
 		if (s_tempWindow is not null) return;
