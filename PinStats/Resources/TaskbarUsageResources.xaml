@@ -24,6 +24,11 @@
                     </MenuFlyoutItem.Command>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="MenuFlyoutItemSetupColor">
+                    <MenuFlyoutItem.Command>
+                        <XamlUICommand ExecuteRequested="OnSetupColorMenuFlyoutItemClicked"/>
+                    </MenuFlyoutItem.Command>
+                </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemSetupStartupProgram">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
