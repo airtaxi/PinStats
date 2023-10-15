@@ -1,5 +1,5 @@
 # PinStats
-A simple Windows 11 Program that display system resources of PC
+A simple Windows 10/11 Program that display system resources of PC
 
 ![showcase](https://raw.githubusercontent.com/airtaxi/PinStats/master/PinStatsShowcase.gif)
 
