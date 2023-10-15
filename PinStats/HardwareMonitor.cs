@@ -22,9 +22,11 @@ public sealed class UpdateVisitor : IVisitor
 public static class HardwareMonitor
 {
 	private const int UsageCacheCount = 20;
+	private const int UsageTimerIntervalInMilliseconds = 50;
+	// Should not be changed in the future because KiloBytesPer"Second" is calculated based on this value.
+	private const int NetworkTimerInMilliseconds = 1000;
 
 	private readonly static Computer Computer;
-
 	private readonly static List<IHardware> CpuHardwares = new();
 	private readonly static List<IHardware> GpuHardwares = new();
 	private readonly static List<IHardware> NetworkHardwares = new();
@@ -32,15 +34,15 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> MemoryHardwares = new();
 	private readonly static List<IHardware> BatteryHardwares = new();
 
-	private readonly static Timer NetworkTimer = new() { Interval = 1000 };
+	private readonly static Timer NetworkTimer = new() { Interval = NetworkTimerInMilliseconds };
 	private static long s_downloadSpeedInBytes;
 	private static long s_uploadSpeedInBytes;
 
-	private readonly static Timer CpuUsageTimer = new() { Interval = 50 };
+	private readonly static Timer CpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
 	private readonly static List<float> LastCpuUsages = new();
 	private static float s_cpuUsage;
 
-	private readonly static Timer GpuUsageTimer = new() { Interval = 50 };
+	private readonly static Timer GpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
 	private readonly static List<float> LastGpuUsages = new();
 	private static float s_gpuUsage;
 
@@ -234,7 +236,7 @@ public static class HardwareMonitor
 	private static IHardware GetCurrentGpuHardware()
 	{
 		var gpuIndex = Configuration.GetValue<int?>("GpuIndex") ?? 0;
-		if (gpuIndex > GpuHardwares.Count)
+		if (gpuIndex > GpuHardwares.Count) // User might have removed a GPU.
 		{
 			gpuIndex = 0;
 			Configuration.SetValue("GpuIndex", gpuIndex);
