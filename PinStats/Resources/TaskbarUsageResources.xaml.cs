@@ -16,49 +16,51 @@ namespace PinStats.Resources;
 public partial class TaskbarUsageResources
 {
 	private const int UpdateTimerInterval = 250;
-	private const int TrayIconSize = 64;
-	private static string BinaryDirectory;
+	private const int TrayIconImageSize = 64;
 
-	private readonly static PrivateFontCollection PrivateFontCollection = new();
+	private static readonly PrivateFontCollection PrivateFontCollection = new();
+	private static readonly string BinaryDirectory;
+	private static readonly string AssetsDirectory;
+	private static readonly Timer UpdateTimer;
+	private static event EventHandler UpdateTimerElapsed;
 
-	private static Timer UpdateTimer;
 	private Image _iconImage;
-
-	private string assetsPath;
-	private string iconImagePath;
-
+	private string _iconImagePath;
 
 	static TaskbarUsageResources()
 	{
 		BinaryDirectory = AppContext.BaseDirectory;
+		AssetsDirectory = Path.Combine(BinaryDirectory, "Assets");
+
 		var fontDirectory = Path.Combine(BinaryDirectory, "Fonts");
 		var fontFilePath = Path.Combine(fontDirectory, "Pretendard-ExtraLight.ttf");
 		PrivateFontCollection.AddFontFile(fontFilePath);
+
+		// TODO: add a setting to change the interval of the timer.
+		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
+	}
+
+	private static void UpdateTimerCallback(object state)
+	{
+		try { UpdateTimerElapsed?.Invoke(null, EventArgs.Empty); }
+		finally { UpdateTimer.Change(UpdateTimerInterval, Timeout.Infinite); }
 	}
 
 	public TaskbarUsageResources()
 	{
+		
 		InitializeComponent();
+
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
 		UpdateIconImageByIconColor();
 
-		// TODO: add a setting to change the interval of the timer.
-		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
-
-		assetsPath = Path.Combine(BinaryDirectory, "Assets");
-
-		Update();
-		TaskbarIconCpuUsage.ForceCreate();
-
 		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
 		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
-	}
 
-	private void UpdateTimerCallback(object state)
-	{
-		try { Update(); }
-		finally { UpdateTimer.Change(UpdateTimerInterval, Timeout.Infinite); }
+		TaskbarIconCpuUsage.ForceCreate();
+
+		UpdateTimerElapsed += (s, e) => Update();
 	}
 
 	private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
@@ -78,8 +80,8 @@ public partial class TaskbarUsageResources
 	{
 		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 		var imageFileName = useWhiteIcon ? "Cpu_white.png" : "Cpu.png";
-		iconImagePath = Path.Combine(assetsPath, imageFileName);
-		_iconImage = Image.FromFile(iconImagePath).GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
+		_iconImagePath = Path.Combine(AssetsDirectory, imageFileName);
+		_iconImage = Image.FromFile(_iconImagePath).GetThumbnailImage(TrayIconImageSize, TrayIconImageSize, null, IntPtr.Zero);
 	}
 
 	[LibraryImport("user32.dll")]
