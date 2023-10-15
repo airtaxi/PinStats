@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace PinStats.Helpers;
 
-public static partial class TaskBarHelper
+public static partial class TaskbarHelper
 {
-	private const int ABM_GETTASKBARPOS = 5;
+	private const int ABM_GETTaskbarPOS = 5;
 
 	[LibraryImport("shell32.dll")]
 	private static partial IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
@@ -29,7 +29,7 @@ public static partial class TaskBarHelper
 		public int Bottom;
 	}
 
-	public static RECT GetTaskBarRect()
+	public static RECT GetTaskbarRect()
 	{
 		var appBarData = GetAppbarData();
 		return appBarData.rc;
@@ -38,23 +38,23 @@ public static partial class TaskBarHelper
 	private static APPBARDATA GetAppbarData()
 	{
 		var data = new APPBARDATA() { cbSize = Marshal.SizeOf(typeof(APPBARDATA)) };
-		SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
+		SHAppBarMessage(ABM_GETTaskbarPOS, ref data);
 		return data;
 	}
 
-	public static TaskBarPosition GetTaskBarPosition()
+	public static TaskbarPosition GetTaskbarPosition()
 	{
 		// Windows 11 is currently not support to change the task bar position. fallback to bottom.
-		if (IsWindows11OrGreater()) return TaskBarPosition.Bottom;
+		if (IsWindows11OrGreater()) return TaskbarPosition.Bottom;
 
 		var appBarData = GetAppbarData();
 		return appBarData.uEdge switch
 		{
-			0 => TaskBarPosition.Left,
-			1 => TaskBarPosition.Top,
-			2 => TaskBarPosition.Right,
-			3 => TaskBarPosition.Bottom,
-			_ => TaskBarPosition.Bottom,// default value
+			0 => TaskbarPosition.Left,
+			1 => TaskbarPosition.Top,
+			2 => TaskbarPosition.Right,
+			3 => TaskbarPosition.Bottom,
+			_ => TaskbarPosition.Bottom,// default value
 		};
 	}
 

@@ -133,27 +133,27 @@ public partial class TaskbarUsageResources
 		var reportWindow = new ReportWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
 
-		var taskBarRect = TaskBarHelper.GetTaskBarRect();
-		TaskBarPosition taskBarPosition = TaskBarHelper.GetTaskBarPosition();
+		var TaskbarRect = TaskbarHelper.GetTaskbarRect();
+		TaskbarPosition TaskbarPosition = TaskbarHelper.GetTaskbarPosition();
 
 		// Default position is bottom.
-		double positionX = taskBarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
-		double positionY = taskBarRect.Top - (reportWindow.Height * scale);
+		double positionX = TaskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+		double positionY = TaskbarRect.Top - (reportWindow.Height * scale);
 
-		if(taskBarPosition == TaskBarPosition.Top)
+		if(TaskbarPosition == TaskbarPosition.Top)
 		{
-			positionX = taskBarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
-			positionY = taskBarRect.Bottom;
+			positionX = TaskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+			positionY = TaskbarRect.Bottom;
 		}
-		else if(taskBarPosition == TaskBarPosition.Left)
+		else if(TaskbarPosition == TaskbarPosition.Left)
 		{
-			positionX = taskBarRect.Left;
-			positionY = taskBarRect.Bottom - (reportWindow.Height * scale);
+			positionX = TaskbarRect.Left;
+			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
 		}
-		else if(taskBarPosition == TaskBarPosition.Right)
+		else if(TaskbarPosition == TaskbarPosition.Right)
 		{
-			positionX = taskBarRect.Right - (reportWindow.Width * scale);
-			positionY = taskBarRect.Bottom - (reportWindow.Height * scale);
+			positionX = TaskbarRect.Right - (reportWindow.Width * scale);
+			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
 		}
 
 		reportWindow.Move((int)positionX, (int)positionY);

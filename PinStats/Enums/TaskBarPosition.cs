@@ -1,6 +1,6 @@
 ﻿namespace PinStats.Enums;
 
-public enum TaskBarPosition
+public enum TaskbarPosition
 {
 	Left,
 	Top,
