@@ -1,5 +1,6 @@
 ﻿using HidSharp.Reports;
 using Microsoft.UI.Xaml.Input;
+using PinStats.Enums;
 using PinStats.Helpers;
 using System;
 using System.Diagnostics;
@@ -126,12 +127,34 @@ public partial class TaskbarUsageResources
 		return usageText;
 	}
 
+	private const int ReportWindowHorizontalOffset = 220;
 	private void OnCpuTaskbarIconLeftClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
 		var reportWindow = new ReportWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
-		var positionX = TaskBarHelper.GetTaskBarRight() - (reportWindow.Width + 220) * scale;
-		var positionY = TaskBarHelper.GetTaskBarTop() - (reportWindow.Height * scale);
+
+		var taskBarRect = TaskBarHelper.GetTaskBarRect();
+		TaskBarPosition taskBarPosition = TaskBarHelper.GetTaskBarPosition();
+
+		// Default position is bottom.
+		double positionX = taskBarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+		double positionY = taskBarRect.Top - (reportWindow.Height * scale);
+
+		if(taskBarPosition == TaskBarPosition.Top)
+		{
+			positionX = taskBarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+			positionY = taskBarRect.Bottom;
+		}
+		else if(taskBarPosition == TaskBarPosition.Left)
+		{
+			positionX = taskBarRect.Left;
+			positionY = taskBarRect.Bottom - (reportWindow.Height * scale);
+		}
+		else if(taskBarPosition == TaskBarPosition.Right)
+		{
+			positionX = taskBarRect.Right - (reportWindow.Width * scale);
+			positionY = taskBarRect.Bottom - (reportWindow.Height * scale);
+		}
 
 		reportWindow.Move((int)positionX, (int)positionY);
 		reportWindow.Activate();

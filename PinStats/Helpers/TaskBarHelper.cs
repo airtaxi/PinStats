@@ -1,14 +1,15 @@
-﻿using System;
+﻿using PinStats.Enums;
+using System;
 using System.Runtime.InteropServices;
 
 namespace PinStats.Helpers;
 
-public static class TaskBarHelper
+public static partial class TaskBarHelper
 {
 	private const int ABM_GETTASKBARPOS = 5;
 
-	[System.Runtime.InteropServices.DllImport("shell32.dll")]
-	private static extern IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
+	[LibraryImport("shell32.dll")]
+	private static partial IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
 
 	private struct APPBARDATA
 	{
@@ -20,26 +21,50 @@ public static class TaskBarHelper
 		public IntPtr lParam;
 	}
 
-	private struct RECT
+	public struct RECT
 	{
-		public int left, top, right, bottom;
+		public int Left;
+		public int Top;
+		public int Right;
+		public int Bottom;
 	}
 
-	public static int GetTaskBarTop()
+	public static RECT GetTaskBarRect()
 	{
-		APPBARDATA data = new APPBARDATA();
-		data.cbSize = Marshal.SizeOf(data);
+		var appBarData = GetAppbarData();
+		return appBarData.rc;
+	}
+
+	private static APPBARDATA GetAppbarData()
+	{
+		var data = new APPBARDATA() { cbSize = Marshal.SizeOf(typeof(APPBARDATA)) };
 		SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
-
-		return data.rc.top;
+		return data;
 	}
 
-	public static int GetTaskBarRight()
+	public static TaskBarPosition GetTaskBarPosition()
 	{
-		APPBARDATA data = new APPBARDATA();
-		data.cbSize = Marshal.SizeOf(data);
-		SHAppBarMessage(ABM_GETTASKBARPOS, ref data);
+		// Windows 11 is currently not support to change the task bar position. fallback to bottom.
+		if (IsWindows11OrGreater()) return TaskBarPosition.Bottom;
 
-		return data.rc.right;
+		var appBarData = GetAppbarData();
+		return appBarData.uEdge switch
+		{
+			0 => TaskBarPosition.Left,
+			1 => TaskBarPosition.Top,
+			2 => TaskBarPosition.Right,
+			3 => TaskBarPosition.Bottom,
+			_ => TaskBarPosition.Bottom,// default value
+		};
 	}
+
+	public static bool IsWindows11OrGreater()
+	{
+		OperatingSystem os = Environment.OSVersion;
+		Version version = os.Version;
+
+		// Windows 11 has at least major version 10 and build version 22000.
+		return version.Major >= 10 && version.Build >= 22000;
+	}
+
 }
