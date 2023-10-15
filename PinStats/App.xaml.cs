@@ -55,7 +55,7 @@ public partial class App : Application
 		base.OnLaunched(args);
 		var resource = new TaskbarUsageResources();
 		Resources.Add("TaskbarUsageResources", resource);
-		App.LaunchDummyWindowIfNotExists();
+		LaunchDummyWindowIfNotExists();
 	}
 
 	public static void LaunchDummyWindowIfNotExists()
