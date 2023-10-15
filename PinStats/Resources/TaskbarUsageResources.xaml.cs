@@ -167,12 +167,12 @@ public partial class TaskbarUsageResources
 		}
 		else if(TaskbarPosition == TaskbarPosition.Left)
 		{
-			positionX = TaskbarRect.Left;
+			positionX = TaskbarRect.Right;
 			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
 		}
 		else if(TaskbarPosition == TaskbarPosition.Right)
 		{
-			positionX = TaskbarRect.Right - (reportWindow.Width * scale);
+			positionX = TaskbarRect.Left - (reportWindow.Width * scale);
 			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
 		}
 
