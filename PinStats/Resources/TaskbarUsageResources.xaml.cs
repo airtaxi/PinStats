@@ -40,17 +40,14 @@ public partial class TaskbarUsageResources
 	{
 		InitializeComponent();
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
-		UpdateSetupColorMenuFlyoutItemTextProperty();
+		UpdateSetupIconColorMenuFlyoutItemTextProperty();
+		UpdateIconImageByIconColor();
 
-        // TODO: add a setting to change the interval of the timer.
-        UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
+		// TODO: add a setting to change the interval of the timer.
+		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 
 		assetsPath = Path.Combine(BinaryDirectory, "Assets");
-		var isWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
-		var _imageFileName = (isWhiteIcon ? "Cpu_white.png" : "Cpu.png");
-		iconImagePath = Path.Combine(assetsPath, _imageFileName);
 
-		_iconImage = Image.FromFile(iconImagePath).GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
 		Update();
 		TaskbarIconCpuUsage.ForceCreate();
 
@@ -71,11 +68,18 @@ public partial class TaskbarUsageResources
 		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 	}
 
-	private void UpdateSetupColorMenuFlyoutItemTextProperty()
+	private void UpdateSetupIconColorMenuFlyoutItemTextProperty()
 	{
-		var isWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
-        MenuFlyoutItemSetupColor.Text = (isWhiteIcon) ? "Change to Black Icon" : "Change to White Icon";
+		var useWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
+		MenuFlyoutItemSetupIconColor.Text = useWhiteIcon ? "Change to Black Icon" : "Change to White Icon";
+	}
 
+	private void UpdateIconImageByIconColor()
+	{
+		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
+		var imageFileName = useWhiteIcon ? "Cpu_white.png" : "Cpu.png";
+		iconImagePath = Path.Combine(assetsPath, imageFileName);
+		_iconImage = Image.FromFile(iconImagePath).GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
 	}
 
 	[LibraryImport("user32.dll")]
@@ -85,7 +89,7 @@ public partial class TaskbarUsageResources
 	private void Update()
 	{
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
-        var isWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
+        var useWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
 
         float usage = 0f;
 		if (lastUsageTarget == "CPU") usage = HardwareMonitor.GetAverageCpuUsage();
@@ -107,7 +111,7 @@ public partial class TaskbarUsageResources
 					LineAlignment = StringAlignment.Center
 				};
 				var rect = new RectangleF(0, 2, image.Width, image.Height);
-				graphics.DrawString(usageText, font, (isWhiteIcon)? Brushes.White : Brushes.Black, rect, stringFormat);
+				graphics.DrawString(usageText, font, useWhiteIcon ? Brushes.White : Brushes.Black, rect, stringFormat);
 
 				try
 				{
@@ -183,16 +187,11 @@ public partial class TaskbarUsageResources
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 	}
 
-    private void OnSetupColorMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+    private void OnSetupIconColorMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
     {
-		var isWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
-        Configuration.SetValue("WhiteIcon", !isWhiteIcon);
-		isWhiteIcon = !isWhiteIcon;
-        UpdateSetupColorMenuFlyoutItemTextProperty();
-
-        var _imageFileName = (isWhiteIcon ? "Cpu_white.png" : "Cpu.png");
-        iconImagePath = Path.Combine(assetsPath, _imageFileName);
-        _iconImage = Image.FromFile(iconImagePath).GetThumbnailImage(TrayIconSize, TrayIconSize, null, IntPtr.Zero);
-
+		var wasWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
+		Configuration.SetValue("WhiteIcon", !wasWhiteIcon);
+        UpdateSetupIconColorMenuFlyoutItemTextProperty();
+		UpdateIconImageByIconColor();
     }
 }
