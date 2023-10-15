@@ -5,7 +5,7 @@ namespace PinStats;
 
 public class Configuration
 {
-	private readonly static object LockObject = new object();
+	private readonly static object LockObject = new();
 	private readonly static string BasePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     private const string ConfigurationDirectoryName = "PinStats";
@@ -75,8 +75,7 @@ public class Configuration
 			var convertedFileContent = GetConfigurationFileContent();
 			if (!convertedFileContent.ContainsKey(key)) return default;
 			var rawValue = convertedFileContent[key];
-			var content = rawValue as JToken;
-			if (content != null) return content.ToObject<T>();
+			if (rawValue is JToken content) return content.ToObject<T>();
 			else if (rawValue is T value) return value;
 			else return default;
 		}
@@ -111,7 +110,7 @@ public class Configuration
 		finally { Monitor.Exit(LockObject); }
 	}
 
-	public static bool IsExiting = false;
+	public static bool IsExiting { get; set; }
 	private static bool s_exited = false;
 	public static void WriteBuffer()
 	{
