@@ -189,7 +189,10 @@ public static class HardwareMonitor
 		return gpuHardware.Name;
 	}
 
-	public static bool HasBattery() => BatteryHardwares != null;
+	// PC with no battery often has Battery Hardware with no sensors.
+	// So we need to check if there are any sensors.
+	// This method checks if there are any sensors by checking battery percentage.
+	public static bool HasBattery() => GetTotalBatteryPercent() != null;
 
 	public static float? GetTotalBatteryPercent(bool update = false)
 	{
@@ -245,13 +248,13 @@ public static class HardwareMonitor
 		return gpuHardware;
 	}
 
-	public static string GetMemoryInformationText()
+	public static string GetMemoryInformationText(bool queryVirtualMemory = false)
 	{
 		MemoryHardwares.ForEach(x => x.Update());
-		var memoryUsedSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used");
+		var memoryUsedSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
 		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
 
-		var memoryAvailableSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available");
+		var memoryAvailableSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Available");
 		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
 		var totalMemory = memoryUsed + memoryAvailable;

@@ -98,7 +98,6 @@ public sealed partial class ReportWindow
 			HardwareMonitor.UpdateCpuHardwares();
 			HardwareMonitor.UpdateMemoryHardwares();
 			HardwareMonitor.UpdateNetworkHardwares();
-			HardwareMonitor.UpdateBatteryHardwares();
 			HardwareMonitor.UpdateCurrentGpuHardware();
 
 			var cpuUage = HardwareMonitor.GetAverageCpuUsage();
@@ -121,28 +120,28 @@ public sealed partial class ReportWindow
 
 
 			string batteryInformationText = null;
-			if (HardwareMonitor.HasBattery())
+			string batteryHealthInformationText = null;
+			if (HardwareMonitor.HasBattery()) // If the device has a battery, update the battery information.
 			{
+				HardwareMonitor.UpdateBatteryHardwares();
+
 				var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
-
-				batteryInformationText = $"{batteryPercentage:N0}%";
+				var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
 
 				string batteryChargeRatePrefix = string.Empty;
 				if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
 				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W") : "";
-				batteryInformationText += batteryChargeRateText;
+				batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText;
 
+				var hasBatteryHealth = batteryHealthPercent != null;
+				if (hasBatteryHealth) batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
 			}
 
-			string batteryHealthInformationText = null;
-			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
-			var hasBatteryHealth = batteryHealthPercent != null;
-			if (hasBatteryHealth) batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
 
 
 			var memoryInformationText = HardwareMonitor.GetMemoryInformationText();
-
+			var virtualMemoryInformationText = HardwareMonitor.GetMemoryInformationText(true);
 
 			var networkUploadSpeed = (float)HardwareMonitor.GetNetworkTotalUploadSpeedInBytes() / 1024;
 			var networkDownloadSpeed = (float)HardwareMonitor.GetNetworkTotalDownloadSpeedInBytes() / 1024;
@@ -153,6 +152,7 @@ public sealed partial class ReportWindow
 				TextBlockCpuInformation.Text = cpuInformationText;
 				TextBlockGpuInformation.Text = gpuInformationText;
 				TextBlockMemoryInformation.Text = memoryInformationText;
+				TextBlockVirtualMemoryInformation.Text = virtualMemoryInformationText;
 				TextBlockNetworkInformation.Text = networkInformationText;
 				if (batteryInformationText != null) TextBlockBatteryInformation.Text = batteryInformationText;
 				if (batteryHealthInformationText != null) TextBlockBatteryHealthInformation.Text = batteryHealthInformationText;

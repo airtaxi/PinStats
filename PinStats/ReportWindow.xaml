@@ -57,6 +57,10 @@
                     <TextBlock x:Name="TextBlockMemoryInformation" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
+                    <TextBlock Text="Virtual Memory" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="TextBlockVirtualMemoryInformation" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
                     <TextBlock Text="Network" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
                 </Grid>
