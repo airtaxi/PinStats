@@ -4,16 +4,10 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using PinStats.Helpers;
 using PinStats.ViewModels;
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using Windows.Security.DataProtection;
-using WinUIEx;
 
 namespace PinStats;
 
-public sealed partial class ReportWindow
+public sealed partial class ReportWindow : IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
 
@@ -23,7 +17,6 @@ public sealed partial class ReportWindow
 	public ReportWindow()
 	{
 		InitializeComponent();
-		Activated += OnActivated;
 
 		// Set window and appwindow properties
 		SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
@@ -88,6 +81,9 @@ public sealed partial class ReportWindow
 	private void RefreshTimerCallback(object state)
 	{
 		RefreshHardwareInformation();
+		
+		// If the window is closed, stop the timer.
+		if (_disposed) return;
 		_refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 	}
 
@@ -171,8 +167,6 @@ public sealed partial class ReportWindow
 		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
 	}
 
-	private void OnUnloaded(object sender, RoutedEventArgs e) => _refreshTimer.Dispose();
-
 	private void OnRadioButtonClicked(object sender, RoutedEventArgs e)
 	{
 		var radioButton = sender as RadioButton;
@@ -202,4 +196,18 @@ public sealed partial class ReportWindow
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
 		RefreshHardwareInformation();
 	}
+
+	private bool _disposed;
+	public void Dispose()
+	{
+		if (_disposed) return;
+		_disposed = true;
+		Activated -= OnActivated;
+		Closed -= OnClosed;
+		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
+		_refreshTimer.Dispose();
+		GC.SuppressFinalize(this);
+	}
+
+	private void OnClosed(object sender, WindowEventArgs args) => Dispose();
 }

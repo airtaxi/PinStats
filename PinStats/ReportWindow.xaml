@@ -12,9 +12,11 @@
     mc:Ignorable="d"
     Width="450"
     Height="350"
-    IsResizable="False">
+    IsResizable="False"
+    Activated="OnActivated"
+    Closed="OnClosed">
 
-    <Grid x:Name="GdMain" Unloaded="OnUnloaded">
+    <Grid x:Name="GdMain">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
