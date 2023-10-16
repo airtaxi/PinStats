@@ -161,6 +161,18 @@ public sealed partial class ReportWindow : IDisposable
 		});
 	}
 
+	private bool _disposed;
+	public void Dispose()
+	{
+		if (_disposed) return;
+		_disposed = true;
+		Activated -= OnActivated;
+		Closed -= OnClosed;
+		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
+		_refreshTimer.Dispose();
+		GC.SuppressFinalize(this);
+	}
+
 	private void OnActivated(object sender, WindowActivatedEventArgs args)
 	{
 		// Close the window when the window lost its focus.
@@ -195,18 +207,6 @@ public sealed partial class ReportWindow : IDisposable
 		Configuration.SetValue("GpuIndex", index);
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
 		RefreshHardwareInformation();
-	}
-
-	private bool _disposed;
-	public void Dispose()
-	{
-		if (_disposed) return;
-		_disposed = true;
-		Activated -= OnActivated;
-		Closed -= OnClosed;
-		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
-		_refreshTimer.Dispose();
-		GC.SuppressFinalize(this);
 	}
 
 	private void OnClosed(object sender, WindowEventArgs args) => Dispose();
