@@ -266,7 +266,6 @@ public static class HardwareMonitor
 
 	private static long GetNetworkTotalUploadedInBytes()
 	{
-		NetworkHardwares.ForEach(x => x.Update());
 		var sensors = NetworkHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Uploaded");
 		var total = sensors.Sum(x => x.Value) ?? 0;
 		return (long)(total * (double)0x40000000);
@@ -274,7 +273,6 @@ public static class HardwareMonitor
 
 	private static long GetNetworkTotalDownloadedInBytes()
 	{
-		NetworkHardwares.ForEach(x => x.Update());
 		var sensors = NetworkHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Downloaded");
 		var total = sensors.Sum(x => x.Value) ?? 0;
 		return (long)(total * (double)0x40000000);
@@ -292,6 +290,7 @@ public static class HardwareMonitor
 	private static long s_bytesDownloaded;
 	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
 	{
+		NetworkHardwares.ForEach(x => x.Update());
 		var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
 		var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
 
