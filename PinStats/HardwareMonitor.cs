@@ -23,7 +23,9 @@ public static class HardwareMonitor
 {
 	private const int UsageCacheCount = 20;
 	private const int UsageTimerIntervalInMilliseconds = 50;
+
 	// Should not be changed in the future because KiloBytesPer"Second" is calculated based on this value.
+	private const int StorageTimerInMilliseconds = 1000;
 	private const int NetworkTimerInMilliseconds = 1000;
 
 	private readonly static Computer Computer;
@@ -33,6 +35,10 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> StorageHardwares = new();
 	private readonly static List<IHardware> MemoryHardwares = new();
 	private readonly static List<IHardware> BatteryHardwares = new();
+
+	private readonly static Timer StorageTimer = new() { Interval = StorageTimerInMilliseconds };
+	private static float s_storageReadRatePerSecondInBytes;
+	private static float s_storageWriteRatePerSecondInBytes;
 
 	private readonly static Timer NetworkTimer = new() { Interval = NetworkTimerInMilliseconds };
 	private static long s_downloadSpeedInBytes;
@@ -100,6 +106,9 @@ public static class HardwareMonitor
 
 		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
 		NetworkTimer.Start();
+
+		StorageTimer.Elapsed += OnStorageTimerElapsed;
+		StorageTimer.Start();
 
 		CpuUsageTimer.Elapsed += OnCpuUsageTimerElapsed;
 		CpuUsageTimer.Start();
@@ -261,6 +270,23 @@ public static class HardwareMonitor
 		return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
 	}
 
+	private static float GetStorageReadRateInBytes()
+	{
+		var sensors = StorageHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Read Rate");
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return total;
+	}
+
+	private static float GetStorageWriteRateInBytes()
+	{
+		var sensors = StorageHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Write Rate");
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return total;
+	}
+
+	public static float GetStorageReadRatePerSecondInBytes() => s_storageReadRatePerSecondInBytes;
+	public static float GetStorageWriteRatePerSecondInBytes() => s_storageWriteRatePerSecondInBytes;
+
 	public static long GetNetworkTotalUploadSpeedInBytes() => s_uploadSpeedInBytes;
 	public static long GetNetworkTotalDownloadSpeedInBytes() => s_downloadSpeedInBytes;
 
@@ -290,7 +316,7 @@ public static class HardwareMonitor
 	private static long s_bytesDownloaded;
 	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
 	{
-		NetworkHardwares.ForEach(x => x.Update());
+		UpdateNetworkHardwares();
 		var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
 		var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
 
@@ -306,6 +332,13 @@ public static class HardwareMonitor
 
 		s_bytesUploaded = totalUploadedBytes;
 		s_bytesDownloaded = totalDownloadedBytes;
+	}
+	
+	private static void OnStorageTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		UpdateStorageHardwares();
+		s_storageReadRatePerSecondInBytes = GetStorageReadRateInBytes();
+		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 	}
 
 	private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)

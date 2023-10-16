@@ -64,6 +64,10 @@
                     <TextBlock Text="Network" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
                 </Grid>
+                <Grid>
+                    <TextBlock Text="Storage" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="TextBlockStorageInformation" HorizontalAlignment="Right"/>
+                </Grid>
                 <Grid x:Name="GridBattery">
                     <TextBlock Text="Battery" HorizontalAlignment="Left"/>
                     <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right"/>
