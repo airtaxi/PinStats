@@ -10,8 +10,8 @@
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:vm="using:PinStats.ViewModels"
     mc:Ignorable="d"
-    Width="400"
-    Height="300"
+    Width="450"
+    Height="350"
     IsResizable="False">
 
     <Grid x:Name="GdMain" Unloaded="OnUnloaded">
