@@ -57,7 +57,17 @@ public partial class App : Application
 		ToastNotificationManagerCompat.OnActivated += OnToastNotificationActivated;
 
 		InitializeComponent();
+		InitializeThemeSettings();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
+	}
+
+	private static void InitializeThemeSettings()
+	{
+		var hasThemeSettingsApplied = Configuration.GetValue<bool?>("WhiteIcon") != null;
+		if (hasThemeSettingsApplied) return;
+
+		var isDarkTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark;
+		Configuration.SetValue("WhiteIcon", isDarkTheme);
 	}
 
 	private static void OnToastNotificationActivated(ToastNotificationActivatedEventArgsCompat toastArgs)
