@@ -72,7 +72,7 @@ public partial class TaskbarUsageResources
 
 	private void UpdateSetupIconColorMenuFlyoutItemTextProperty()
 	{
-		var useWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
+		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 		MenuFlyoutItemSetupIconColor.Text = useWhiteIcon ? "Change to Black Icon" : "Change to White Icon";
 	}
 
@@ -91,7 +91,7 @@ public partial class TaskbarUsageResources
 	private void Update()
 	{
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
-        var useWhiteIcon = Configuration.GetValue<bool>("WhiteIcon");
+        var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 
         float usage = 0f;
 		if (lastUsageTarget == "CPU") usage = HardwareMonitor.GetAverageCpuUsage();
