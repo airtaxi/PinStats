@@ -51,7 +51,8 @@ public partial class App : Application
 
 	public App()
 	{
-		Current.UnhandledException += OnApplicationUnhandledException;
+		// Setup exception handlers to prevent the app from crashing and to log the exception.
+		Application.Current.UnhandledException += OnApplicationUnhandledException;
 		AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 		ToastNotificationManagerCompat.OnActivated += OnToastNotificationActivated;
