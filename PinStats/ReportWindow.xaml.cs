@@ -14,6 +14,8 @@ public sealed partial class ReportWindow : IDisposable
 	public readonly static UsageViewModel CpuUsageViewModel = new();
 	public readonly static UsageViewModel GpuUsageViewModel = new();
 
+	public static event EventHandler OnCurrentGpuChanged;
+
 	private readonly Timer _refreshTimer;
 
 	public ReportWindow()
@@ -82,11 +84,12 @@ public sealed partial class ReportWindow : IDisposable
 
 	private void RefreshTimerCallback(object state)
 	{
-		RefreshHardwareInformation();
-		
-		// If the window is closed, stop the timer.
-		if (_disposed) return;
-		_refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+		try { RefreshHardwareInformation(); }
+		finally
+		{
+			if (!_disposed)
+				_refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite);
+		}
 	}
 
 	private void RefreshHardwareInformation()
@@ -207,6 +210,7 @@ public sealed partial class ReportWindow : IDisposable
 		var comboBox = sender as ComboBox;
 		var index = comboBox.SelectedIndex;
 		Configuration.SetValue("GpuIndex", index);
+		OnCurrentGpuChanged?.Invoke(this, EventArgs.Empty);
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
 		RefreshHardwareInformation();
 	}
