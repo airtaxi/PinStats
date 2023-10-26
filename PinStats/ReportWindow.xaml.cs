@@ -130,7 +130,7 @@ public sealed partial class ReportWindow : IDisposable
 			var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
 			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
 
-			string batteryChargeRatePrefix = "-";
+			string batteryChargeRatePrefix = string.Empty;
 			if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
 			var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W") : "";
 			batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText;
