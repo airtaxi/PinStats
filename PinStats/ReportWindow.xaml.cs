@@ -13,7 +13,9 @@ public sealed partial class ReportWindow : IDisposable
 
 	public readonly static UsageViewModel CpuUsageViewModel = new();
 	public readonly static UsageViewModel GpuUsageViewModel = new();
+
 	private readonly Timer _refreshTimer;
+
 	public ReportWindow()
 	{
 		InitializeComponent();
@@ -75,7 +77,7 @@ public sealed partial class ReportWindow : IDisposable
 		RefreshHardwareInformation();
 
 		// Setup the timer to refresh the hardware information.
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms
+		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms);
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -100,7 +102,7 @@ public sealed partial class ReportWindow : IDisposable
 		var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 
 		var cpuInformationText = $"{cpuUage:N0}%";
-		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
+		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "ï¿½C") : "";
 		var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
 		cpuInformationText += cpuTempertureText + cpuPowerText;
 
@@ -110,7 +112,7 @@ public sealed partial class ReportWindow : IDisposable
 		var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 
 		var gpuInformationText = $"{gpuUage:N0}%";
-		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
+		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "ï¿½C") : "";
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTempertureText + gpuPowerText;
 
