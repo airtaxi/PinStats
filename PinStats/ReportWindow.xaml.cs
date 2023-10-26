@@ -77,7 +77,7 @@ public sealed partial class ReportWindow : IDisposable
 		RefreshHardwareInformation();
 
 		// Setup the timer to refresh the hardware information.
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms);
+		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 	}
 
 	private void RefreshTimerCallback(object state)
