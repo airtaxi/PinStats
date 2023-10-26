@@ -105,7 +105,7 @@ public sealed partial class ReportWindow : IDisposable
 		var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 
 		var cpuInformationText = $"{cpuUage:N0}%";
-		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "�C") : "";
+		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
 		var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
 		cpuInformationText += cpuTempertureText + cpuPowerText;
 
