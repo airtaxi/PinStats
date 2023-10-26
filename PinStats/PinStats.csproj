@@ -21,6 +21,7 @@
 	<ItemGroup>
 		<None Remove="Assets\Cpu.png" />
 		<None Remove="Fonts\Pretendard-Thin.ttf" />
+		<None Remove="MonitorWindow.xaml" />
 		<None Remove="ReportWindow.xaml" />
 		<None Remove="Resources\TaskbarUsageResources.xaml" />
 	</ItemGroup>
@@ -66,6 +67,9 @@
 		<None Update="icon.ico">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
+		<Page Update="MonitorWindow.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="ReportWindow.xaml">

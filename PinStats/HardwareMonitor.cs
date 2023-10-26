@@ -36,6 +36,9 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> MemoryHardwares = new();
 	private readonly static List<IHardware> BatteryHardwares = new();
 
+	// Motherboard hardware is not a list because only one motherboard is assumed to be present.
+	private readonly static IHardware MotherboardHardware;
+
 	private readonly static Timer StorageTimer = new() { Interval = StorageTimerInMilliseconds };
 	private static float s_storageReadRatePerSecondInBytes;
 	private static float s_storageWriteRatePerSecondInBytes;
@@ -62,7 +65,8 @@ public static class HardwareMonitor
 			IsMemoryEnabled = true,
 			IsNetworkEnabled = true,
 			IsBatteryEnabled = true,
-			IsStorageEnabled = true
+			IsStorageEnabled = true,
+			IsMotherboardEnabled = true,
 		};
 		Computer.Open();
 		Computer.Accept(new UpdateVisitor());
@@ -74,6 +78,11 @@ public static class HardwareMonitor
 			if (hardware.HardwareType == HardwareType.Cpu)
 			{
 				CpuHardwares.Add(hardware);
+				continue;
+			}
+			else if (hardware.HardwareType == HardwareType.Motherboard)
+			{
+				MotherboardHardware = hardware;
 				continue;
 			}
 			else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel)
@@ -137,6 +146,8 @@ public static class HardwareMonitor
 		else if (hardware.HardwareType == HardwareType.Memory) MemoryHardwares.Add(hardware);
 		else if (hardware.HardwareType == HardwareType.Battery) BatteryHardwares.Add(hardware);
 	}
+
+	public static string GetMotherboardName() => MotherboardHardware.Name;
 
 	public static List<string> GetGpuHardwareNames() => GpuHardwares.Select(x => x.Name).ToList();
 
@@ -268,6 +279,29 @@ public static class HardwareMonitor
 
 		var totalMemory = memoryUsed + memoryAvailable;
 		return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
+	}
+
+	public static float GetTotalMemory(bool queryVirtualMemory = false, bool update = false)
+	{
+		if (update) MemoryHardwares.ForEach(x => x.Update());
+
+		var memoryUsedSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
+		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
+
+		var memoryAvailableSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Available");
+		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
+		
+		var totalMemory = memoryUsed + memoryAvailable;
+		return totalMemory;
+	}
+
+	public static float GetUsedMemory(bool queryVirtualMemory = false, bool update = false)
+	{
+		if (update) MemoryHardwares.ForEach(x => x.Update());
+
+		var memoryUsedSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
+		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
+		return memoryUsed;
 	}
 
 	private static float GetStorageReadRateInBytes()

@@ -24,6 +24,10 @@
                     </MenuFlyoutItem.Command>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutSubItem
+                    x:Name="MenuFlyoutSubItemMonitors"
+                    Text="Show Hardware Monitor"/>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemSetupIconColor">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnSetupIconColorMenuFlyoutItemClicked"/>

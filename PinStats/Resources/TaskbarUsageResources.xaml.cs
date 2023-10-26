@@ -1,15 +1,14 @@
-﻿using HidSharp.Reports;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using PinStats.Enums;
 using PinStats.Helpers;
-using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using WinUIEx;
+using Image = System.Drawing.Image;
+using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
 
 namespace PinStats.Resources;
 
@@ -50,6 +49,7 @@ public partial class TaskbarUsageResources
 	{
 		
 		InitializeComponent();
+		InitializeShowHardwareMonitorMenuFlyoutSubItem();
 
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
@@ -61,6 +61,39 @@ public partial class TaskbarUsageResources
 		TaskbarIconCpuUsage.ForceCreate();
 
 		UpdateTimerElapsed += (s, e) => Update();
+	}
+
+	// Since command doesn't have a tag property, I used a dictionary to map the command to the monitor.
+	private Dictionary<XamlUICommand, Monitor> _commandMonitorMap = new();
+	private void InitializeShowHardwareMonitorMenuFlyoutSubItem()
+	{
+		var monitors = MonitorHelper.GetMonitors();
+		int index = 0;
+		foreach(var monitor in monitors)
+		{
+			var resolutionText = $"{monitor.SizeAndPosition.Width}x{monitor.SizeAndPosition.Height}";
+			var menuFlyoutItem = new MenuFlyoutItem { Text = $"Monitor {++index}: {monitor.MonitorName} ({resolutionText})", Tag = monitor };
+
+			// Setup the command to show the hardware monitor window.
+			var command = new XamlUICommand();
+			command.ExecuteRequested += OnShowHardwareMonitorMenuFlyoutItemClicked;
+			_commandMonitorMap.Add(command, monitor); // Add the monitor to the command since command doesn't have a tag property.
+			menuFlyoutItem.Command = command;
+
+			MenuFlyoutSubItemMonitors.Items.Add(menuFlyoutItem);
+		}
+	}
+
+	private void OnShowHardwareMonitorMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	{
+		var monitor = _commandMonitorMap[sender]; // Retrieve the monitor from the command.
+
+		// Close the existing window instance to prevent multiple windows to be opened.
+		var existingWindowInstance = MonitorWindow.Instance;
+		if (existingWindowInstance != null) existingWindowInstance.Close();
+
+		var monitorWindow = new MonitorWindow(monitor);
+		monitorWindow.Activate();
 	}
 
 	private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
@@ -132,9 +165,11 @@ public partial class TaskbarUsageResources
 
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
 		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
+		MonitorWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
 
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 		ReportWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
+		MonitorWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
 	}
 
 
