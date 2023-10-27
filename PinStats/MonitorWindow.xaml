@@ -32,6 +32,8 @@
                 Background="Transparent"
                 BorderThickness="0"
                 HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Padding="5"
                 Click="OnExitButtonClicked">
                 <SymbolIcon Symbol="Cancel" />
             </Button>
