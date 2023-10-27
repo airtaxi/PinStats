@@ -336,11 +336,10 @@ public static class MonitorHelper
 		error = QueryDisplayConfig(QUERY_DEVICE_CONFIG_FLAGS.QDC_ONLY_ACTIVE_PATHS, ref pathCount, displayPaths, ref modeCount, displayModes, IntPtr.Zero);
 		if (error != ERROR_SUCCESS) throw new Win32Exception(error);
 
-		var displays = displayModes.GroupBy(x => x.adapterId);
-		foreach(var display in displays)
+		foreach(var path in displayPaths)
 		{
-			var source = display.FirstOrDefault(x => x.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_SOURCE);
-
+			// Query source and retrieve monitor size and position
+			var source = displayModes.FirstOrDefault(x => x.id == path.sourceInfo.id);
 			var sizeAndPosition = new SizeAndPosition
 			{
 				X = source.modeInfo.sourceMode.position.x,
@@ -349,9 +348,14 @@ public static class MonitorHelper
 				Height = (int)source.modeInfo.sourceMode.height
 			};
 
-			var target = display.FirstOrDefault(x => x.infoType == DISPLAYCONFIG_MODE_INFO_TYPE.DISPLAYCONFIG_MODE_INFO_TYPE_TARGET);
+			// Query target and retrieve monitor friendly name
+			var target = displayModes.FirstOrDefault(x => x.id == path.targetInfo.id);
 			var monitorFriendlyName = MonitorFriendlyName(target.adapterId, target.id);
 
+			// Empty monitor friendly name means internal display
+			if (string.IsNullOrEmpty(monitorFriendlyName)) monitorFriendlyName = "Internal Display";
+
+			// Synthesize monitor object
 			var monitor = new Monitor
 			{
 				MonitorName = monitorFriendlyName,
