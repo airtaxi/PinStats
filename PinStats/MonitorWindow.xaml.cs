@@ -3,7 +3,9 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using PinStats.Enums;
 using PinStats.Helpers;
+using PinStats.Resources;
 using PinStats.ViewModels;
 using WinUIEx;
 using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
@@ -33,7 +35,6 @@ public sealed partial class MonitorWindow : IDisposable
 		InitializeComponent();
 
 		ExtendsContentIntoTitleBar = true;
-		SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
 		AppWindow.IsShownInSwitchers = false;
 		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), monitor);
 		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
@@ -41,11 +42,23 @@ public sealed partial class MonitorWindow : IDisposable
 		InitializeControls();
 		RefreshHardwareInformation();
 
+
+		// Setup the timer to refresh the hardware information
 		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 	}
 
 	private void InitializeControls()
 	{
+		// Apply background image if available or use Mica backdrop
+		if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.HardwareMonitor, ImageBackground))
+		{
+			GridBackground.Visibility = Visibility.Collapsed;
+			SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
+		}
+		// No need to set the backdrop to null since it is already null by default
+
+		TaskbarUsageResources.HardwareMonitorBackgroundImageSet += OnHardwareMonitorBackgroundImageSet;
+
 		TextBlockMotherboardName.Text = HardwareMonitor.GetMotherboardName();
 		TextBlockCpuName.Text = HardwareMonitor.GetCpuName();
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
@@ -60,7 +73,7 @@ public sealed partial class MonitorWindow : IDisposable
 		// Setup GPU usage chart
 		GpuUsageViewModel.RefreshSync();
 		CartesianChartGpuUsage.DataContext = GpuUsageViewModel;
-		ReportWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
+		PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
 
 
 		CartesianChartBattery.DataContext = _batteryViewModel;
@@ -170,10 +183,26 @@ public sealed partial class MonitorWindow : IDisposable
 		if (_disposed) return;
 		_disposed = true;
 		Instance = null;
-		ReportWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
+		TaskbarUsageResources.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
+		PopupWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
 		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
 		_refreshTimer.Dispose();
 		GC.SuppressFinalize(this);
+	}
+
+	private void OnHardwareMonitorBackgroundImageSet(object sender, EventArgs e)
+	{
+		// Apply background image if available or use Mica backdrop
+		if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.HardwareMonitor, ImageBackground))
+		{
+			GridBackground.Visibility = Visibility.Collapsed;
+			SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
+		}
+		else
+		{
+			GridBackground.Visibility = Visibility.Visible;
+			SystemBackdrop = null; // Reset backdrop to default since the background image is available
+		}
 	}
 
 	private void OnCurrentGpuChanged(object sender, EventArgs e) => TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();

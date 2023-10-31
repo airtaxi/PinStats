@@ -22,7 +22,7 @@
 		<None Remove="Assets\Cpu.png" />
 		<None Remove="Fonts\Pretendard-Thin.ttf" />
 		<None Remove="MonitorWindow.xaml" />
-		<None Remove="ReportWindow.xaml" />
+		<None Remove="PopupWindow.xaml" />
 		<None Remove="Resources\TaskbarUsageResources.xaml" />
 	</ItemGroup>
 	<ItemGroup>
@@ -44,6 +44,7 @@
 		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
 		<PackageReference Include="TaskScheduler" Version="2.10.1" />
 		<PackageReference Include="WinUIEx" Version="2.3.2" />
+		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
 
@@ -72,7 +73,7 @@
 		</Page>
 	</ItemGroup>
 	<ItemGroup>
-		<Page Update="ReportWindow.xaml">
+		<Page Update="PopupWindow.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>

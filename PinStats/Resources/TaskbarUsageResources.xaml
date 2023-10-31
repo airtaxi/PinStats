@@ -16,6 +16,31 @@
                 <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False"/>
                 <MenuFlyoutItem Text="Author: Howon Lee" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutSubItem Text="Popup Background Image">
+                    <MenuFlyoutItem Text="Select Image">
+                        <MenuFlyoutItem.Command>
+                            <XamlUICommand ExecuteRequested="OnSelectPopupBackgroundImageMenuFlyoutItemClicked"/>
+                        </MenuFlyoutItem.Command>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetPopupBackgroundImage" Text="Reset">
+                        <MenuFlyoutItem.Command>
+                            <XamlUICommand ExecuteRequested="OnResetPopupBackgroundImageMenuFlyoutItemClicked"/>
+                        </MenuFlyoutItem.Command>
+                    </MenuFlyoutItem>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSubItem Text="Hardware Monitor Background Image">
+                    <MenuFlyoutItem Text="Select Image">
+                        <MenuFlyoutItem.Command>
+                            <XamlUICommand ExecuteRequested="OnSelectHardwareMonitorBackgroundImageMenuFlyoutItemClicked"/>
+                        </MenuFlyoutItem.Command>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetHardwareMonitorBackgroundImage" Text="Reset">
+                        <MenuFlyoutItem.Command>
+                            <XamlUICommand ExecuteRequested="OnResetHardwareMonitorBackgroundImageMenuFlyoutItemClicked"/>
+                        </MenuFlyoutItem.Command>
+                    </MenuFlyoutItem>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutSubItem
                     x:Name="MenuFlyoutSubItemMonitors"
                     Text="Show Hardware Monitor"/>

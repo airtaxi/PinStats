@@ -2,12 +2,14 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.ViewModels;
 
 namespace PinStats;
 
-public sealed partial class ReportWindow : IDisposable
+public sealed partial class PopupWindow : IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
 
@@ -18,10 +20,17 @@ public sealed partial class ReportWindow : IDisposable
 
 	private readonly Timer _refreshTimer;
 
-	public ReportWindow()
+	public PopupWindow()
 	{
 		InitializeComponent();
+		Initialize();
 
+		// Setup the timer to refresh the hardware information
+		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+	}
+
+	private void Initialize()
+	{
 		// Set window and appwindow properties
 		SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
 		AppWindow.IsShownInSwitchers = false;
@@ -30,6 +39,14 @@ public sealed partial class ReportWindow : IDisposable
 		// If OverlappedPresenter's border and titlebar is manually set, the window will not be rounded.
 		// So we need to set the window corner to rounded corner manually.
 		WindowHelper.SetWindowCornerToRoundedCorner(this);
+
+		// Apply background image if available or use Mica backdrop
+		if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.Popup, ImageBackground))
+		{
+            GridBackground.Visibility = Visibility.Collapsed;
+			SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
+		}
+		// No need to set the backdrop to null since it is already null by default
 
 		// Setup saved usage target
 		UsageViewModel usageViewModel = null;
@@ -77,9 +94,6 @@ public sealed partial class ReportWindow : IDisposable
 
 		// Refresh the hardware information manually since timer callback is not yet triggered.
 		RefreshHardwareInformation();
-
-		// Setup the timer to refresh the hardware information.
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 	}
 
 	private void RefreshTimerCallback(object state)

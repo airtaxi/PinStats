@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using PinStats.Enums;
 using PinStats.Helpers;
 using System.Drawing;
@@ -25,6 +26,9 @@ public partial class TaskbarUsageResources
 
 	private Image _iconImage;
 	private string _iconImagePath;
+
+	// Popup does not need this event since popup and context menu cannot be opened at the same time
+	public static event EventHandler HardwareMonitorBackgroundImageSet;
 
 	static TaskbarUsageResources()
 	{
@@ -53,6 +57,7 @@ public partial class TaskbarUsageResources
 
 		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
+		UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty();
 		UpdateIconImageByIconColor();
 
 		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
@@ -61,6 +66,12 @@ public partial class TaskbarUsageResources
 		TaskbarIconCpuUsage.ForceCreate();
 
 		UpdateTimerElapsed += (s, e) => Update();
+	}
+
+	private void UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty()
+	{
+		UpdateResetPopupBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
+		UpdateResetHardwareMonitorBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
 	}
 
 	// Since command doesn't have a tag property, I used a dictionary to map the command to the monitor.
@@ -164,11 +175,11 @@ public partial class TaskbarUsageResources
 		});
 
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
-		ReportWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
+		PopupWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
 		MonitorWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
 
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
-		ReportWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
+		PopupWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
 		MonitorWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
 	}
 
@@ -185,7 +196,7 @@ public partial class TaskbarUsageResources
 	private const int ReportWindowHorizontalOffset = 220;
 	private void OnCpuTaskbarIconLeftClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
-		var reportWindow = new ReportWindow();
+		var reportWindow = new PopupWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
 
 		var TaskbarRect = TaskbarHelper.GetTaskbarRect();
@@ -231,4 +242,55 @@ public partial class TaskbarUsageResources
         UpdateSetupIconColorMenuFlyoutItemTextProperty();
 		UpdateIconImageByIconColor();
     }
+
+	private void UpdateResetPopupBackgroundImagePathMenuFlyoutItemIsEnabledProperty()
+	{
+		var backgroundImagePath = Configuration.GetValue<string>("PopupBackgroundImagePath");
+		MenuFlyoutItemResetPopupBackgroundImage.IsEnabled = backgroundImagePath != null;
+	}
+
+	private void UpdateResetHardwareMonitorBackgroundImagePathMenuFlyoutItemIsEnabledProperty()
+	{
+		var backgroundImagePath = Configuration.GetValue<string>("HardwareMonitorBackgroundImagePath");
+		MenuFlyoutItemResetHardwareMonitorBackgroundImage.IsEnabled = backgroundImagePath != null;
+	}
+
+	private void OnResetPopupBackgroundImageMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	{
+		Configuration.SetValue("PopupBackgroundImagePath", null);
+		UpdateResetPopupBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
+	}
+
+	private void OnResetHardwareMonitorBackgroundImageMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	{
+		Configuration.SetValue("HardwareMonitorBackgroundImagePath", null);
+		UpdateResetHardwareMonitorBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
+		HardwareMonitorBackgroundImageSet?.Invoke(this, EventArgs.Empty);
+	}
+
+	private void OnSelectPopupBackgroundImageMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	{
+		ConfigureBackgroundImagePath(BackgroundImageType.Popup);
+		UpdateResetPopupBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
+	}
+
+	private void OnSelectHardwareMonitorBackgroundImageMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	{
+		ConfigureBackgroundImagePath(BackgroundImageType.HardwareMonitor);
+		UpdateResetHardwareMonitorBackgroundImagePathMenuFlyoutItemIsEnabledProperty();
+		HardwareMonitorBackgroundImageSet?.Invoke(this, EventArgs.Empty);
+	}
+
+	private static void ConfigureBackgroundImagePath(BackgroundImageType backgroundImageType)
+	{
+		// WinUI's FileOpenPicker won't work with elevated application binary for now
+		// Use WindowsAPICodePack's CommonOpenFileDialog instead
+		var dialog = new CommonOpenFileDialog();
+		dialog.Filters.Add(new CommonFileDialogFilter("Image File", "*.png;*.jpg;*.jpeg"));
+		if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+
+		// Configure background image path with prefix string
+		var path = dialog.FileName;
+		Configuration.SetValue(backgroundImageType.ToString() + "BackgroundImagePath", path);
+	}
 }
