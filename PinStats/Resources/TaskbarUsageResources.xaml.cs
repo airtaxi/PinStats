@@ -139,7 +139,7 @@ public partial class TaskbarUsageResources
 				using var bitmap = new Bitmap(image);
 				using var graphics = Graphics.FromImage(bitmap);
 
-				var font = new Font(PrivateFontCollection.Families[0], 12);
+				var font = new Font(PrivateFontCollection.Families[0], 11.5f);
 				var stringFormat = new StringFormat
 				{
 					Alignment = StringAlignment.Center,
