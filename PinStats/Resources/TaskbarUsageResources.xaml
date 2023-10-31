@@ -13,16 +13,8 @@
         </tb:TaskbarIcon.IconSource>
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
-                <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False">
-                    <MenuFlyoutItem.Command>
-                        <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
-                    </MenuFlyoutItem.Command>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Author: Howon Lee" IsEnabled="False">
-                    <MenuFlyoutItem.Command>
-                        <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked"/>
-                    </MenuFlyoutItem.Command>
-                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False"/>
+                <MenuFlyoutItem Text="Author: Howon Lee" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutSubItem
                     x:Name="MenuFlyoutSubItemMonitors"
