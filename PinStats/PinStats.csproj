@@ -13,9 +13,9 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
-		<Version>2.1.7</Version>
-		<AssemblyVersion>2.1.7</AssemblyVersion>
-		<FileVersion>2.1.7</FileVersion>
+		<Version>2.1.8</Version>
+		<AssemblyVersion>2.1.8</AssemblyVersion>
+		<FileVersion>2.1.8</FileVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
