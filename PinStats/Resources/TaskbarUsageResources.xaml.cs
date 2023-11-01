@@ -101,7 +101,7 @@ public partial class TaskbarUsageResources
 
 		// Close the existing window instance to prevent multiple windows to be opened.
 		var existingWindowInstance = MonitorWindow.Instance;
-		if (existingWindowInstance != null) existingWindowInstance.Close();
+		existingWindowInstance?.Close();
 
 		var monitorWindow = new MonitorWindow(monitor);
 		monitorWindow.Activate();
@@ -137,7 +137,7 @@ public partial class TaskbarUsageResources
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
         var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 
-        float usage = 0f;
+        var usage = 0f;
 		if (lastUsageTarget == "CPU") usage = HardwareMonitor.GetAverageCpuUsage();
 		else if (lastUsageTarget == "GPU") usage = HardwareMonitor.GetCurrentGpuUsage();
 		string usageText = GenerateUsageText(usage);
@@ -199,27 +199,27 @@ public partial class TaskbarUsageResources
 		var reportWindow = new PopupWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
 
-		var TaskbarRect = TaskbarHelper.GetTaskbarRect();
-		TaskbarPosition TaskbarPosition = TaskbarHelper.GetTaskbarPosition();
+		var taskbarRect = TaskbarHelper.GetTaskbarRect();
+		var taskbarPosition = TaskbarHelper.GetTaskbarPosition();
 
 		// Default position is bottom.
-		double positionX = TaskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
-		double positionY = TaskbarRect.Top - (reportWindow.Height * scale);
+		var positionX = taskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+		var positionY = taskbarRect.Top - (reportWindow.Height * scale);
 
-		if(TaskbarPosition == TaskbarPosition.Top)
+		switch (taskbarPosition)
 		{
-			positionX = TaskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
-			positionY = TaskbarRect.Bottom;
-		}
-		else if(TaskbarPosition == TaskbarPosition.Left)
-		{
-			positionX = TaskbarRect.Right;
-			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
-		}
-		else if(TaskbarPosition == TaskbarPosition.Right)
-		{
-			positionX = TaskbarRect.Left - (reportWindow.Width * scale);
-			positionY = TaskbarRect.Bottom - (reportWindow.Height * scale);
+			case TaskbarPosition.Top:
+				positionX = taskbarRect.Right - (reportWindow.Width + ReportWindowHorizontalOffset) * scale;
+				positionY = taskbarRect.Bottom;
+				break;
+			case TaskbarPosition.Left:
+				positionX = taskbarRect.Right;
+				positionY = taskbarRect.Bottom - reportWindow.Height * scale;
+				break;
+			case TaskbarPosition.Right:
+				positionX = taskbarRect.Left - reportWindow.Width * scale;
+				positionY = taskbarRect.Bottom - reportWindow.Height * scale;
+				break;
 		}
 
 		reportWindow.Move((int)positionX, (int)positionY);
