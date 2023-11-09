@@ -117,7 +117,7 @@ public sealed partial class MonitorWindow : IDisposable
 		var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 
 		var gpuInformationText = $"{gpuUage:N0}%";
-		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "�C") : "";
+		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTempertureText + gpuPowerText;
 
