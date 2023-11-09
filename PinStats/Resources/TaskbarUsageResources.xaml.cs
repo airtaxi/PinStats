@@ -307,9 +307,9 @@ public partial class TaskbarUsageResources
 		HardwareMonitorBackgroundImageSet?.Invoke(this, EventArgs.Empty);
 	}
 
-	private void OnRefreshHardwaresMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	private async void OnRefreshHardwaresMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
-		HardwareMonitor.RefreshComputerHardwares();
 		RefreshShowHardwareMonitorMenuFlyoutSubItems();
+		await HardwareMonitor.RefreshComputerHardwaresAsync();
 	}
 }
