@@ -15,7 +15,7 @@
     IsAlwaysOnTop="True"
     Closed="OnClosed">
 
-    <Grid Loaded="OnLoaded">
+    <Grid Loaded="OnLoaded" SizeChanged="OnSizeChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

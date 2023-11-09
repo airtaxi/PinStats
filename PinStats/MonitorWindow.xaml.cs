@@ -220,4 +220,7 @@ public sealed partial class MonitorWindow : IDisposable
 		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
 		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 	}
+
+	// Setup presenter again when the window is resized (monitor might have changed)
+	private void OnSizeChanged(object sender, SizeChangedEventArgs e) => AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 }
