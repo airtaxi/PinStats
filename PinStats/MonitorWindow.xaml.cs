@@ -226,6 +226,7 @@ public sealed partial class MonitorWindow : IDisposable
 	{
 		var isFullscreen = e.Kind == AppWindowPresenterKind.FullScreen;
 		if (isFullscreen) return; // Presenter is already in full screen mode
+
 		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 	}
 }
