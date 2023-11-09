@@ -222,5 +222,10 @@ public sealed partial class MonitorWindow : IDisposable
 	}
 
 	// Keep the window in full screen mode
-	private void OnPresenterChanged(object sender, AppWindowPresenter e) => AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+	private void OnPresenterChanged(object sender, AppWindowPresenter e)
+	{
+		var isFullscreen = e.Kind == AppWindowPresenterKind.FullScreen;
+		if (isFullscreen) return; // Presenter is already in full screen mode
+		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+	}
 }
