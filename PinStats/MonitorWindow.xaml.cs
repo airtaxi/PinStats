@@ -221,6 +221,6 @@ public sealed partial class MonitorWindow : IDisposable
 		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 	}
 
-	// Setup presenter again when the window is resized (monitor might have changed)
-	private void OnSizeChanged(object sender, SizeChangedEventArgs e) => AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+	// Keep the window in full screen mode
+	private void OnPresenterChanged(object sender, AppWindowPresenter e) => AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 }

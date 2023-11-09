@@ -13,9 +13,10 @@
     IsMaximizable="False"
     IsMinimizable="False"
     IsAlwaysOnTop="True"
-    Closed="OnClosed">
+    Closed="OnClosed"
+    PresenterChanged="OnPresenterChanged">
 
-    <Grid Loaded="OnLoaded" SizeChanged="OnSizeChanged">
+    <Grid Loaded="OnLoaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
