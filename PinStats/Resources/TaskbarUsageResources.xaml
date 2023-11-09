@@ -45,6 +45,11 @@
                     x:Name="MenuFlyoutSubItemMonitors"
                     Text="Show Hardware Monitor"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="MenuFlyoutItemRefreshHardwares" Text="Refresh Hardwares">
+                    <MenuFlyoutItem.Command>
+                        <XamlUICommand ExecuteRequested="OnRefreshHardwaresMenuFlyoutItemClicked"/>
+                    </MenuFlyoutItem.Command>
+                </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemSetupIconColor">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnSetupIconColorMenuFlyoutItemClicked"/>

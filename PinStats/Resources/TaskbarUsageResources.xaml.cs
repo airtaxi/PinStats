@@ -51,21 +51,29 @@ public partial class TaskbarUsageResources
 
 	public TaskbarUsageResources()
 	{
-		
-		InitializeComponent();
-		InitializeShowHardwareMonitorMenuFlyoutSubItem();
+		InitializeComponent(); // This is required to initialize the context menu.
 
-		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
+		// Setup MenuFlyoutItem(s)
+		RefreshShowHardwareMonitorMenuFlyoutSubItems();
+		UpdateSetupStartupProgramMenuFlyoutItemTextProperty();
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
+		UpdateVersioNameMenuFlyoutItemTextProperty();
 		UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty();
+
+		// Update the icon image
 		UpdateIconImageByIconColor();
 
-		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
-		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
-
+		// Create the taskbar icon
 		TaskbarIconCpuUsage.ForceCreate();
 
+		// Setup the timer to update the icon image
 		UpdateTimerElapsed += (s, e) => Update();
+	}
+
+	private void UpdateVersioNameMenuFlyoutItemTextProperty()
+	{
+		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
+		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
 	}
 
 	private void UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty()
@@ -76,8 +84,13 @@ public partial class TaskbarUsageResources
 
 	// Since command doesn't have a tag property, I used a dictionary to map the command to the monitor.
 	private Dictionary<XamlUICommand, Monitor> _commandMonitorMap = new();
-	private void InitializeShowHardwareMonitorMenuFlyoutSubItem()
+	private void RefreshShowHardwareMonitorMenuFlyoutSubItems()
 	{
+		// Clear the existing menu items and the command map.
+		_commandMonitorMap.Clear();
+		MenuFlyoutSubItemMonitors.Items.Clear();
+
+		// Add the menu items.
 		var monitors = MonitorHelper.GetMonitors();
 		int index = 0;
 		foreach(var monitor in monitors)
@@ -107,7 +120,7 @@ public partial class TaskbarUsageResources
 		monitorWindow.Activate();
 	}
 
-	private void UpdateSetupStartupProgramMenuFLyoutItemTextProperty()
+	private void UpdateSetupStartupProgramMenuFlyoutItemTextProperty()
 	{
 		var isStartupProgram = StartupHelper.IsStartupProgram;
 		if (isStartupProgram) MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
@@ -193,6 +206,19 @@ public partial class TaskbarUsageResources
 		return usageText;
 	}
 
+	private static void ConfigureBackgroundImagePath(BackgroundImageType backgroundImageType)
+	{
+		// WinUI's FileOpenPicker won't work with elevated application binary for now
+		// Use WindowsAPICodePack's CommonOpenFileDialog instead
+		var dialog = new CommonOpenFileDialog();
+		dialog.Filters.Add(new CommonFileDialogFilter("Image File", "*.png;*.jpg;*.jpeg"));
+		if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+
+		// Configure background image path with prefix string
+		var path = dialog.FileName;
+		Configuration.SetValue(backgroundImageType.ToString() + "BackgroundImagePath", path);
+	}
+
 	private const int ReportWindowHorizontalOffset = 220;
 	private void OnCpuTaskbarIconLeftClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
@@ -232,7 +258,7 @@ public partial class TaskbarUsageResources
 	private void OnSetupStartupProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
 		StartupHelper.SetupStartupProgram();
-		UpdateSetupStartupProgramMenuFLyoutItemTextProperty();
+		UpdateSetupStartupProgramMenuFlyoutItemTextProperty();
 	}
 
     private void OnSetupIconColorMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
@@ -281,16 +307,9 @@ public partial class TaskbarUsageResources
 		HardwareMonitorBackgroundImageSet?.Invoke(this, EventArgs.Empty);
 	}
 
-	private static void ConfigureBackgroundImagePath(BackgroundImageType backgroundImageType)
+	private void OnRefreshHardwaresMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
-		// WinUI's FileOpenPicker won't work with elevated application binary for now
-		// Use WindowsAPICodePack's CommonOpenFileDialog instead
-		var dialog = new CommonOpenFileDialog();
-		dialog.Filters.Add(new CommonFileDialogFilter("Image File", "*.png;*.jpg;*.jpeg"));
-		if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
-
-		// Configure background image path with prefix string
-		var path = dialog.FileName;
-		Configuration.SetValue(backgroundImageType.ToString() + "BackgroundImagePath", path);
+		HardwareMonitor.RefreshComputerHardwares();
+		RefreshShowHardwareMonitorMenuFlyoutSubItems();
 	}
 }
