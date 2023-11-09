@@ -76,7 +76,7 @@ public static class HardwareMonitor
 		Computer.HardwareAdded += OnComputerHardwareAdded;
 
 		// Initialize Hardwares
-		RefreshComputerHardwaresAsync();
+		_ = RefreshComputerHardwaresAsync();
 
 		// Initialize Timers
 		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
