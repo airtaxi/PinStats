@@ -339,7 +339,7 @@ public static class MonitorHelper
 		foreach(var path in displayPaths)
 		{
 			// Query source and retrieve monitor size and position
-			var source = displayModes.FirstOrDefault(x => x.id == path.sourceInfo.id);
+			var source = displayModes.FirstOrDefault(x => x.id == path.sourceInfo.id && x.adapterId.HighPart == path.sourceInfo.adapterId.HighPart && x.adapterId.LowPart == path.sourceInfo.adapterId.LowPart);
 			var sizeAndPosition = new SizeAndPosition
 			{
 				X = source.modeInfo.sourceMode.position.x,
