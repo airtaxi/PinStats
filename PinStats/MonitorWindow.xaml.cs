@@ -27,17 +27,17 @@ public sealed partial class MonitorWindow : IDisposable
 	public readonly TotalUsageViewModel _batteryViewModel = new();
 	public readonly TotalUsageViewModel _batteryHealthViewModel = new();
 
+	private readonly Monitor _monitor;
 	private readonly Timer _refreshTimer;
 
 	public MonitorWindow(Monitor monitor)
 	{
 		Instance = this;
+		_monitor = monitor;
 		InitializeComponent();
 
 		ExtendsContentIntoTitleBar = true;
 		AppWindow.IsShownInSwitchers = false;
-		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), monitor);
-		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 
 		InitializeControls();
 		RefreshHardwareInformation();
@@ -81,10 +81,6 @@ public sealed partial class MonitorWindow : IDisposable
 
 		_batteryViewModel.SetValue(100, 0, "N/A");
 		_batteryHealthViewModel.SetValue(100, 0, "N/A");
-		//var hasBattery = HardwareMonitor.HasBattery();
-		//if (!hasBattery)
-		//{
-		//}
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -210,4 +206,11 @@ public sealed partial class MonitorWindow : IDisposable
 	private void OnExitButtonClicked(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => Close();
 
 	private void OnClosed(object sender, Microsoft.UI.Xaml.WindowEventArgs args) => Dispose();
+
+	// Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
+	private void OnLoaded(object sender, RoutedEventArgs e)
+	{
+		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
+		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+	}
 }
