@@ -244,7 +244,7 @@ public static class HardwareMonitor
 	public static float GetCurrentGpuPower(bool update = false)
 	{
 		var gpuHardware = GetCurrentGpuHardware();
-		if (gpuHardware == null) return 0; // If there are no GPUs, return 0.
+		if (gpuHardware == null) return 0; // If there are no GPUs, return 0
 
 		if (update) gpuHardware.Update();
 
@@ -259,7 +259,7 @@ public static class HardwareMonitor
 	public static float? GetCurrentGpuTemperature(bool update = false)
 	{
 		var gpuHardware = GetCurrentGpuHardware();
-		if (gpuHardware == null) return 0; // If there are no GPUs, return 0.
+		if (gpuHardware == null) return null; // If there are no GPUs, return null
 
 		if (update) gpuHardware.Update();
 
