@@ -37,7 +37,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> StorageHardwares = new();
 	private readonly static List<IHardware> MemoryHardwares = new();
 	private readonly static List<IHardware> BatteryHardwares = new();
-	private readonly static SemaphoreSlim HardwareSemapore = new(1, 1);
+	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
 
 	// Motherboard hardware is not a list because only one motherboard is assumed to be present.
 	private static IHardware s_motherboardHardware;
@@ -122,7 +122,7 @@ public static class HardwareMonitor
 
 	private static void RefreshHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			CpuHardwares.Clear();
@@ -167,12 +167,12 @@ public static class HardwareMonitor
 			}
 			GpuHardwares.Reverse();
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static void OnComputerHardwareRemoved(IHardware hardware)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (hardware.HardwareType == HardwareType.Cpu) CpuHardwares.Remove(hardware);
@@ -182,12 +182,12 @@ public static class HardwareMonitor
 			else if (hardware.HardwareType == HardwareType.Memory) MemoryHardwares.Remove(hardware);
 			else if (hardware.HardwareType == HardwareType.Battery) BatteryHardwares.Remove(hardware);
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static void OnComputerHardwareAdded(IHardware hardware)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (hardware.HardwareType == HardwareType.Cpu) CpuHardwares.Add(hardware);
@@ -197,23 +197,23 @@ public static class HardwareMonitor
 			else if (hardware.HardwareType == HardwareType.Memory) MemoryHardwares.Add(hardware);
 			else if (hardware.HardwareType == HardwareType.Battery) BatteryHardwares.Add(hardware);
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static string GetMotherboardName() => s_motherboardHardware.Name;
 
 	public static List<string> GetGpuHardwareNames()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { return GpuHardwares.Select(x => x.Name).ToList(); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetAverageCpuUsage() => s_cpuUsage;
 
 	public static float? GetAverageCpuTemperature(bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (update) CpuHardwares.ForEach(x => x.Update());
@@ -222,12 +222,12 @@ public static class HardwareMonitor
 			var temperature = cpuTemperatureSensors.Where(x => x.Value != null && x.Value != float.NaN).Average(x => x.Value) ?? 0;
 			return temperature > 0 ? temperature : null;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetTotalCpuPackagePower(bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (update) CpuHardwares.ForEach(x => x.Update());
@@ -236,7 +236,7 @@ public static class HardwareMonitor
 			var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value) ?? 0;
 			return cpuPackagePower;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
@@ -274,9 +274,9 @@ public static class HardwareMonitor
 	{
 		if(CpuHardwares.Count == 0) return "N/A"; // If there are no CPUs, return N/A.
 
-		var firstCpuHardwre = CpuHardwares[0];
-		if (CpuHardwares.Count == 1) return firstCpuHardwre.Name;
-		else return firstCpuHardwre.Name + " + " + (CpuHardwares.Count - 1) + " more";
+		var firstCpuHardware = CpuHardwares[0];
+		if (CpuHardwares.Count == 1) return firstCpuHardware.Name;
+		else return firstCpuHardware.Name + " + " + (CpuHardwares.Count - 1) + " more";
 	}
 
 	public static string GetCurrentGpuName()
@@ -294,7 +294,7 @@ public static class HardwareMonitor
 
 	public static float? GetTotalBatteryPercent(bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (BatteryHardwares == null) return null;
@@ -307,12 +307,12 @@ public static class HardwareMonitor
 
 			return remainingCapacity / fullChargedCapacity * 100;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float? GetTotalBatteryChargeRate(bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (BatteryHardwares == null) return null;
@@ -327,12 +327,12 @@ public static class HardwareMonitor
 			var result = chargeRate + dischargeRate;
 			return result;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float? GetAverageBatteryHealthPercent(bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (BatteryHardwares == null) return null;
@@ -348,7 +348,7 @@ public static class HardwareMonitor
 			var percent = fullyChargedCapacitySum / designedCapacitySum * 100;
 			return percent;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static IHardware GetCurrentGpuHardware()
@@ -369,7 +369,7 @@ public static class HardwareMonitor
 
 	public static string GetMemoryInformationText(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (update) MemoryHardwares.ForEach(x => x.Update());
@@ -383,12 +383,12 @@ public static class HardwareMonitor
 			var totalMemory = memoryUsed + memoryAvailable;
 			return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetTotalMemory(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (update) MemoryHardwares.ForEach(x => x.Update());
@@ -402,12 +402,12 @@ public static class HardwareMonitor
 			var totalMemory = memoryUsed + memoryAvailable;
 			return totalMemory;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetUsedMemory(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			if (update) MemoryHardwares.ForEach(x => x.Update());
@@ -415,12 +415,12 @@ public static class HardwareMonitor
 			var memoryUsedSensors = MemoryHardwares.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
 			return memoryUsedSensors.Sum(x => x.Value) ?? 0;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static float GetStorageReadRateInBytes()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			var sensors = StorageHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Read Rate");
@@ -428,12 +428,12 @@ public static class HardwareMonitor
 			var total = sensors.Sum(x => x.Value) ?? 0;
 			return total;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static float GetStorageWriteRateInBytes()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			var sensors = StorageHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Write Rate");
@@ -441,7 +441,7 @@ public static class HardwareMonitor
 			var total = sensors.Sum(x => x.Value) ?? 0;
 			return total;
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetStorageReadRatePerSecondInBytes() => s_storageReadRatePerSecondInBytes;
@@ -452,7 +452,7 @@ public static class HardwareMonitor
 
 	private static long GetNetworkTotalUploadedInBytes()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			var sensors = NetworkHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Uploaded");
@@ -460,12 +460,12 @@ public static class HardwareMonitor
 			var total = sensors.Sum(x => x.Value) ?? 0;
 			return (long)(total * (double)0x40000000);
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	private static long GetNetworkTotalDownloadedInBytes()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try
 		{
 			var sensors = NetworkHardwares.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Downloaded");
@@ -473,49 +473,49 @@ public static class HardwareMonitor
 			var total = sensors.Sum(x => x.Value) ?? 0;
 			return (long)(total * (double)0x40000000);
 		}
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateCpuHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { CpuHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateGpuHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { GpuHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateNetworkHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { NetworkHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateStorageHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { StorageHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateMemoryHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { MemoryHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateBatteryHardwares()
 	{
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { BatteryHardwares.ForEach(x => x.Update()); }
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware()?.Update();
@@ -554,9 +554,9 @@ public static class HardwareMonitor
 	{
 		// Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
 		IHardware[] cpuHardwares;
-		HardwareSemapore.Wait();
+		HardwareSemaphore.Wait();
 		try { cpuHardwares = CpuHardwares.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
-		finally { HardwareSemapore.Release(); }
+		finally { HardwareSemaphore.Release(); }
 
 		// Array doesn't support ForEach method. Use foreach instead.
 		foreach (var cpuHardware in cpuHardwares) cpuHardware.Update();
