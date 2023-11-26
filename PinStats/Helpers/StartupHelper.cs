@@ -30,23 +30,37 @@ public static class StartupHelper
 		}
 	}
 
+	public static bool IsStartupProgramPathValid
+	{
+        get
+		{
+            var startupProgramPath = Configuration.GetValue<string>("StartupProgramPath");
+            return startupProgramPath != null && startupProgramPath == Environment.ProcessPath;
+        }
+    }
+
 	public static void SetupStartupProgram()
 	{
 		using var taskService = new TaskService();
 
-		if(IsStartupProgram) taskService.RootFolder.DeleteTask(ProgramName);
+		if (IsStartupProgram)
+		{
+			taskService.RootFolder.DeleteTask(ProgramName);
+            Configuration.SetValue("StartupProgramPath", null);
+        }
 		else
 		{
 			using var taskDefinition = taskService.NewTask();
 			taskDefinition.RegistrationInfo.Description = "Set up " + ProgramName + " to run at startup.";
 			taskDefinition.Principal.RunLevel = TaskRunLevel.Highest;
-		
+
 			taskDefinition.Triggers.Add(new LogonTrigger());
 			taskDefinition.Settings.DisallowStartIfOnBatteries = false;
 			taskDefinition.Settings.StopIfGoingOnBatteries = false;
 			taskDefinition.Settings.ExecutionTimeLimit = TimeSpan.Zero;
 
-			var programPath = Process.GetCurrentProcess().MainModule.FileName;
+			var programPath = Environment.ProcessPath;
+			Configuration.SetValue("StartupProgramPath", programPath);
 			taskDefinition.Actions.Add(new ExecAction(programPath, null, null));
 
 			taskService.RootFolder.RegisterTaskDefinition(ProgramName, taskDefinition);

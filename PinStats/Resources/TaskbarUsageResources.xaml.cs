@@ -122,8 +122,26 @@ public partial class TaskbarUsageResources
 
 	private void UpdateSetupStartupProgramMenuFlyoutItemTextProperty()
 	{
-		var isStartupProgram = StartupHelper.IsStartupProgram;
-		if (isStartupProgram) MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
+		// If the startup program is set up, change the menu item text to "Remove from Startup".
+		if (StartupHelper.IsStartupProgram)
+		{
+            // If the startup program path is not valid, reinitialize the startup program.
+            if (!StartupHelper.IsStartupProgramPathValid)
+			{
+				// Disable the menu item to prevent the user from clicking the menu item multiple times.
+				MenuFlyoutItemSetupStartupProgram.IsEnabled = false;
+				MenuFlyoutItemSetupStartupProgram.Text = "Reinitializing Startup Program...";
+
+				// Reinitialize the startup program by calling the SetupStartupProgram method twice.
+				StartupHelper.SetupStartupProgram(); // Delete the existing startup program
+				StartupHelper.SetupStartupProgram(); // Reinitialize the startup program
+
+				// Reenable the menu item to allow the user to click the menu item again.
+				MenuFlyoutItemSetupStartupProgram.IsEnabled = true;
+			}
+			MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
+		}
+		// If the startup program is not set up, change the menu item text to "Add to Startup".
 		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
 	}
 
