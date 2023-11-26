@@ -12,11 +12,13 @@ public sealed class UpdateVisitor : IVisitor
 	{
 		computer.Traverse(this);
 	}
+
 	public void VisitHardware(IHardware hardware)
 	{
 		hardware.Update();
 		foreach (IHardware subHardware in hardware.SubHardware) subHardware.Accept(this);
 	}
+
 	public void VisitSensor(ISensor sensor) { }
 	public void VisitParameter(IParameter parameter) { }
 }
@@ -30,7 +32,7 @@ public static class HardwareMonitor
 	private const int StorageTimerInMilliseconds = 1000;
 	private const int NetworkTimerInMilliseconds = 1000;
 
-	private readonly static Computer Computer;
+	private static Computer Computer;
 	private readonly static List<IHardware> CpuHardwares = new();
 	private readonly static List<IHardware> GpuHardwares = new();
 	private readonly static List<IHardware> NetworkHardwares = new();
@@ -61,20 +63,6 @@ public static class HardwareMonitor
 
 	static HardwareMonitor()
 	{
-		// Configure Computer
-		Computer = new Computer
-		{
-			IsCpuEnabled = true,
-			IsGpuEnabled = true,
-			IsMemoryEnabled = true,
-			IsNetworkEnabled = true,
-			IsBatteryEnabled = true,
-			IsStorageEnabled = true,
-			IsMotherboardEnabled = true,
-		};
-		Computer.HardwareRemoved += OnComputerHardwareRemoved;
-		Computer.HardwareAdded += OnComputerHardwareAdded;
-
 		// Initialize Hardwares
 		_ = RefreshComputerHardwaresAsync();
 
@@ -103,16 +91,39 @@ public static class HardwareMonitor
 
 		s_refreshingComputerHardwares = true;
 
-		// Refresh Computer Hardwares in Task.Run to prevent blocking the UI thread.
-		await Task.Run(() =>
+        if (Computer != null)
+		{
+			// Closing computer takes a lot of time.
+			// Caching Computer and closing it in a separate thread improves performance.
+			_ = Task.Run(() =>
+			{
+				var computer = Computer;
+				computer.Close();
+			});
+        }
+        // Configure new Computer
+        Computer = new Computer
+        {
+            IsCpuEnabled = true,
+            IsGpuEnabled = true,
+            IsMemoryEnabled = true,
+            IsNetworkEnabled = true,
+            IsBatteryEnabled = true,
+            IsStorageEnabled = true,
+            IsMotherboardEnabled = true,
+        };
+        Computer.HardwareRemoved += OnComputerHardwareRemoved;
+        Computer.HardwareAdded += OnComputerHardwareAdded;
+
+        // Refresh Computer Hardwares in Task.Run to prevent blocking the UI thread.
+        await Task.Run(() =>
 		{
 			// Close (Optional) and Open Computer to refresh Hardwares.
-			Computer.Close();
 			Computer.Open(); // This method takes a lot of time. It is recommended to call this method in a separate thread.
 			Computer.Accept(new UpdateVisitor());
 
-			// Refresh Hardwares
-			RefreshHardwares();
+            // Refresh Hardwares
+            RefreshHardwares();
 		});
 		// Setup Motherboard hardware
 		s_motherboardHardware ??= Computer.Hardware.Where(x => x.HardwareType == HardwareType.Motherboard).FirstOrDefault();
