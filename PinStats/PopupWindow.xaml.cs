@@ -31,12 +31,12 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void Initialize()
 	{
-		// Set window and appwindow properties
+		// Set window and AppWindow properties
 		SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
 		AppWindow.IsShownInSwitchers = false;
 		(AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
 
-		// If OverlappedPresenter's border and titlebar is manually set, the window will not be rounded.
+		// If OverlappedPresenter's border and TitleBar is manually set, the window will not be rounded.
 		// So we need to set the window corner to rounded corner manually.
 		WindowHelper.SetWindowCornerToRoundedCorner(this);
 
@@ -108,37 +108,37 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void RefreshHardwareInformation()
 	{
-		HardwareMonitor.UpdateCpuHardwares();
-		HardwareMonitor.UpdateMemoryHardwares();
-		HardwareMonitor.UpdateNetworkHardwares();
-		HardwareMonitor.UpdateStorageHardwares();
+		HardwareMonitor.UpdateCpuHardware();
+		HardwareMonitor.UpdateMemoryHardware();
+		HardwareMonitor.UpdateNetworkHardware();
+		HardwareMonitor.UpdateStorageHardware();
 		HardwareMonitor.UpdateCurrentGpuHardware();
 
 		// CPU
-		var cpuUage = HardwareMonitor.GetAverageCpuUsage();
+		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
 		var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 
-		var cpuInformationText = $"{cpuUage:N0}%";
-		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
+		var cpuInformationText = $"{cpuUsage:N0}%";
+		var cpuTemperatureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
 		var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
-		cpuInformationText += cpuTempertureText + cpuPowerText;
+		cpuInformationText += cpuTemperatureText + cpuPowerText;
 
 		// GPU
-		var gpuUage = HardwareMonitor.GetCurrentGpuUsage();
+		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 		var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
 		var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 
-		var gpuInformationText = $"{gpuUage:N0}%";
-		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
+		var gpuInformationText = $"{gpuUsage:N0}%";
+		var gpuTemperatureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
-		gpuInformationText += gpuTempertureText + gpuPowerText;
+		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
 		// Battery
 		string batteryInformationText = null;
 		string batteryHealthInformationText = null;
 		if (HardwareMonitor.HasBattery()) // If the device has a battery, update the battery information.
 		{
-			HardwareMonitor.UpdateBatteryHardwares();
+			HardwareMonitor.UpdateBatteryHardware();
 
 			var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
 			var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();

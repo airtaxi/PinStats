@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PinStats.Enums;
 using PinStats.Helpers;
@@ -23,6 +24,7 @@ public partial class TaskbarUsageResources
 	private static readonly string AssetsDirectory;
 	private static readonly Timer UpdateTimer;
 	private static event EventHandler UpdateTimerElapsed;
+	private static bool s_shouldUpdate = true;
 
 	private Image _iconImage;
 	private string _iconImagePath;
@@ -43,7 +45,7 @@ public partial class TaskbarUsageResources
 		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 	}
 
-	private static void UpdateTimerCallback(object state)
+    private static void UpdateTimerCallback(object state)
 	{
 		try { UpdateTimerElapsed?.Invoke(null, EventArgs.Empty); }
 		finally { UpdateTimer.Change(UpdateTimerInterval, Timeout.Infinite); }
@@ -165,6 +167,9 @@ public partial class TaskbarUsageResources
 
 	private void Update()
 	{
+		// If the system is in sleep or hibernate mode, don't update the icon image.
+		if (!s_shouldUpdate) return;
+
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
         var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 
@@ -325,9 +330,24 @@ public partial class TaskbarUsageResources
 		HardwareMonitorBackgroundImageSet?.Invoke(this, EventArgs.Empty);
 	}
 
-	private async void OnRefreshHardwaresMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
+	private async void OnRefreshHardwareMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args)
 	{
 		RefreshShowHardwareMonitorMenuFlyoutSubItems();
-		await HardwareMonitor.RefreshComputerHardwaresAsync();
+		await HardwareMonitor.RefreshComputerHardwareAsync();
 	}
+
+
+    private static async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    {
+        // If the system is in sleep or hibernate mode, don't update the hardware information.
+        if (e.Mode == PowerModes.Suspend) s_shouldUpdate = false;
+        else if (e.Mode == PowerModes.Resume) s_shouldUpdate = true;
+
+        // Power mode changes like AC power to battery or vice versa causes hardware monitor's battery information to be refreshed
+        // (Seems like LibreHardwareMonitor's bug)
+        else if (e.Mode == PowerModes.StatusChange) await HardwareMonitor.RefreshComputerHardwareAsync();
+    }
+
+    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => SystemEvents.PowerModeChanged += OnPowerModeChanged;
+    private void OnUnloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => SystemEvents.PowerModeChanged -= OnPowerModeChanged;
 }

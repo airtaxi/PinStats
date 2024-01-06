@@ -98,31 +98,31 @@ public sealed partial class MonitorWindow : IDisposable
 
 	private void RefreshHardwareInformation()
 	{
-		HardwareMonitor.UpdateCpuHardwares();
-		HardwareMonitor.UpdateMemoryHardwares();
-		HardwareMonitor.UpdateNetworkHardwares();
-		HardwareMonitor.UpdateStorageHardwares();
+		HardwareMonitor.UpdateCpuHardware();
+		HardwareMonitor.UpdateMemoryHardware();
+		HardwareMonitor.UpdateNetworkHardware();
+		HardwareMonitor.UpdateStorageHardware();
 		HardwareMonitor.UpdateCurrentGpuHardware();
-		if (HardwareMonitor.HasBattery()) HardwareMonitor.UpdateBatteryHardwares();
+		if (HardwareMonitor.HasBattery()) HardwareMonitor.UpdateBatteryHardware();
 
 		// CPU
-		var cpuUage = HardwareMonitor.GetAverageCpuUsage();
+		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
 		var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 
-		var cpuInformationText = $"{cpuUage:N0}%";
-		var cpuTempertureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
+		var cpuInformationText = $"{cpuUsage:N0}%";
+		var cpuTemperatureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
 		var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
-		cpuInformationText += cpuTempertureText + cpuPowerText;
+		cpuInformationText += cpuTemperatureText + cpuPowerText;
 
 		// GPU
-		var gpuUage = HardwareMonitor.GetCurrentGpuUsage();
+		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 		var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
 		var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 
-		var gpuInformationText = $"{gpuUage:N0}%";
-		var gpuTempertureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
+		var gpuInformationText = $"{gpuUsage:N0}%";
+		var gpuTemperatureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
-		gpuInformationText += gpuTempertureText + gpuPowerText;
+		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
 		// Memory
 		var totalMemory = HardwareMonitor.GetTotalMemory();
@@ -211,7 +211,7 @@ public sealed partial class MonitorWindow : IDisposable
 	private void OnClosed(object sender, WindowEventArgs args)
 	{
 		Dispose();
-		EfficiencyModeUtilities.SetEfficiencyMode(true); // Restre efficiency mode
+		EfficiencyModeUtilities.SetEfficiencyMode(true); // Restore efficiency mode
 	}
 
 	// Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)

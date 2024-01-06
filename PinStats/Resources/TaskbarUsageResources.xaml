@@ -6,7 +6,9 @@
     xmlns:tb="using:H.NotifyIcon">
     <tb:TaskbarIcon
         x:Name="TaskbarIconCpuUsage"
-        NoLeftClickDelay="True">
+        NoLeftClickDelay="True"
+        Loaded="OnLoaded"
+        Unloaded="OnUnloaded">
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource
                 BackgroundSource="ms-appx:///Assets/Cpu.png"/>
@@ -47,7 +49,7 @@
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemRefreshHardwares" Text="Refresh Hardwares">
                     <MenuFlyoutItem.Command>
-                        <XamlUICommand ExecuteRequested="OnRefreshHardwaresMenuFlyoutItemClicked"/>
+                        <XamlUICommand ExecuteRequested="OnRefreshHardwareMenuFlyoutItemClicked"/>
                     </MenuFlyoutItem.Command>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="MenuFlyoutItemSetupIconColor">
