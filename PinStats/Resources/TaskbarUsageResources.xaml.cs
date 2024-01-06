@@ -225,7 +225,7 @@ public partial class TaskbarUsageResources
 		usage = Math.Min(usage, 100);
 
 		var usageText = usage.ToString("N0");
-		if (usage >= 100) usageText = "M"; // Usage can got 100% or more. So, I decided to use "M" instead of "100";
+		if (double.Parse(usageText) >= 100) usageText = "M"; // Usage can got 100% or more. So, I decided to use "M" instead of "100";
 		return usageText;
 	}
 
