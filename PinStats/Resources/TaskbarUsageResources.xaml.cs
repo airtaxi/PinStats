@@ -57,7 +57,7 @@ public partial class TaskbarUsageResources
 		RefreshShowHardwareMonitorMenuFlyoutSubItems();
 		UpdateSetupStartupProgramMenuFlyoutItemTextProperty();
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
-		UpdateVersioNameMenuFlyoutItemTextProperty();
+		UpdateVersionNameMenuFlyoutItemTextProperty();
 		UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty();
 
 		// Update the icon image
@@ -70,7 +70,7 @@ public partial class TaskbarUsageResources
 		UpdateTimerElapsed += (s, e) => Update();
 	}
 
-	private void UpdateVersioNameMenuFlyoutItemTextProperty()
+	private void UpdateVersionNameMenuFlyoutItemTextProperty()
 	{
 		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
 		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
