@@ -6,9 +6,7 @@
     xmlns:tb="using:H.NotifyIcon">
     <tb:TaskbarIcon
         x:Name="TaskbarIconCpuUsage"
-        NoLeftClickDelay="True"
-        Loaded="OnLoaded"
-        Unloaded="OnUnloaded">
+        NoLeftClickDelay="True">
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource
                 BackgroundSource="ms-appx:///Assets/Cpu.png"/>
