@@ -15,9 +15,7 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
-		<Version>2.2.2</Version>
-		<AssemblyVersion>2.2.2</AssemblyVersion>
-		<FileVersion>2.2.2</FileVersion>
+		<Version>2.2.3</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
