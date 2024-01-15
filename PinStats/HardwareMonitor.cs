@@ -1,4 +1,5 @@
 ﻿using LibreHardwareMonitor.Hardware;
+using Microsoft.Win32;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
@@ -60,11 +61,16 @@ public static class HardwareMonitor
 	private readonly static List<float> LastGpuUsages = new();
 	private static float s_gpuUsage;
 
+    public static bool ShouldUpdate { get; set; } = true;
 
-	static HardwareMonitor()
+
+    static HardwareMonitor()
 	{
 		// Initialize Hardware
 		_ = RefreshComputerHardwareAsync();
+
+		// Initialize Events
+		SystemEvents.PowerModeChanged += OnPowerModeChanged;
 
 		// Initialize Timers
 		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
@@ -82,7 +88,8 @@ public static class HardwareMonitor
 		GpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
 		GpuUsageTimer.Start();
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
-	}
+
+    }
 
 	private static bool s_refreshingComputerHardware = false;
 	public static async Task RefreshComputerHardwareAsync()
@@ -260,7 +267,7 @@ public static class HardwareMonitor
 		if (update) gpuHardware.Update();
 
 		ISensor gpuPowerSensor = null;
-		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
+		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Core");
 		else if (gpuHardware.HardwareType == HardwareType.GpuNvidia) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
 		else if (gpuHardware.HardwareType == HardwareType.GpuIntel) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Power");
 
@@ -535,8 +542,11 @@ public static class HardwareMonitor
 	private static long s_bytesDownloaded;
 
 	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
-	{
-		UpdateNetworkHardware();
+    {
+        // If the system is in sleep or hibernate mode, don't update the hardware information.
+        if (!ShouldUpdate) return;
+
+        UpdateNetworkHardware();
 		var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
 		var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
 
@@ -555,19 +565,25 @@ public static class HardwareMonitor
 	}
 
 	private static void OnStorageTimerElapsed(object sender, ElapsedEventArgs e)
-	{
-		UpdateStorageHardware();
+    {
+        // If the system is in sleep or hibernate mode, don't update the hardware information.
+        if (!ShouldUpdate) return;
+
+        UpdateStorageHardware();
 		s_storageReadRatePerSecondInBytes = GetStorageReadRateInBytes();
 		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 	}
 
 	private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
-	{
-		// Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
-		IHardware[] cpuHardware;
+    {
+        // If the system is in sleep or hibernate mode, don't update the hardware information.
+        if (!ShouldUpdate) return;
+
+        // Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
+        IHardware[] cpuHardware;
 		HardwareSemaphore.Wait();
-		try { cpuHardware = CpuHardware.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
-		finally { HardwareSemaphore.Release(); }
+        try { cpuHardware = CpuHardware.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
+        finally { HardwareSemaphore.Release(); }
 
 		// Array doesn't support ForEach method. Use foreach instead.
 		foreach (var cpu in cpuHardware) cpu.Update();
@@ -582,8 +598,11 @@ public static class HardwareMonitor
 	}
 
 	private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
-	{
-		var gpuHardware = GetCurrentGpuHardware();
+    {
+        // If the system is in sleep or hibernate mode, don't update the hardware information.
+        if (!ShouldUpdate) return;
+
+        var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return; // If there are no GPUs, return.
 
 		gpuHardware.Update();
@@ -604,5 +623,16 @@ public static class HardwareMonitor
 
 		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
 		s_gpuUsage = LastGpuUsages.Average();
-	}
+    }
+
+    private static async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    {
+		// If the system is in sleep or hibernate mode, don't update the hardware information.
+		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
+		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
+
+		// Power mode changes like AC power to battery or vice versa causes hardware monitor's battery information to be refreshed
+		// (Seems like LibreHardwareMonitor's bug)
+		else if (e.Mode == PowerModes.StatusChange) await RefreshComputerHardwareAsync();
+    }
 }

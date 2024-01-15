@@ -24,7 +24,6 @@ public partial class TaskbarUsageResources
 	private static readonly string AssetsDirectory;
 	private static readonly Timer UpdateTimer;
 	private static event EventHandler UpdateTimerElapsed;
-	private static bool s_shouldUpdate = true;
 
 	private Image _iconImage;
 	private string _iconImagePath;
@@ -168,7 +167,7 @@ public partial class TaskbarUsageResources
 	private void Update()
 	{
 		// If the system is in sleep or hibernate mode, don't update the icon image.
-		if (!s_shouldUpdate) return;
+		if (!HardwareMonitor.ShouldUpdate) return;
 
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
         var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
@@ -335,19 +334,4 @@ public partial class TaskbarUsageResources
 		RefreshShowHardwareMonitorMenuFlyoutSubItems();
 		await HardwareMonitor.RefreshComputerHardwareAsync();
 	}
-
-
-    private static async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
-    {
-        // If the system is in sleep or hibernate mode, don't update the hardware information.
-        if (e.Mode == PowerModes.Suspend) s_shouldUpdate = false;
-        else if (e.Mode == PowerModes.Resume) s_shouldUpdate = true;
-
-        // Power mode changes like AC power to battery or vice versa causes hardware monitor's battery information to be refreshed
-        // (Seems like LibreHardwareMonitor's bug)
-        else if (e.Mode == PowerModes.StatusChange) await HardwareMonitor.RefreshComputerHardwareAsync();
-    }
-
-    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => SystemEvents.PowerModeChanged += OnPowerModeChanged;
-    private void OnUnloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => SystemEvents.PowerModeChanged -= OnPowerModeChanged;
 }
