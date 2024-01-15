@@ -106,6 +106,8 @@ public static class HardwareMonitor
 			_ = Task.Run(() =>
 			{
 				var computer = Computer;
+				computer.HardwareAdded -= OnComputerHardwareAdded;
+				computer.HardwareRemoved -= OnComputerHardwareRemoved;
 				computer.Close();
 			});
         }
