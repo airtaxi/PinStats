@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
+using Windows.ApplicationModel;
 using Timer = System.Timers.Timer;
 
 namespace PinStats;
@@ -243,6 +244,7 @@ public static class HardwareMonitor
 		finally { HardwareSemaphore.Release(); }
 	}
 
+	private static float s_lastTotalCpuPackagePower;
 	public static float GetTotalCpuPackagePower(bool update = false)
 	{
 		HardwareSemaphore.Wait();
@@ -251,9 +253,10 @@ public static class HardwareMonitor
 			if (update) CpuHardware.ForEach(x => x.Update());
 			var cpuPowerSensors = CpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power);
 
-			var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value) ?? 0;
-			return cpuPackagePower;
-		}
+			var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value);
+			if (cpuPackagePower.HasValue) s_lastTotalCpuPackagePower = cpuPackagePower.Value;
+			return cpuPackagePower ?? s_lastTotalCpuPackagePower;
+        }
 		finally { HardwareSemaphore.Release(); }
 	}
 
@@ -607,19 +610,11 @@ public static class HardwareMonitor
 
 		gpuHardware.Update();
 
-		if (gpuHardware.HardwareType == HardwareType.GpuIntel)
-		{
-			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
-			var value = gpuLoadSensor?.Value ?? 0;
-			value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
-			LastGpuUsages.Add(value);
-		}
-		else
-		{
-			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core");
-			var value = gpuLoadSensor?.Value ?? 0;
-			LastGpuUsages.Add(value);
-		}
+		var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core")
+			?? gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
+		var value = gpuLoadSensor?.Value ?? 0;
+		value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+		LastGpuUsages.Add(value);
 
 		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
 		s_gpuUsage = LastGpuUsages.Average();
