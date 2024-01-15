@@ -262,7 +262,8 @@ public static class HardwareMonitor
 
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
 
-	public static float GetCurrentGpuPower(bool update = false)
+    private static float s_lastCurrentGpuPower;
+    public static float GetCurrentGpuPower(bool update = false)
 	{
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return 0; // If there are no GPUs, return 0
@@ -274,7 +275,9 @@ public static class HardwareMonitor
 		else if (gpuHardware.HardwareType == HardwareType.GpuNvidia) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
 		else if (gpuHardware.HardwareType == HardwareType.GpuIntel) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Power");
 
-		return gpuPowerSensor?.Value ?? 0;
+		if (gpuPowerSensor?.Value.HasValue ?? false) s_lastCurrentGpuPower = gpuPowerSensor.Value.Value;
+
+		return gpuPowerSensor?.Value ?? s_lastCurrentGpuPower;
 	}
 
 	public static float? GetCurrentGpuTemperature(bool update = false)
