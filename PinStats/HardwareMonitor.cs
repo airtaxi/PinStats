@@ -106,8 +106,8 @@ public static class HardwareMonitor
 			_ = Task.Run(() =>
 			{
 				var computer = Computer;
-				computer.HardwareAdded -= OnComputerHardwareAdded;
-				computer.HardwareRemoved -= OnComputerHardwareRemoved;
+				computer.HardwareAdded -= OnComputerHardwareAddedOrRemoved;
+				computer.HardwareRemoved -= OnComputerHardwareAddedOrRemoved;
 				computer.Close();
 			});
         }
@@ -122,8 +122,8 @@ public static class HardwareMonitor
             IsStorageEnabled = true,
             IsMotherboardEnabled = true,
         };
-        Computer.HardwareRemoved += OnComputerHardwareRemoved;
-        Computer.HardwareAdded += OnComputerHardwareAdded;
+		Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
+        Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
 
         // Refresh Computer Hardware in Task.Run to prevent blocking the UI thread.
         await Task.Run(() =>
@@ -191,37 +191,9 @@ public static class HardwareMonitor
 		finally { HardwareSemaphore.Release(); }
 	}
 
-	private static void OnComputerHardwareRemoved(IHardware hardware)
-	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (hardware.HardwareType == HardwareType.Cpu) CpuHardware.Remove(hardware);
-			else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel) GpuHardware.Remove(hardware);
-			else if (hardware.HardwareType == HardwareType.Network) NetworkHardware.Remove(hardware);
-			else if (hardware.HardwareType == HardwareType.Storage) StorageHardware.Remove(hardware);
-			else if (hardware.HardwareType == HardwareType.Memory) MemoryHardware.Remove(hardware);
-			else if (hardware.HardwareType == HardwareType.Battery) BatteryHardware.Remove(hardware);
-		}
-		finally { HardwareSemaphore.Release(); }
-	}
+    private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
 
-	private static void OnComputerHardwareAdded(IHardware hardware)
-	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (hardware.HardwareType == HardwareType.Cpu) CpuHardware.Add(hardware);
-			else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel) GpuHardware.Add(hardware);
-			else if (hardware.HardwareType == HardwareType.Network) NetworkHardware.Add(hardware);
-			else if (hardware.HardwareType == HardwareType.Storage) StorageHardware.Add(hardware);
-			else if (hardware.HardwareType == HardwareType.Memory) MemoryHardware.Add(hardware);
-			else if (hardware.HardwareType == HardwareType.Battery) BatteryHardware.Add(hardware);
-		}
-		finally { HardwareSemaphore.Release(); }
-	}
-
-	public static string GetMotherboardName() => s_motherboardHardware.Name;
+    public static string GetMotherboardName() => s_motherboardHardware.Name;
 
 	public static List<string> GetGpuHardwareNames()
 	{
