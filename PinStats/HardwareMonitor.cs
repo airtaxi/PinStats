@@ -43,9 +43,6 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> BatteryHardware = new();
 	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
 
-	// Motherboard hardware is not a list because only one motherboard is assumed to be present.
-	private static IHardware s_motherboardHardware;
-
 	private readonly static Timer StorageTimer = new() { Interval = StorageTimerInMilliseconds };
 	private static float s_storageReadRatePerSecondInBytes;
 	private static float s_storageWriteRatePerSecondInBytes;
@@ -89,7 +86,6 @@ public static class HardwareMonitor
 		GpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
 		GpuUsageTimer.Start();
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
-
     }
 
 	private static bool s_refreshingComputerHardware = false;
@@ -135,8 +131,6 @@ public static class HardwareMonitor
             // Refresh Hardware
             RefreshHardware();
 		});
-		// Setup Motherboard hardware
-		s_motherboardHardware ??= Computer.Hardware.Where(x => x.HardwareType == HardwareType.Motherboard).FirstOrDefault();
 
 		s_refreshingComputerHardware = false;
 	}
@@ -193,9 +187,9 @@ public static class HardwareMonitor
 
     private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
 
-    public static string GetMotherboardName() => s_motherboardHardware.Name;
+	public static string GetMotherboardName() => Computer.Hardware.Where(x => x.HardwareType == HardwareType.Motherboard).FirstOrDefault()?.Name ?? "N/A";
 
-	public static List<string> GetGpuHardwareNames()
+    public static List<string> GetGpuHardwareNames()
 	{
 		HardwareSemaphore.Wait();
 		try { return GpuHardware.Select(x => x.Name).ToList(); }
@@ -597,14 +591,10 @@ public static class HardwareMonitor
 		s_gpuUsage = LastGpuUsages.Average();
     }
 
-    private static async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    private static void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
 		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
-
-		// Power mode changes like AC power to battery or vice versa causes hardware monitor's battery information to be refreshed
-		// (Seems like LibreHardwareMonitor's bug)
-		else if (e.Mode == PowerModes.StatusChange) await RefreshComputerHardwareAsync();
     }
 }
