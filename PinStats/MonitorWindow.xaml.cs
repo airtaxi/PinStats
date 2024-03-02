@@ -15,7 +15,7 @@ namespace PinStats;
 
 public sealed partial class MonitorWindow : IDisposable
 {
-	private const int RefreshTimerIntervalInMilliseconds = 500;
+	private const int RefreshTimerIntervalInMilliseconds = 1000;
 
 	public static MonitorWindow Instance { get; set; }
 
@@ -44,7 +44,6 @@ public sealed partial class MonitorWindow : IDisposable
 
 		InitializeControls();
 		RefreshHardwareInformation();
-
 
 		// Setup the timer to refresh the hardware information
 		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
