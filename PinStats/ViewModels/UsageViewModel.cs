@@ -12,7 +12,7 @@ namespace PinStats.ViewModels;
 
 public class UsageViewModel : ObservableObject
 {
-	private readonly List<DateTimePoint> _values = new();
+	private readonly List<DateTimePoint> _values = [];
 	private readonly DateTimeAxis _customAxis;
 
 	public ObservableCollection<ISeries> Series { get; set; }
@@ -23,16 +23,16 @@ public class UsageViewModel : ObservableObject
 
 	public UsageViewModel()
 	{
-		Series = new ObservableCollection<ISeries>
-		{
-			new LineSeries<DateTimePoint>
+		Series =
+        [
+            new LineSeries<DateTimePoint>
 			{
 				Values = _values,
 				Fill = null,
 				GeometryFill = null,
 				GeometryStroke = null,
 			}
-		};
+		];
 
 		_customAxis = new DateTimeAxis(TimeSpan.FromSeconds(1), Formatter)
 		{
@@ -41,18 +41,18 @@ public class UsageViewModel : ObservableObject
 			SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100)),
 		};
 
-		XAxes = new Axis[] { _customAxis };
-		YAxes = new Axis[] {
+		XAxes = [_customAxis];
+		YAxes = [
 			new Axis {
 				MaxLimit = 100,
 				MinLimit = 0
 			}
-		};
+		];
 	}
 
 	public void RefreshSync() => Sync = new object();
 
-	private double[] GetSeparators()
+	private static double[] GetSeparators()
 	{
 		var now = DateTime.Now;
 
@@ -63,7 +63,7 @@ public class UsageViewModel : ObservableObject
 		}
 
 		seperators.Reverse();
-		return seperators.ToArray();
+		return [.. seperators];
 	}
 
 	private static string Formatter(DateTime date)
@@ -80,7 +80,7 @@ public class UsageViewModel : ObservableObject
 		lock (Sync)
 		{
 			_values.Add(new DateTimePoint(DateTime.Now, percent));
-			if (_values.Count > 100) _values.RemoveAt(0);
+			while (_values.Count > 100) _values.RemoveAt(0);
 
 			// we need to update the separators every time we add a new point 
 			_customAxis.CustomSeparators = GetSeparators();
