@@ -46,6 +46,7 @@ public partial class App : Application
 			.AddArgument("versionString", remoteVersionString);
 			builder.Show();
 		}
+		catch (HttpRequestException) { } // Ignore 
 		finally { UpdateCheckTimer.Change((int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite); }
 	}
 
