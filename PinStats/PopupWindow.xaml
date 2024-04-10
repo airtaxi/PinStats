@@ -104,7 +104,8 @@
                 Series="{Binding Series}"
                 XAxes="{Binding XAxes}"
                 YAxes="{Binding YAxes}"
-                Margin="0,0,0,0"/>
+                Margin="0,0,0,0"
+                ZoomMode="None"/>
         </Grid>
     </Grid>
 </winuiex:WindowEx>

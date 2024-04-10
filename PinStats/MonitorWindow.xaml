@@ -160,7 +160,8 @@
                         SyncContext="{Binding Sync}"
                         Series="{Binding Series}"
                         XAxes="{Binding XAxes}"
-                        YAxes="{Binding YAxes}"/>
+                        YAxes="{Binding YAxes}"
+                        ZoomMode="None"/>
                 </Grid>
                 <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
@@ -185,7 +186,8 @@
                         SyncContext="{Binding Sync}"
                         Series="{Binding Series}"
                         XAxes="{Binding XAxes}"
-                        YAxes="{Binding YAxes}"/>
+                        YAxes="{Binding YAxes}"
+                        ZoomMode="None"/>
                 </Grid>
             </Grid>
         </Grid>
