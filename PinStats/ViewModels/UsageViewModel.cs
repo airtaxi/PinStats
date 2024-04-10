@@ -12,7 +12,7 @@ namespace PinStats.ViewModels;
 
 public class UsageViewModel : ObservableObject
 {
-	private readonly List<DateTimePoint> _values = [];
+	private readonly ObservableCollection<DateTimePoint> _values = [];
 	private readonly DateTimeAxis _customAxis;
 
 	public ObservableCollection<ISeries> Series { get; set; }
@@ -38,7 +38,7 @@ public class UsageViewModel : ObservableObject
 		{
 			CustomSeparators = GetSeparators(),
 			AnimationsSpeed = TimeSpan.FromMilliseconds(0),
-			SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100)),
+			SeparatorsPaint = new SolidColorPaint(SKColors.Black.WithAlpha(100))
 		};
 
 		XAxes = [_customAxis];
