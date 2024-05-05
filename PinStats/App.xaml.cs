@@ -143,7 +143,7 @@ public partial class App : Application
         var xamlRoot = s_emptyWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
 
-        var resource = new TaskbarUsageResources();
+        var resource = new TaskbarUsageResource();
         Resources.Add("TaskbarUsageResources", resource);
         await CheckForUpdateAsync();
     }

@@ -22,7 +22,7 @@
 		<None Remove="Fonts\Pretendard-Thin.ttf" />
 		<None Remove="MonitorWindow.xaml" />
 		<None Remove="PopupWindow.xaml" />
-		<None Remove="Resources\TaskbarUsageResources.xaml" />
+		<None Remove="Resources\TaskbarUsageResource.xaml" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Fonts\Pretendard-ExtraLight.ttf">
@@ -79,7 +79,7 @@
 		</Page>
 	</ItemGroup>
 	<ItemGroup>
-		<Page Update="Resources\TaskbarUsageResources.xaml">
+		<Page Update="Resources\TaskbarUsageResource.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 	</ItemGroup>

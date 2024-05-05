@@ -59,7 +59,7 @@ public sealed partial class MonitorWindow : IDisposable
 		}
 		// No need to set the backdrop to null since it is already null by default
 
-		TaskbarUsageResources.HardwareMonitorBackgroundImageSet += OnHardwareMonitorBackgroundImageSet;
+		TaskbarUsageResource.HardwareMonitorBackgroundImageSet += OnHardwareMonitorBackgroundImageSet;
 
 		TextBlockMotherboardName.Text = HardwareMonitor.GetMotherboardName();
 		TextBlockCpuName.Text = HardwareMonitor.GetCpuName();
@@ -181,7 +181,7 @@ public sealed partial class MonitorWindow : IDisposable
 		if (_disposed) return;
 		_disposed = true;
 		Instance = null;
-		TaskbarUsageResources.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
+		TaskbarUsageResource.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
 		PopupWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
 		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
 		_refreshTimer.Dispose();

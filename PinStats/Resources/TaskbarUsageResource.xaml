@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ResourceDictionary
-    x:Class="PinStats.Resources.TaskbarUsageResources"
+    x:Class="PinStats.Resources.TaskbarUsageResource"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:tb="using:H.NotifyIcon">

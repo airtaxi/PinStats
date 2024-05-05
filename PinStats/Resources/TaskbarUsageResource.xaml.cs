@@ -14,7 +14,7 @@ using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
 
 namespace PinStats.Resources;
 
-public partial class TaskbarUsageResources
+public partial class TaskbarUsageResource
 {
 	private const int UpdateTimerInterval = 250;
 	private const int TrayIconImageSize = 64;
@@ -31,7 +31,7 @@ public partial class TaskbarUsageResources
 	// Popup does not need this event since popup and context menu cannot be opened at the same time
 	public static event EventHandler HardwareMonitorBackgroundImageSet;
 	
-    static TaskbarUsageResources()
+    static TaskbarUsageResource()
 	{
 		BinaryDirectory = AppContext.BaseDirectory;
 		AssetsDirectory = Path.Combine(BinaryDirectory, "Assets");
@@ -50,7 +50,7 @@ public partial class TaskbarUsageResources
 		finally { UpdateTimer.Change(UpdateTimerInterval, Timeout.Infinite); }
 	}
 
-	public TaskbarUsageResources()
+	public TaskbarUsageResource()
 	{
 		InitializeComponent(); // This is required to initialize the context menu.
 
