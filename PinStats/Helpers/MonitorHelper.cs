@@ -369,7 +369,23 @@ public static class MonitorHelper
 	{
 		var sizeAndPosition = monitor.SizeAndPosition;
 		SetWindowPos(hWnd, IntPtr.Zero, sizeAndPosition.X, sizeAndPosition.Y, sizeAndPosition.Width, sizeAndPosition.Height, 0);
-	}
+    }
+
+    #region Display Scale
+    [DllImport("gdi32.dll")]
+    static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+    [DllImport("user32.dll")]
+    static extern IntPtr GetDC(IntPtr hWnd);
+    const int LOGPIXELSX = 88;
+
+    public static float GetMainMonitorDisplayScaleRatio()
+    {
+        IntPtr desktop = GetDC(IntPtr.Zero);
+        int dpiX = GetDeviceCaps(desktop, LOGPIXELSX);
+		var scale = dpiX / 96f;
+		return scale;
+    }
+    #endregion
 }
 #pragma warning restore IDE0044
 #pragma warning restore CA1069

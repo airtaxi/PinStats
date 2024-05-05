@@ -185,7 +185,8 @@ public partial class TaskbarUsageResources
 				using var bitmap = new Bitmap(image);
 				using var graphics = Graphics.FromImage(bitmap);
 
-				var font = new Font(PrivateFontCollection.Families[0], 15f);
+				var scale = MonitorHelper.GetMainMonitorDisplayScaleRatio();
+				var font = new Font(PrivateFontCollection.Families[0], 30f / scale);
 				var stringFormat = new StringFormat
 				{
 					Alignment = StringAlignment.Center,
