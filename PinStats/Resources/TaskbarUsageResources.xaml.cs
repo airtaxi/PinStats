@@ -26,12 +26,12 @@ public partial class TaskbarUsageResources
 	private static event EventHandler UpdateTimerElapsed;
 
 	private Image _iconImage;
-	private string _iconImagePath;
+    private string _iconImagePath;
 
 	// Popup does not need this event since popup and context menu cannot be opened at the same time
 	public static event EventHandler HardwareMonitorBackgroundImageSet;
-
-	static TaskbarUsageResources()
+	
+    static TaskbarUsageResources()
 	{
 		BinaryDirectory = AppContext.BaseDirectory;
 		AssetsDirectory = Path.Combine(BinaryDirectory, "Assets");
@@ -40,8 +40,8 @@ public partial class TaskbarUsageResources
 		var fontFilePath = Path.Combine(fontDirectory, "Pretendard-ExtraLight.ttf");
 		PrivateFontCollection.AddFontFile(fontFilePath);
 
-		// TODO: add a setting to change the interval of the timer.
-		UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
+        // TODO: add a setting to change the interval of the timer.
+        UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
 	}
 
     private static void UpdateTimerCallback(object state)
@@ -64,8 +64,8 @@ public partial class TaskbarUsageResources
 		// Update the icon image
 		UpdateIconImageByIconColor();
 
-		// Create the taskbar icon
-		TaskbarIconCpuUsage.ForceCreate();
+        // Create the taskbar icon
+        TaskbarIconCpuUsage.ForceCreate();
 
 		// Setup the timer to update the icon image
 		UpdateTimerElapsed += (s, e) => Update();
@@ -184,9 +184,7 @@ public partial class TaskbarUsageResources
 				var image = _iconImage;
 				using var bitmap = new Bitmap(image);
 				using var graphics = Graphics.FromImage(bitmap);
-
-				var scale = MonitorHelper.GetMainMonitorDisplayScaleRatio();
-				var font = new Font(PrivateFontCollection.Families[0], 30f / scale);
+				var font = new Font(PrivateFontCollection.Families[0], 30f / App.MainWindowRasterizationScale);
 				var stringFormat = new StringFormat
 				{
 					Alignment = StringAlignment.Center,

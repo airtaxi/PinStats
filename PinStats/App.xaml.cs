@@ -7,6 +7,8 @@ using Windows.UI.Notifications;
 using System.Diagnostics;
 using Microsoft.Toolkit.Uwp.Notifications;
 using HarfBuzzSharp;
+using Microsoft.Graphics.Display;
+using Microsoft.UI.Xaml.Controls;
 
 namespace PinStats;
 
@@ -110,23 +112,39 @@ public partial class App : Application
 		if (exception.InnerException is not null) WriteException(exception.InnerException);
 	}
 
-	protected override async void OnLaunched(LaunchActivatedEventArgs args)
+	protected override void OnLaunched(LaunchActivatedEventArgs args)
 	{
 		base.OnLaunched(args);
-		var resource = new TaskbarUsageResources();
-		Resources.Add("TaskbarUsageResources", resource);
-		LaunchDummyWindowIfNotExists();
-		await CheckForUpdateAsync();
+		LaunchEmptyWindowIfNotExists();
 	}
 
-	private static Window s_tempWindow;
-	public static void LaunchDummyWindowIfNotExists()
+	private static Window s_emptyWindow;
+	// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
+	private void LaunchEmptyWindowIfNotExists()
 	{
-		if (s_tempWindow is not null) return;
-		// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
-		s_tempWindow = new();
-		s_tempWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
-		s_tempWindow.Activate();
-		s_tempWindow.Hide(); // Hide the window so it doesn't appear on the screen.
-	}
+		if (s_emptyWindow != null) return;
+
+		s_emptyWindow = new() { Content = new Frame() };
+
+        // TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
+        (s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
+
+        s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
+        s_emptyWindow.Activate();
+        s_emptyWindow.Hide(); // Hide the window so it doesn't appear on the screen.
+    }
+
+	public static float MainWindowRasterizationScale { get; private set; }
+    private async void OnEmptyWindowContentLoaded(object sender, RoutedEventArgs e)
+    {
+        // Unsubscribe the event to prevent memory leak.
+        (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
+
+        var xamlRoot = s_emptyWindow.Content.XamlRoot;
+        MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
+
+        var resource = new TaskbarUsageResources();
+        Resources.Add("TaskbarUsageResources", resource);
+        await CheckForUpdateAsync();
+    }
 }
