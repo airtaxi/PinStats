@@ -128,10 +128,8 @@ public partial class App : Application
 
         // TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
         (s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
-
         s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
         s_emptyWindow.Activate();
-        s_emptyWindow.Hide(); // Hide the window so it doesn't appear on the screen.
     }
 
 	public static float MainWindowRasterizationScale { get; private set; }
@@ -139,6 +137,9 @@ public partial class App : Application
     {
         // Unsubscribe the event to prevent memory leak.
         (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
+
+        // Hide the window so it doesn't appear on the screen.
+        s_emptyWindow.Hide(); // Hide the window so it doesn't appear on the screen.
 
         var xamlRoot = s_emptyWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
