@@ -6,7 +6,6 @@
     xmlns:tb="using:H.NotifyIcon">
     <tb:TaskbarIcon
         x:Name="TaskbarIconCpuUsage"
-        ContextMenuMode="SecondWindow"
         NoLeftClickDelay="True">
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource
