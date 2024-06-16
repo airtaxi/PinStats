@@ -1,5 +1,6 @@
 ﻿using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
+using PinStats.Enums;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
@@ -67,8 +68,10 @@ public static class HardwareMonitor
 		// Initialize Hardware
 		_ = RefreshComputerHardwareAsync();
 
-		// Initialize Events
+		// SystemEvents.PowerModeChanged is used to detect Sleep and Hibernate modes.
 		SystemEvents.PowerModeChanged += OnPowerModeChanged;
+		// SystemEvents.SessionSwitch is used to detect Sleep mode with modern standby.
+		SystemEvents.SessionSwitch += OnSessionSwitch;
 
 		// Initialize Timers
 		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
@@ -88,7 +91,7 @@ public static class HardwareMonitor
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
     }
 
-	private static bool s_refreshingComputerHardware = false;
+    private static bool s_refreshingComputerHardware = false;
 	public static async Task RefreshComputerHardwareAsync()
 	{
 		if(s_refreshingComputerHardware) return; // Prevent multiple refreshes.
@@ -596,5 +599,12 @@ public static class HardwareMonitor
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
 		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
+    }
+
+    private static void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+		// If the system is in modern standby sleep mode, don't update the hardware information.
+        if (e.Reason == SessionSwitchReason.SessionLock) ShouldUpdate = false;
+		else if (e.Reason == SessionSwitchReason.SessionUnlock) ShouldUpdate = true;
     }
 }
