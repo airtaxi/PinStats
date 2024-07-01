@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.ViewModels;
+using System.Runtime.InteropServices;
 
 namespace PinStats;
 
@@ -133,8 +134,10 @@ public sealed partial class PopupWindow : IDisposable
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
-		// Battery
-		string batteryInformationText = null;
+        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64) gpuInformationText = "N/A";
+
+        // Battery
+        string batteryInformationText = null;
 		string batteryHealthInformationText = null;
 		if (HardwareMonitor.HasBattery()) // If the device has a battery, update the battery information.
 		{

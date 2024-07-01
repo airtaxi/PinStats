@@ -1,10 +1,9 @@
 ﻿using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
-using PinStats.Enums;
-using System.Linq;
+using System.Diagnostics;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Timers;
-using Windows.ApplicationModel;
 using Timer = System.Timers.Timer;
 
 namespace PinStats;
@@ -43,6 +42,8 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> MemoryHardware = new();
 	private readonly static List<IHardware> BatteryHardware = new();
 	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
+	private static string FallbackCpuHardwareName;
+	private static string FallbackGpuHardwareName;
 
 	private readonly static Timer StorageTimer = new() { Interval = StorageTimerInMilliseconds };
 	private static float s_storageReadRatePerSecondInBytes;
@@ -97,7 +98,6 @@ public static class HardwareMonitor
         if (Interlocked.CompareExchange(ref s_refreshingComputerHardware, 1, 0) != 0) return;
 		try
 		{
-
 			if (Computer != null)
 			{
 				// Closing computer takes a lot of time.
@@ -113,8 +113,8 @@ public static class HardwareMonitor
 			// Configure new Computer
 			Computer = new Computer
 			{
-				IsCpuEnabled = true,
-				IsGpuEnabled = true,
+				IsCpuEnabled = RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64,
+				IsGpuEnabled = RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64,
 				IsMemoryEnabled = true,
 				IsNetworkEnabled = true,
 				IsBatteryEnabled = true,
@@ -123,6 +123,33 @@ public static class HardwareMonitor
 			};
 			Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
 			Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
+
+			if(RuntimeInformation.ProcessArchitecture != Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X64)
+			{
+				using (var searcher = new ManagementObjectSearcher("select * from Win32_VideoController"))
+				{
+					var gpuName = searcher.Get().Cast<ManagementObject>().FirstOrDefault()["Name"].ToString();
+					FallbackGpuHardwareName = gpuName;
+				}
+
+				using (var searcher = new ManagementObjectSearcher("select Name from Win32_Processor"))
+				{
+					var managementObjects = searcher.Get();
+
+					string cpuName = null;
+					int cpuCount = 0;
+					foreach (var managementObject in managementObjects)
+					{
+						if (string.IsNullOrEmpty(cpuName)) cpuName = managementObject["Name"].ToString();
+						cpuCount++;
+						managementObject.Dispose();
+					}
+
+					if (cpuCount == 0) FallbackCpuHardwareName = "N/A";
+					else if (cpuCount == 1) FallbackCpuHardwareName = cpuName;
+					else FallbackCpuHardwareName = cpuName + " + " + (cpuCount - 1) + " more";
+				}
+            }
 
 			// Refresh Computer Hardware in Task.Run to prevent blocking the UI thread.
 			await Task.Run(() =>
@@ -195,7 +222,7 @@ public static class HardwareMonitor
     public static List<string> GetGpuHardwareNames()
 	{
 		HardwareSemaphore.Wait();
-		try { return GpuHardware.Select(x => x.Name).ToList(); }
+		try { return GpuHardware.Select(x => x.Name).Append(FallbackGpuHardwareName).ToList(); }
 		finally { HardwareSemaphore.Release(); }
 	}
 
@@ -267,8 +294,10 @@ public static class HardwareMonitor
 
 	public static string GetCpuName()
 	{
-		if(CpuHardware.Count == 0) return "N/A"; // If there are no CPUs, return N/A.
-
+		if (CpuHardware.Count == 0)
+		{
+			return FallbackCpuHardwareName ?? "N/A";
+		}
 		var firstCpuHardware = CpuHardware[0];
 		if (CpuHardware.Count == 1) return firstCpuHardware.Name;
 		else return firstCpuHardware.Name + " + " + (CpuHardware.Count - 1) + " more";
@@ -277,7 +306,11 @@ public static class HardwareMonitor
 	public static string GetCurrentGpuName()
 	{
 		var gpuHardware = GetCurrentGpuHardware();
-		if (gpuHardware == null) return "N/A"; // If there are no GPUs, return N/A.
+		if (gpuHardware == null)
+		{
+			if (!string.IsNullOrEmpty(FallbackGpuHardwareName)) return FallbackGpuHardwareName;
+			return "N/A"; // If there are no GPUs, return N/A.
+		}
 
 		return gpuHardware.Name;
 	}
@@ -551,22 +584,33 @@ public static class HardwareMonitor
 		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 	}
 
-	private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor", "% Processor Time", "_Total");
+    private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If the system is in sleep or hibernate mode, don't update the hardware information.
         if (!ShouldUpdate) return;
 
-        // Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
-        IHardware[] cpuHardware;
-		HardwareSemaphore.Wait();
-        try { cpuHardware = CpuHardware.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
-        finally { HardwareSemaphore.Release(); }
+		float usage;
 
-		// Array doesn't support ForEach method. Use foreach instead.
-		foreach (var cpu in cpuHardware) cpu.Update();
-		var cpuTotalSensors = cpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
+        if (RuntimeInformation.ProcessArchitecture == Architecture.X86 && RuntimeInformation.ProcessArchitecture == Architecture.X64)
+        {
+			// Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
+			IHardware[] cpuHardware;
+			HardwareSemaphore.Wait();
+			try { cpuHardware = CpuHardware.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
+			finally { HardwareSemaphore.Release(); }
 
-		var usage = cpuTotalSensors.Average(x => x.Value) ?? 0;
+			// Array doesn't support ForEach method. Use foreach instead.
+			foreach (var cpu in cpuHardware) cpu.Update();
+			var cpuTotalSensors = cpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
+
+			usage = cpuTotalSensors.Average(x => x.Value) ?? 0;
+        }
+		else
+		{
+			usage = CpuPerformanceCounter.NextValue();
+			usage = Math.Clamp(usage, 0, 100);
+		}
 
 		LastCpuUsages.Add(usage);
 		if (LastCpuUsages.Count > UsageCacheCount) LastCpuUsages.RemoveAt(0);
@@ -574,21 +618,29 @@ public static class HardwareMonitor
 		s_cpuUsage = LastCpuUsages.Average();
 	}
 
-	private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	private static ManagementObjectSearcher GpuManagementObjectSearcher = new("root\\CIMV2", "SELECT * FROM Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine");
+    private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If the system is in sleep or hibernate mode, don't update the hardware information.
         if (!ShouldUpdate) return;
 
-        var gpuHardware = GetCurrentGpuHardware();
-		if (gpuHardware == null) return; // If there are no GPUs, return.
+		float usage = 0;
 
-		gpuHardware.Update();
+		if (RuntimeInformation.ProcessArchitecture == Architecture.X86 && RuntimeInformation.ProcessArchitecture == Architecture.X64)
+		{
 
-		var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core")
-			?? gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
-		var value = gpuLoadSensor?.Value ?? 0;
-		value = Math.Min(value, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
-		LastGpuUsages.Add(value);
+			var gpuHardware = GetCurrentGpuHardware();
+			if (gpuHardware == null) return; // If there are no GPUs, return.
+
+			gpuHardware.Update();
+
+			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core")
+				?? gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
+			usage = gpuLoadSensor?.Value ?? 0;
+		}
+
+		usage = Math.Clamp(usage, 0, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+		LastGpuUsages.Add(usage);
 
 		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
 		s_gpuUsage = LastGpuUsages.Average();

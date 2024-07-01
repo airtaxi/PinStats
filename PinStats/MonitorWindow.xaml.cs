@@ -8,6 +8,7 @@ using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.Resources;
 using PinStats.ViewModels;
+using System.Runtime.InteropServices;
 using WinUIEx;
 using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
 
@@ -123,8 +124,10 @@ public sealed partial class MonitorWindow : IDisposable
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
-		// Memory
-		var totalMemory = HardwareMonitor.GetTotalMemory();
+        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64) gpuInformationText = "N/A";
+
+        // Memory
+        var totalMemory = HardwareMonitor.GetTotalMemory();
 		var usedMemory = HardwareMonitor.GetUsedMemory();
 		var memoryInformationText = $"{usedMemory:N2} / {totalMemory:N2} GB";
 
