@@ -1,111 +1,126 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <winuiex:WindowEx
     x:Class="PinStats.PopupWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PinStats"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:winuiex="using:WinUIEx"
+    xmlns:local="using:PinStats"
     xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:PinStats.ViewModels"
-    mc:Ignorable="d"
+    xmlns:winuiex="using:WinUIEx"
     Width="450"
     Height="350"
-    IsResizable="False"
     Activated="OnActivated"
-    Closed="OnClosed">
+    Closed="OnClosed"
+    IsResizable="False"
+    mc:Ignorable="d">
 
     <Grid x:Name="GdMain">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid
-            x:Name="GridBackground"
-            Grid.RowSpan="2">
+        <Grid x:Name="GridBackground" Grid.RowSpan="2">
             <Image
                 x:Name="ImageBackground"
-                Stretch="UniformToFill"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"/>
-            <Rectangle
-                Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+                VerticalAlignment="Center"
+                Stretch="UniformToFill" />
+            <Rectangle Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}" />
         </Grid>
 
-        <Grid Grid.Row="0" Padding="10,10,10,0" Margin="0,0,0,-10">
+        <Grid
+            Grid.Row="0"
+            Margin="0,0,0,-10"
+            Padding="10,10,10,0">
             <StackPanel>
                 <Grid>
-                    <TextBlock x:Name="TextBlockCpuName"/>
-                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right"/>
+                    <TextBlock
+                        x:Name="TextBlockCpuName"
+                        MaxWidth="390"
+                        HorizontalAlignment="Left"
+                        MaxLines="1"
+                        TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid>
                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-                        <TextBlock x:Name="TextBlockGpuName"/>
+                        <TextBlock
+                            x:Name="TextBlockGpuName"
+                            MaxWidth="390"
+                            MaxLines="1"
+                            TextTrimming="CharacterEllipsis" />
                         <Button
                             x:Name="ButtonSelectGpu"
-                            Margin="5,3,0,0"
-                            Background="Transparent"
-                            BorderThickness="0"
                             Height="10"
+                            Margin="5,3,0,0"
                             Padding="0"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0">
                             <Button.Content>
-                                <SymbolIcon Symbol="More"/>
+                                <SymbolIcon Symbol="More" />
                             </Button.Content>
                             <Button.Flyout>
                                 <Flyout>
                                     <ComboBox
+                                        x:Name="ComboBoxGpuList"
                                         Width="auto"
                                         MinWidth="200"
-                                        x:Name="ComboBoxGpuList"
-                                        SelectionChanged="OnGpuListComboBoxSelectionChanged"/>
+                                        SelectionChanged="OnGpuListComboBoxSelectionChanged" />
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
                     </StackPanel>
-                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid>
-                    <TextBlock Text="Memory" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockMemoryInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Memory" />
+                    <TextBlock x:Name="TextBlockMemoryInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid>
-                    <TextBlock Text="Virtual Memory" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockVirtualMemoryInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Virtual Memory" />
+                    <TextBlock x:Name="TextBlockVirtualMemoryInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid>
-                    <TextBlock Text="Network" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Network" />
+                    <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid>
-                    <TextBlock Text="Storage" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockStorageInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Storage" />
+                    <TextBlock x:Name="TextBlockStorageInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid x:Name="GridBattery">
-                    <TextBlock Text="Battery" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Battery" />
+                    <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <Grid x:Name="GridBatteryHealth">
-                    <TextBlock Text="Battery Health" HorizontalAlignment="Left"/>
-                    <TextBlock x:Name="TextBlockBatteryHealthInformation" HorizontalAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Text="Battery Health" />
+                    <TextBlock x:Name="TextBlockBatteryHealthInformation" HorizontalAlignment="Right" />
                 </Grid>
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="RadioButtonCpu" Content="CPU Usage" Click="OnRadioButtonClicked"/>
-                    <RadioButton x:Name="RadioButtonGpu" Content="GPU Usage" Click="OnRadioButtonClicked"/>
+                    <RadioButton
+                        x:Name="RadioButtonCpu"
+                        Click="OnRadioButtonClicked"
+                        Content="CPU Usage" />
+                    <RadioButton
+                        x:Name="RadioButtonGpu"
+                        Click="OnRadioButtonClicked"
+                        Content="GPU Usage" />
                 </StackPanel>
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
             <lvc:CartesianChart
                 x:Name="CartesianChartUsage"
-                SyncContext="{Binding Sync}"
+                Margin="0,0,0,0"
                 Series="{Binding Series}"
+                SyncContext="{Binding Sync}"
                 XAxes="{Binding XAxes}"
                 YAxes="{Binding YAxes}"
-                Margin="0,0,0,0"
-                ZoomMode="None"/>
+                ZoomMode="None" />
         </Grid>
     </Grid>
 </winuiex:WindowEx>
