@@ -91,51 +91,51 @@ public static class HardwareMonitor
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
     }
 
-    private static bool s_refreshingComputerHardware = false;
+    private static int s_refreshingComputerHardware = 0;
 	public static async Task RefreshComputerHardwareAsync()
 	{
-		if(s_refreshingComputerHardware) return; // Prevent multiple refreshes.
-
-		s_refreshingComputerHardware = true;
-
-        if (Computer != null)
+        if (Interlocked.CompareExchange(ref s_refreshingComputerHardware, 1, 0) != 0) return;
+		try
 		{
-			// Closing computer takes a lot of time.
-			// Caching Computer and closing it in a separate thread improves performance.
-			_ = Task.Run(() =>
+
+			if (Computer != null)
 			{
-				var computer = Computer;
-				computer.HardwareAdded -= OnComputerHardwareAddedOrRemoved;
-				computer.HardwareRemoved -= OnComputerHardwareAddedOrRemoved;
-				computer.Close();
+				// Closing computer takes a lot of time.
+				// Caching Computer and closing it in a separate thread improves performance.
+				_ = Task.Run(() =>
+				{
+					var computer = Computer;
+					computer.HardwareAdded -= OnComputerHardwareAddedOrRemoved;
+					computer.HardwareRemoved -= OnComputerHardwareAddedOrRemoved;
+					computer.Close();
+				});
+			}
+			// Configure new Computer
+			Computer = new Computer
+			{
+				IsCpuEnabled = true,
+				IsGpuEnabled = true,
+				IsMemoryEnabled = true,
+				IsNetworkEnabled = true,
+				IsBatteryEnabled = true,
+				IsStorageEnabled = true,
+				IsMotherboardEnabled = true,
+			};
+			Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
+			Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
+
+			// Refresh Computer Hardware in Task.Run to prevent blocking the UI thread.
+			await Task.Run(() =>
+			{
+				// Close (Optional) and Open Computer to refresh Hardware.
+				Computer.Open(); // This method takes a lot of time. It is recommended to call this method in a separate thread.
+				Computer.Accept(new UpdateVisitor());
+
+				// Refresh Hardware
+				RefreshHardware();
 			});
-        }
-        // Configure new Computer
-        Computer = new Computer
-        {
-            IsCpuEnabled = true,
-            IsGpuEnabled = true,
-            IsMemoryEnabled = true,
-            IsNetworkEnabled = true,
-            IsBatteryEnabled = true,
-            IsStorageEnabled = true,
-            IsMotherboardEnabled = true,
-        };
-		Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
-        Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
-
-        // Refresh Computer Hardware in Task.Run to prevent blocking the UI thread.
-        await Task.Run(() =>
-		{
-			// Close (Optional) and Open Computer to refresh Hardware.
-			Computer.Open(); // This method takes a lot of time. It is recommended to call this method in a separate thread.
-			Computer.Accept(new UpdateVisitor());
-
-            // Refresh Hardware
-            RefreshHardware();
-		});
-
-		s_refreshingComputerHardware = false;
+		}
+		finally { Interlocked.Exchange(ref s_refreshingComputerHardware, 0); }
 	}
 
 	private static void RefreshHardware()
