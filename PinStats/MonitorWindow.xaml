@@ -1,193 +1,204 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <winuiex:WindowEx
     x:Class="PinStats.MonitorWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PinStats"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:PinStats"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winuiex="using:WinUIEx"
-    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
-    mc:Ignorable="d"
-    IsResizable="False"
+    Closed="OnClosed"
+    IsAlwaysOnTop="True"
     IsMaximizable="False"
     IsMinimizable="False"
-    IsAlwaysOnTop="True"
-    Closed="OnClosed"
-    PresenterChanged="OnPresenterChanged">
+    IsResizable="False"
+    PresenterChanged="OnPresenterChanged"
+    mc:Ignorable="d">
 
     <Grid Loaded="OnLoaded">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid
-            x:Name="GridBackground"
-            Grid.RowSpan="2">
+        <Grid x:Name="GridBackground" Grid.RowSpan="2">
             <Image
                 x:Name="ImageBackground"
-                Stretch="UniformToFill"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"/>
-            <Rectangle
-                Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}"/>
+                VerticalAlignment="Center"
+                Stretch="UniformToFill" />
+            <Rectangle Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}" />
         </Grid>
 
         <Grid Grid.Row="0">
             <TextBlock
                 x:Name="TextBlockMotherboardName"
-                FontSize="35"
-                FontWeight="Bold"
+                Margin="10,5,0,5"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Margin="10,5,0,5"/>
+                FontSize="35"
+                FontWeight="Bold" />
             <Button
-                Background="Transparent"
-                BorderThickness="0"
+                Padding="5"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
-                Padding="5"
+                Background="Transparent"
+                BorderThickness="0"
                 Click="OnExitButtonClicked">
                 <SymbolIcon Symbol="Cancel" />
             </Button>
         </Grid>
         <Grid Grid.Row="1" Padding="10,0,10,10">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0">
                 <Grid ColumnSpacing="15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
                         <TextBlock
-                            Text="Network"
+                            HorizontalAlignment="Left"
                             FontSize="21"
-                            HorizontalAlignment="Left"/>
+                            Text="Network" />
                         <TextBlock
                             x:Name="TextBlockNetworkInformation"
-                            Text=""
-                            FontSize="18"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"/>
+                            VerticalAlignment="Bottom"
+                            FontSize="18"
+                            Text="" />
                     </Grid>
 
                     <Grid Grid.Column="1">
                         <TextBlock
-                            Text="Storage"
+                            HorizontalAlignment="Left"
                             FontSize="21"
-                            HorizontalAlignment="Left"/>
+                            Text="Storage" />
                         <TextBlock
                             x:Name="TextBlockStorageInformation"
-                            FontSize="18"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"/>
+                            VerticalAlignment="Bottom"
+                            FontSize="18" />
                     </Grid>
                 </Grid>
 
-                <Grid ColumnSpacing="15" Margin="0,5,0,0">
+                <Grid Margin="0,5,0,0" ColumnSpacing="15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <StackPanel Grid.Column="0">
-                        <TextBlock
-                            Text="Memory"
-                            FontSize="21"/>
-                        <lvc:CartesianChart x:Name="CartesianChartMemory" Series="{Binding Series}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" Height="100" Margin="0,-30,0,-30"/>
+                        <TextBlock FontSize="21" Text="Memory" />
+                        <lvc:CartesianChart
+                            x:Name="CartesianChartMemory"
+                            Height="100"
+                            Margin="0,-30,0,-30"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            YAxes="{Binding YAxes}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock
-                            Text="Virtual Memory"
-                            FontSize="21"/>
-                        <lvc:CartesianChart x:Name="CartesianChartVirtualMemory" Series="{Binding Series}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" Height="100" Margin="0,-30,0,-30"/>
+                        <TextBlock FontSize="21" Text="Virtual Memory" />
+                        <lvc:CartesianChart
+                            x:Name="CartesianChartVirtualMemory"
+                            Height="100"
+                            Margin="0,-30,0,-30"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            YAxes="{Binding YAxes}" />
                     </StackPanel>
                 </Grid>
-                <Grid ColumnSpacing="15" Margin="0,5,0,0">
+                <Grid Margin="0,5,0,0" ColumnSpacing="15">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <StackPanel Grid.Column="0">
-                        <TextBlock
-                            Text="Battery"
-                            FontSize="21"/>
-                        <lvc:CartesianChart x:Name="CartesianChartBattery" Series="{Binding Series}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" Height="100" Margin="0,-30,0,-30"/>
+                        <TextBlock FontSize="21" Text="Battery" />
+                        <lvc:CartesianChart
+                            x:Name="CartesianChartBattery"
+                            Height="100"
+                            Margin="0,-30,0,-30"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            YAxes="{Binding YAxes}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock
-                            Text="Battery Health"
-                            FontSize="21"/>
-                        <lvc:CartesianChart x:Name="CartesianChartBatteryHealth" Series="{Binding Series}" XAxes="{Binding XAxes}" YAxes="{Binding YAxes}" Height="100" Margin="0,-30,0,-30"/>
+                        <TextBlock FontSize="21" Text="Battery Health" />
+                        <lvc:CartesianChart
+                            x:Name="CartesianChartBatteryHealth"
+                            Height="100"
+                            Margin="0,-30,0,-30"
+                            Series="{Binding Series}"
+                            XAxes="{Binding XAxes}"
+                            YAxes="{Binding YAxes}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
-            <Grid
-                Grid.Row="1"
-                Margin="0,5,0,0">
+            <Grid Grid.Row="1" Margin="0,5,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <TextBlock
                         x:Name="TextBlockCpuName"
                         Grid.Row="0"
-                        FontSize="21"
-                        HorizontalAlignment="Left"/>
-                    <TextBlock 
+                        HorizontalAlignment="Left"
+                        FontSize="21" />
+                    <TextBlock
                         x:Name="TextBlockCpuInformation"
                         Grid.Row="0"
-                        FontSize="18"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"/>
+                        VerticalAlignment="Bottom"
+                        FontSize="18" />
                     <lvc:CartesianChart
                         x:Name="CartesianChartCpuUsage"
                         Grid.Row="1"
-                        SyncContext="{Binding Sync}"
                         Series="{Binding Series}"
+                        SyncContext="{Binding Sync}"
                         XAxes="{Binding XAxes}"
                         YAxes="{Binding YAxes}"
-                        ZoomMode="None"/>
+                        ZoomMode="None" />
                 </Grid>
                 <Grid Grid.Row="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <TextBlock
                         x:Name="TextBlockGpuName"
                         Grid.Row="0"
-                        FontSize="21"
                         HorizontalAlignment="Left"
-                        VerticalAlignment="Bottom"/>
-                    <TextBlock 
+                        VerticalAlignment="Bottom"
+                        FontSize="21" />
+                    <TextBlock
                         x:Name="TextBlockGpuInformation"
                         Grid.Row="0"
-                        FontSize="18"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"/>
+                        VerticalAlignment="Bottom"
+                        FontSize="18" />
                     <lvc:CartesianChart
                         x:Name="CartesianChartGpuUsage"
                         Grid.Row="1"
-                        SyncContext="{Binding Sync}"
                         Series="{Binding Series}"
+                        SyncContext="{Binding Sync}"
                         XAxes="{Binding XAxes}"
                         YAxes="{Binding YAxes}"
-                        ZoomMode="None"/>
+                        ZoomMode="None" />
                 </Grid>
             </Grid>
         </Grid>
