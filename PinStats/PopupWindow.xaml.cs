@@ -69,8 +69,7 @@ public sealed partial class PopupWindow : IDisposable
 		var gpuNames = HardwareMonitor.GetGpuHardwareNames();
 		if (gpuNames.Count > 1)
 		{
-			foreach (var name in gpuNames)
-				ComboBoxGpuList.Items.Add(name);
+			ComboBoxGpuList.ItemsSource = gpuNames;
 			ComboBoxGpuList.SelectedIndex = Configuration.GetValue<int?>("GpuIndex") ?? 0;
 		}
 		else ButtonSelectGpu.Visibility = Visibility.Collapsed;
