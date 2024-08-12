@@ -153,20 +153,32 @@ public sealed partial class MonitorWindow : IDisposable
 			_memoryUsageViewModel.SetValue(totalMemory, usedMemory, memoryInformationText);
 			_virtualMemoryUsageViewModel.SetValue(totalVirtualMemory, usedVirtualMemory, virtualMemoryInformationText);
 
-			if (HardwareMonitor.HasBattery()) // If the device has a battery, update the battery information.
+            // If the device has a battery, update the battery information.
+            if (HardwareMonitor.HasBattery())
 			{
 				var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent().Value; // Assume that the device has a battery due to the if statement above.
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
+				var batteryEstimatedTime = HardwareMonitor.GetTotalBatteryEstimatedTime();
 
-				string batteryChargeRatePrefix = string.Empty;
-				if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
-				var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W") : "";
-				var batteryViewModelDataLabelText = $"{batteryPercentage:N0}%" + batteryChargeRateText;
+				// Battery information
+				var batteryChargeRateText = string.Empty;
+                if (batteryChargeRate.HasValue)
+				{
+					var batteryChargeRatePrefix = string.Empty;
+					if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
+					batteryChargeRateText = " / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W";
+				}
+				var batteryEstimatedTimeText = string.Empty;
+				if (batteryEstimatedTime.HasValue) batteryEstimatedTimeText = " / " + batteryEstimatedTime.Value.ToString(@"hh\:mm\:ss") + " left";
+
+				var batteryViewModelDataLabelText = $"{batteryPercentage:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
+
+				// Apply battery information to the view model
 				_batteryViewModel.SetValue(100, batteryPercentage, batteryViewModelDataLabelText);
 
+				// Battery health
 				var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
-				var hasBatteryHealth = batteryHealthPercent != null;
-				if (hasBatteryHealth)
+				if (batteryHealthPercent.HasValue)
 				{
 					var batteryHealthViewModelDataLabelText = $"{batteryHealthPercent:N0}%";
 					_batteryHealthViewModel.SetValue(100, batteryHealthPercent.Value, batteryHealthViewModelDataLabelText);

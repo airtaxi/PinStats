@@ -358,6 +358,24 @@ public static class HardwareMonitor
 		finally { HardwareSemaphore.Release(); }
 	}
 
+	public static TimeSpan? GetTotalBatteryEstimatedTime(bool update = false)
+	{
+		HardwareSemaphore.Wait();
+		try
+		{
+			if (BatteryHardware == null) return null;
+			if (update) BatteryHardware.ForEach(x => x.Update());
+
+			var sensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.TimeSpan);
+			var remainingSeconds = sensors.Sum(x => x.Value) ?? 0;
+			if (remainingSeconds == 0) return null;
+
+			var result = TimeSpan.FromSeconds(remainingSeconds);
+			return result;
+		}
+		finally { HardwareSemaphore.Release(); }
+	}
+
 	public static float? GetAverageBatteryHealthPercent(bool update = false)
 	{
 		HardwareSemaphore.Wait();
@@ -651,7 +669,10 @@ public static class HardwareMonitor
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
 		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
-		else if (e.Mode == PowerModes.StatusChange) Task.Run(RefreshComputerHardwareAsync);
+		else if (e.Mode == PowerModes.StatusChange)
+		{
+			Task.Run(RefreshComputerHardwareAsync);
+		}
     }
 
     private static void OnSessionSwitch(object sender, SessionSwitchEventArgs e)

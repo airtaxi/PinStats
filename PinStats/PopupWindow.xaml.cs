@@ -135,24 +135,36 @@ public sealed partial class PopupWindow : IDisposable
 
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64) gpuInformationText = "N/A";
 
-        // Battery
+        // Define battery information texts
         string batteryInformationText = null;
 		string batteryHealthInformationText = null;
-		if (HardwareMonitor.HasBattery()) // If the device has a battery, update the battery information.
+
+        // If the device has a battery, update the battery information.
+        if (HardwareMonitor.HasBattery())
 		{
 			HardwareMonitor.UpdateBatteryHardware();
 
-			var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
-			var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
-			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
+			var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent().Value; // Assume that the device has a battery due to the if statement above.
+            var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
+            var batteryEstimatedTime = HardwareMonitor.GetTotalBatteryEstimatedTime();
 
-			string batteryChargeRatePrefix = string.Empty;
-			if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
-			var batteryChargeRateText = batteryChargeRate != null ? (" / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W") : "";
-			batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText;
+			// Battery charge rate and estimated time text
+            var batteryChargeRateText = string.Empty;
+            if (batteryChargeRate.HasValue)
+            {
+                var batteryChargeRatePrefix = string.Empty;
+                if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
+                batteryChargeRateText = " / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W";
+            }
+            var batteryEstimatedTimeText = string.Empty;
+            if (batteryEstimatedTime.HasValue) batteryEstimatedTimeText = " / " + batteryEstimatedTime.Value.ToString(@"hh\:mm\:ss") + " left";
 
-			var hasBatteryHealth = batteryHealthPercent != null;
-			if (hasBatteryHealth) batteryHealthInformationText = $"{batteryHealthPercent:N0}%";
+			// Battery information text
+			batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
+
+			// Battery health information text
+            var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
+			if (batteryHealthPercent.HasValue) batteryHealthInformationText = $"{batteryHealthPercent.Value:N0}%";
 		}
 
 		// Memory
