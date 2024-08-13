@@ -9,6 +9,8 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using HarfBuzzSharp;
 using Microsoft.Graphics.Display;
 using Microsoft.UI.Xaml.Controls;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 
 namespace PinStats;
 
@@ -20,7 +22,7 @@ public partial class App : Application
 	static App()
 	{
 		UpdateCheckTimer = new(UpdateCheckTimerCallback, null, (int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite);
-	}
+    }
 
 	private const string UpdateAvailableTitle = "Update Available";
 	private static async void UpdateCheckTimerCallback(object state) => await CheckForUpdateAsync();
@@ -60,7 +62,10 @@ public partial class App : Application
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 		ToastNotificationManagerCompat.OnActivated += OnToastNotificationActivated;
 
-		InitializeComponent();
+        if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
+        else LiveCharts.Configure(config => config.AddDarkTheme());
+
+        InitializeComponent();
 		InitializeThemeSettings();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
 	}
@@ -72,7 +77,7 @@ public partial class App : Application
 
 		var isDarkTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark;
 		Configuration.SetValue("WhiteIcon", isDarkTheme);
-	}
+    }
 
 	private static void OnToastNotificationActivated(ToastNotificationActivatedEventArgsCompat toastArgs)
 	{
@@ -128,11 +133,18 @@ public partial class App : Application
 
         // TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
         (s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
+        (s_emptyWindow.Content as Frame).ActualThemeChanged += OnActualThemeChanged;
         s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
         s_emptyWindow.Activate();
     }
 
-	public static float MainWindowRasterizationScale { get; private set; }
+    private void OnActualThemeChanged(FrameworkElement sender, object args)
+    {
+        if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
+        else LiveCharts.Configure(config => config.AddDarkTheme());
+    }
+
+    public static float MainWindowRasterizationScale { get; private set; }
     private async void OnEmptyWindowContentLoaded(object sender, RoutedEventArgs e)
     {
         // Unsubscribe the event to prevent memory leak.
