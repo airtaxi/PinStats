@@ -602,35 +602,16 @@ public static class HardwareMonitor
 		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 	}
 
-	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor", "% Processor Time", "_Total");
+	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor Information", "% Processor Utility", "_Total");
     private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If the system is in sleep or hibernate mode, don't update the hardware information.
         if (!ShouldUpdate) return;
 
-		float usage;
+        var usage = CpuPerformanceCounter.NextValue();
+        usage = Math.Clamp(usage, 0, 100);
 
-        if (RuntimeInformation.ProcessArchitecture == Architecture.X86 && RuntimeInformation.ProcessArchitecture == Architecture.X64)
-        {
-			// Updating CPU Hardware takes a lot of time. Caching CPU Hardware and updating them in a separate thread improves performance.
-			IHardware[] cpuHardware;
-			HardwareSemaphore.Wait();
-			try { cpuHardware = CpuHardware.ToArray(); } // Use ToArray instead of ToList to reduce memory usage.
-			finally { HardwareSemaphore.Release(); }
-
-			// Array doesn't support ForEach method. Use foreach instead.
-			foreach (var cpu in cpuHardware) cpu.Update();
-			var cpuTotalSensors = cpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Load && x.Name == "CPU Total");
-
-			usage = cpuTotalSensors.Average(x => x.Value) ?? 0;
-        }
-		else
-		{
-			usage = CpuPerformanceCounter.NextValue();
-			usage = Math.Clamp(usage, 0, 100);
-		}
-
-		LastCpuUsages.Add(usage);
+        LastCpuUsages.Add(usage);
 		if (LastCpuUsages.Count > UsageCacheCount) LastCpuUsages.RemoveAt(0);
 
 		s_cpuUsage = LastCpuUsages.Average();
