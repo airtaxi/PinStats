@@ -4,12 +4,15 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:tb="using:H.NotifyIcon">
-    <tb:TaskbarIcon x:Name="TaskbarIconCpuUsage" NoLeftClickDelay="True">
+    <tb:TaskbarIcon
+        x:Name="TaskbarIconCpuUsage"
+        ContextMenuMode="SecondWindow"
+        NoLeftClickDelay="True">
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource BackgroundSource="ms-appx:///Assets/Cpu.png" />
         </tb:TaskbarIcon.IconSource>
         <tb:TaskbarIcon.ContextFlyout>
-            <MenuFlyout>
+            <MenuFlyout AreOpenCloseAnimationsEnabled="False">
                 <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False" />
                 <MenuFlyoutItem IsEnabled="False" Text="Author: Howon Lee" />
                 <MenuFlyoutSeparator />
