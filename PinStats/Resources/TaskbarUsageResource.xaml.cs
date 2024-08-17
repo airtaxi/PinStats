@@ -271,7 +271,6 @@ public partial class TaskbarUsageResource
 
 		reportWindow.Move((int)positionX, (int)positionY);
 		reportWindow.Activate();
-		reportWindow.BringToFront();
 	}
 
 	private void OnCloseProgramMenuFlyoutItemClicked(XamlUICommand sender, ExecuteRequestedEventArgs args) => Environment.Exit(0);

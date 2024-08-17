@@ -7,27 +7,31 @@ using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.ViewModels;
 using System.Runtime.InteropServices;
+using Windows.UI.WindowManagement;
+using WinUIEx;
 
 namespace PinStats;
 
 public sealed partial class PopupWindow : IDisposable
 {
-	private const int RefreshTimerIntervalInMilliseconds = 1000;
+    // Import the necessary function from user32.dll
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+
+    private const int RefreshTimerIntervalInMilliseconds = 1000;
 
 	public readonly static UsageViewModel CpuUsageViewModel = new();
 	public readonly static UsageViewModel GpuUsageViewModel = new();
 
 	public static event EventHandler OnCurrentGpuChanged;
 
-	private readonly Timer _refreshTimer;
+	private Timer _refreshTimer;
 
 	public PopupWindow()
 	{
 		InitializeComponent();
 		Initialize();
-
-		// Setup the timer to refresh the hardware information
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 	}
 
 	private void Initialize()
@@ -91,9 +95,6 @@ public sealed partial class PopupWindow : IDisposable
 		// Set the text of the CPU name and GPU name.
 		TextBlockCpuName.Text = HardwareMonitor.GetCpuName();
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
-
-		// Refresh the hardware information manually since timer callback is not yet triggered.
-		RefreshHardwareInformation();
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -107,8 +108,11 @@ public sealed partial class PopupWindow : IDisposable
 	}
 
 	private void RefreshHardwareInformation()
-	{
-		HardwareMonitor.UpdateCpuHardware();
+    {
+		var isWindowInFocus = GetForegroundWindow() == this.GetWindowHandle();
+        if (!isWindowInFocus) DispatcherQueue.TryEnqueue(Close);
+
+        HardwareMonitor.UpdateCpuHardware();
 		HardwareMonitor.UpdateMemoryHardware();
 		HardwareMonitor.UpdateNetworkHardware();
 		HardwareMonitor.UpdateStorageHardware();
@@ -210,6 +214,15 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		// Close the window when the window lost its focus.
 		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
+		else
+        {
+            BringToFront();
+            this.SetForegroundWindow();
+
+            // Setup the timer to refresh the hardware information
+            _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+			RefreshHardwareInformation();
+        }
 	}
 
 	private void OnRadioButtonClicked(object sender, RoutedEventArgs e)
