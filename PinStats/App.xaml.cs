@@ -3,11 +3,8 @@ using Microsoft.UI.Xaml;
 using PinStats.Helpers;
 using PinStats.Resources;
 using System.Reflection;
-using Windows.UI.Notifications;
 using System.Diagnostics;
 using Microsoft.Toolkit.Uwp.Notifications;
-using HarfBuzzSharp;
-using Microsoft.Graphics.Display;
 using Microsoft.UI.Xaml.Controls;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -16,7 +13,7 @@ namespace PinStats;
 
 public partial class App : Application
 {
-	private const int UpdateCheckIntervalInMinutes = 10;
+    private const int UpdateCheckIntervalInMinutes = 10;
 	private static readonly Timer UpdateCheckTimer;
 
 	static App()
@@ -68,9 +65,9 @@ public partial class App : Application
         InitializeComponent();
 		InitializeThemeSettings();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
-	}
+    }
 
-	private static void InitializeThemeSettings()
+    private static void InitializeThemeSettings()
 	{
 		var hasThemeSettingsApplied = Configuration.GetValue<bool?>("WhiteIcon") != null;
 		if (hasThemeSettingsApplied) return;
