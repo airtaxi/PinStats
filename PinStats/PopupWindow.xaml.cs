@@ -2,7 +2,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
 using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.ViewModels;
@@ -16,8 +15,19 @@ public sealed partial class PopupWindow : IDisposable
 {
     // Import the necessary function from user32.dll
     [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
 
     private const int RefreshTimerIntervalInMilliseconds = 1000;
 
@@ -31,28 +41,27 @@ public sealed partial class PopupWindow : IDisposable
 	public PopupWindow()
 	{
 		InitializeComponent();
-		Initialize();
-	}
 
-	private void Initialize()
-	{
-		// Set window and AppWindow properties
-		SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
-		AppWindow.IsShownInSwitchers = false;
-		(AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
+        // Set window and AppWindow properties
+        SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
+        AppWindow.IsShownInSwitchers = false;
+        (AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
 
-		// If OverlappedPresenter's border and TitleBar is manually set, the window will not be rounded.
-		// So we need to set the window corner to rounded corner manually.
-		WindowHelper.SetWindowCornerToRoundedCorner(this);
+        // If OverlappedPresenter's border and TitleBar is manually set, the window will not be rounded.
+        // So we need to set the window corner to rounded corner manually.
+        WindowHelper.SetWindowCornerToRoundedCorner(this);
 
-		// Apply background image if available or use Mica backdrop
-		if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.Popup, ImageBackground))
-		{
+        // Apply background image if available or use Mica backdrop
+        if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.Popup, ImageBackground))
+        {
             GridBackground.Visibility = Visibility.Collapsed;
-			SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
-		}
-		// No need to set the backdrop to null since it is already null by default
+            SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
+        }
+        // No need to set the backdrop to null since it is already null by default
+    }
 
+    private void Initialize()
+	{
 		// Setup saved usage target
 		UsageViewModel usageViewModel = null;
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
@@ -203,8 +212,10 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		if (_disposed) return;
 		_disposed = true;
+
 		Activated -= OnActivated;
 		Closed -= OnClosed;
+
 		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
 		_refreshTimer.Dispose();
 		GC.SuppressFinalize(this);
@@ -214,14 +225,25 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		// Close the window when the window lost its focus.
 		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
-		else
+		else if(_refreshTimer == null)
         {
-            BringToFront();
-            this.SetForegroundWindow();
-
             // Setup the timer to refresh the hardware information
             _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
-			RefreshHardwareInformation();
+
+            // Force the window to be in the foreground
+            var hWnd = this.GetWindowHandle();
+            var foregroundWindow = GetForegroundWindow();
+            var foregroundThreadId = GetWindowThreadProcessId(foregroundWindow, out _);
+			var currentThreadId = GetCurrentThreadId();
+			AttachThreadInput(foregroundThreadId, currentThreadId, true);
+            SetForegroundWindow(hWnd);
+
+            // Should be called after BringToFront() to prevent the window from being closed when ComboBoxGpuList.SelectedIndex is set.
+			// (RefreshHardwareInformation() calls Close() when the window is not in focus)
+            Initialize();
+
+            // Refresh the hardware information immediately
+            RefreshHardwareInformation();
         }
 	}
 
