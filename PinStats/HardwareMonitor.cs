@@ -625,7 +625,7 @@ public static class HardwareMonitor
 
 		float usage = 0;
 
-		if (RuntimeInformation.ProcessArchitecture == Architecture.X86 && RuntimeInformation.ProcessArchitecture == Architecture.X64)
+		if (RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64)
 		{
 
 			var gpuHardware = GetCurrentGpuHardware();
