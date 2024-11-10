@@ -13,6 +13,7 @@
     Height="350"
     Activated="OnActivated"
     Closed="OnClosed"
+    IsMaximizable="False"
     IsResizable="False"
     mc:Ignorable="d">
 

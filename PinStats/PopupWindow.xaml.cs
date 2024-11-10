@@ -45,11 +45,10 @@ public sealed partial class PopupWindow : IDisposable
         // Set window and AppWindow properties
         SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
         AppWindow.IsShownInSwitchers = false;
-        (AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
 
-        // If OverlappedPresenter's border and TitleBar is manually set, the window will not be rounded.
-        // So we need to set the window corner to rounded corner manually.
-        WindowHelper.SetWindowCornerToRoundedCorner(this);
+        // Hide the title bar
+        ExtendsContentIntoTitleBar = true; // Should be set after WinUI 1.6
+		(AppWindow.Presenter as OverlappedPresenter).SetBorderAndTitleBar(true, false);
 
         // Apply background image if available or use Mica backdrop
         if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.Popup, ImageBackground))
