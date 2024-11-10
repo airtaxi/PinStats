@@ -5,16 +5,6 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PinStats", "PinStats\PinStats.csproj", "{F86C776A-1D61-46A1-A87A-1F1CA7E8B923}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependency", "Dependency", "{31D73464-EB50-4356-A05B-FEFD3326C2FB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveChartsCore", "Dependency\LiveChartsCore\LiveChartsCore.csproj", "{BAD4199C-288C-4F61-A48B-F3E393294ECC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveChartsCore.Behaviours", "Dependency\LiveChartsCore.Behaviours\LiveChartsCore.Behaviours.csproj", "{3EA34725-7ABF-4DC9-857A-714824044DCF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveChartsCore.SkiaSharpView", "Dependency\skiasharp\LiveChartsCore.SkiaSharp\LiveChartsCore.SkiaSharpView.csproj", "{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveChartsCore.SkiaSharpView.WinUI", "Dependency\skiasharp\LiveChartsCore.SkiaSharpView.WinUI\LiveChartsCore.SkiaSharpView.WinUI.csproj", "{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -35,47 +25,9 @@ Global
 		{F86C776A-1D61-46A1-A87A-1F1CA7E8B923}.Release|x64.ActiveCfg = Release|x64
 		{F86C776A-1D61-46A1-A87A-1F1CA7E8B923}.Release|x64.Build.0 = Release|x64
 		{F86C776A-1D61-46A1-A87A-1F1CA7E8B923}.Release|x64.Deploy.0 = Release|x64
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Debug|x64.Build.0 = Debug|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Release|ARM64.Build.0 = Release|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Release|x64.ActiveCfg = Release|Any CPU
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC}.Release|x64.Build.0 = Release|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Debug|x64.Build.0 = Debug|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Release|ARM64.Build.0 = Release|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Release|x64.ActiveCfg = Release|Any CPU
-		{3EA34725-7ABF-4DC9-857A-714824044DCF}.Release|x64.Build.0 = Release|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Debug|x64.Build.0 = Debug|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Release|ARM64.Build.0 = Release|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Release|x64.ActiveCfg = Release|Any CPU
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1}.Release|x64.Build.0 = Release|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Debug|x64.Build.0 = Debug|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Release|ARM64.Build.0 = Release|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Release|x64.ActiveCfg = Release|Any CPU
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{BAD4199C-288C-4F61-A48B-F3E393294ECC} = {31D73464-EB50-4356-A05B-FEFD3326C2FB}
-		{3EA34725-7ABF-4DC9-857A-714824044DCF} = {31D73464-EB50-4356-A05B-FEFD3326C2FB}
-		{DF83A459-194F-4991-9AE0-D8AB4CE8B3B1} = {31D73464-EB50-4356-A05B-FEFD3326C2FB}
-		{C8E3B138-B751-4E2E-8FD6-EB17E5195A45} = {31D73464-EB50-4356-A05B-FEFD3326C2FB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {57EF0C00-DB8A-4B54-8BCD-DC2CA9644E0C}
