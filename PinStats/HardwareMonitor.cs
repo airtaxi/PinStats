@@ -128,7 +128,7 @@ public static class HardwareMonitor
 			{
 				using (var searcher = new ManagementObjectSearcher("select * from Win32_VideoController"))
 				{
-					var gpuName = searcher.Get().Cast<ManagementObject>().FirstOrDefault()["Name"].ToString();
+					var gpuName = searcher.Get().Cast<ManagementObject>().Where(d => d["VideoProcessor"] != null).FirstOrDefault()["Name"].ToString();
 					FallbackGpuHardwareName = gpuName;
 				}
 
