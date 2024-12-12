@@ -328,12 +328,12 @@ public static class HardwareMonitor
 			if (BatteryHardware == null) return null;
 			if (update) BatteryHardware.ForEach(x => x.Update());
 
-			var fullChargedCapacity = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity").Sum(x => x.Value) ?? 0;
-			if (fullChargedCapacity == 0) return null;
+			var fullyChargedCapacity = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity").Sum(x => x.Value) ?? 0;
+			if (fullyChargedCapacity == 0) return null;
 
 			var remainingCapacity = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity").Sum(x => x.Value) ?? 0;
 
-			return remainingCapacity / fullChargedCapacity * 100;
+			return remainingCapacity / fullyChargedCapacity * 100;
 		}
 		finally { HardwareSemaphore.Release(); }
 	}
@@ -346,8 +346,8 @@ public static class HardwareMonitor
 			if (BatteryHardware == null) return null;
 			if (update) BatteryHardware.ForEach(x => x.Update());
 
-			var dischargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Discharge"));
-			var chargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name.StartsWith("Charge"));
+			var dischargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name == "Discharge Rate");
+			var chargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name == "Charge Rate");
 
 			var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
 			var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
@@ -385,7 +385,7 @@ public static class HardwareMonitor
 			if (update) BatteryHardware.ForEach(x => x.Update());
 
 			var designedCapacitySensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Designed Capacity");
-			var fullyChargedCapacitySensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Full Charged Capacity");
+			var fullyChargedCapacitySensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity");
 
 			var designedCapacitySum = designedCapacitySensors.Sum(x => x.Value) ?? 0;
 			var fullyChargedCapacitySum = fullyChargedCapacitySensors.Sum(x => x.Value) ?? 0;
