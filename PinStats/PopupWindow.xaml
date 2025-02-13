@@ -17,7 +17,7 @@
     IsResizable="False"
     mc:Ignorable="d">
 
-    <Grid x:Name="GdMain">
+    <Grid x:Name="GdMain" Loaded="OnLoaded">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />

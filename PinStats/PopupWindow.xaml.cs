@@ -13,22 +13,6 @@ namespace PinStats;
 
 public sealed partial class PopupWindow : IDisposable
 {
-    // Import the necessary function from user32.dll
-    [DllImport("user32.dll")]
-    private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr GetForegroundWindow();
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-    [DllImport("kernel32.dll")]
-    private static extern uint GetCurrentThreadId();
-
     private const int RefreshTimerIntervalInMilliseconds = 1000;
 
 	public readonly static UsageViewModel CpuUsageViewModel = new();
@@ -59,7 +43,7 @@ public sealed partial class PopupWindow : IDisposable
         // No need to set the backdrop to null since it is already null by default
     }
 
-    private void Initialize()
+    private void InitializeInterface()
 	{
 		// Setup saved usage target
 		UsageViewModel usageViewModel = null;
@@ -117,7 +101,7 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void RefreshHardwareInformation()
     {
-		var isWindowInFocus = GetForegroundWindow() == this.GetWindowHandle();
+		var isWindowInFocus = WindowHelper.GetForegroundWindow() == this.GetWindowHandle();
         if (!isWindowInFocus) DispatcherQueue.TryEnqueue(Close);
 
         HardwareMonitor.UpdateCpuHardware();
@@ -223,27 +207,10 @@ public sealed partial class PopupWindow : IDisposable
 	private void OnActivated(object sender, WindowActivatedEventArgs args)
 	{
 		// Close the window when the window lost its focus.
-		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
-		else if(_refreshTimer == null)
-        {
-            // Setup the timer to refresh the hardware information
-            _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
-
-            // Force the window to be in the foreground
-            var hWnd = this.GetWindowHandle();
-            var foregroundWindow = GetForegroundWindow();
-            var foregroundThreadId = GetWindowThreadProcessId(foregroundWindow, out _);
-			var currentThreadId = GetCurrentThreadId();
-			AttachThreadInput(foregroundThreadId, currentThreadId, true);
-            SetForegroundWindow(hWnd);
-
-            // Should be called after BringToFront() to prevent the window from being closed when ComboBoxGpuList.SelectedIndex is set.
-			// (RefreshHardwareInformation() calls Close() when the window is not in focus)
-            Initialize();
-
-            // Refresh the hardware information immediately
-            RefreshHardwareInformation();
-        }
+		if (args.WindowActivationState == WindowActivationState.Deactivated)
+		{
+			Close();
+		}
 	}
 
 	private void OnRadioButtonClicked(object sender, RoutedEventArgs e)
@@ -274,8 +241,31 @@ public sealed partial class PopupWindow : IDisposable
 		Configuration.SetValue("GpuIndex", index);
 		OnCurrentGpuChanged?.Invoke(this, EventArgs.Empty);
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
-		RefreshHardwareInformation();
 	}
 
-	private void OnClosed(object sender, WindowEventArgs args) => Dispose();
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (_refreshTimer == null)
+        {
+            // Setup the timer to refresh the hardware information
+            _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+
+            // Force the window to be in the foreground
+            var hWnd = this.GetWindowHandle();
+            var foregroundWindow = WindowHelper.GetForegroundWindow();
+            var foregroundThreadId = WindowHelper.GetWindowThreadProcessId(foregroundWindow, out _);
+            var currentThreadId = WindowHelper.GetCurrentThreadId();
+            WindowHelper.AttachThreadInput(foregroundThreadId, currentThreadId, true);
+            WindowHelper.SetForegroundWindow(hWnd);
+
+            // Should be called after BringToFront() to prevent the window from being closed when ComboBoxGpuList.SelectedIndex is set.
+            // (RefreshHardwareInformation() calls Close() when the window is not in focus)
+            InitializeInterface();
+
+            // Refresh the hardware information immediately
+            RefreshHardwareInformation();
+        }
+    }
+
+    private void OnClosed(object sender, WindowEventArgs args) => Dispose();
 }
