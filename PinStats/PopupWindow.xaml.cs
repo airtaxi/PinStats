@@ -43,8 +43,8 @@ public sealed partial class PopupWindow : IDisposable
 		InitializeComponent();
 
         // Set window and AppWindow properties
-        SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
-        AppWindow.IsShownInSwitchers = false;
+		this.SetIsAlwaysOnTop(true);
+		this.SetIsShownInSwitchers(false);
 
         // Hide the title bar
         ExtendsContentIntoTitleBar = true; // Should be set after WinUI 1.6
