@@ -7,8 +7,10 @@ namespace PinStats.Helpers;
 public static partial class WindowHelper
 {
 	private const uint DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+    private const uint DWMWA_TRANSITIONS_FORCEDISABLED = 3;
+    private const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
-	public enum DWM_WINDOW_CORNER_PREFERENCE
+    public enum DWM_WINDOW_CORNER_PREFERENCE
 	{
 		DWMWCP_DEFAULT = 0,
 		DWMWCP_DONOTROUND = 1,
@@ -40,5 +42,21 @@ public static partial class WindowHelper
 		IntPtr hwnd = window.GetWindowHandle();
 		uint attribute = (uint)DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUND;
 		DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref attribute, sizeof(uint));
-	}
+    }
+
+    public static void DisableWindowAnimations(Window window)
+    {
+        IntPtr hwnd = window.GetWindowHandle();
+        uint disableAnimation = 1;
+        DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, ref disableAnimation, sizeof(uint));
+    }
+
+    public static void SetDarkModeWindow(Window window)
+    {
+        IntPtr hwnd = window.GetWindowHandle();
+        uint darkMode = 1;
+
+        DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(uint));
+    }
+
 }

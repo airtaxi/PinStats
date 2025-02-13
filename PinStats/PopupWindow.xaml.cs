@@ -26,8 +26,14 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		InitializeComponent();
 
+        // Disable window animations and set dark mode if 
+        WindowHelper.DisableWindowAnimations(this);
+
+		// Fix white flickering issue when the window is first shown
+		if ((Content as FrameworkElement).RequestedTheme == ElementTheme.Dark) WindowHelper.SetDarkModeWindow(this);
+
         // Set window and AppWindow properties
-		this.SetIsAlwaysOnTop(true);
+        this.SetIsAlwaysOnTop(true);
 		this.SetIsShownInSwitchers(false);
 
         // Hide the title bar
