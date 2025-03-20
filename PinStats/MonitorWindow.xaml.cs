@@ -89,7 +89,8 @@ public sealed partial class MonitorWindow : IDisposable
 	private void RefreshTimerCallback(object state)
 	{
 		try { RefreshHardwareInformation(); }
-		finally
+        catch { } // Ignore. Hardware is unpredictable.
+        finally
 		{
 			if (!_disposed)
 				_refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite);
