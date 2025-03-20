@@ -100,63 +100,63 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Spacing="8">
+                    <StackPanel Grid.Column="0">
                         <TextBlock FontSize="21" Text="Memory" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartMemory"
-                            Height="100"
-                            Margin="0,-30,0,-30"
+                            Height="40"
+                            Margin="0,0,0,0"
                             Series="{x:Bind MemoryUsageViewModel. Series}"
                             XAxes="{x:Bind MemoryUsageViewModel.XAxes}"
                             YAxes="{x:Bind MemoryUsageViewModel.YAxes}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Spacing="8">
+                    <StackPanel Grid.Column="1">
                         <TextBlock FontSize="21" Text="Virtual Memory" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartVirtualMemory"
-                            Height="100"
-                            Margin="0,-30,0,-30"
+                            Height="40"
+                            Margin="0,0,0,0"
                             Series="{x:Bind VirtualMemoryUsageViewModel.Series}"
                             XAxes="{x:Bind VirtualMemoryUsageViewModel.XAxes}"
                             YAxes="{x:Bind VirtualMemoryUsageViewModel.YAxes}" />
                     </StackPanel>
                 </Grid>
-                <Grid Margin="0,4,0,0" ColumnSpacing="16">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Spacing="8">
+                    <StackPanel Grid.Column="0">
                         <TextBlock FontSize="21" Text="Battery" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBattery"
-                            Height="100"
-                            Margin="0,-30,0,-30"
+                            Height="40"
+                            Margin="0,0,0,0"
                             Series="{x:Bind BatteryViewModel.Series}"
                             XAxes="{x:Bind BatteryViewModel.XAxes}"
                             YAxes="{x:Bind BatteryViewModel.YAxes}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" Spacing="8">
+                    <StackPanel Grid.Column="1">
                         <TextBlock FontSize="21" Text="Battery Health" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBatteryHealth"
-                            Height="100"
-                            Margin="0,-30,0,-30"
+                            Height="40"
+                            Margin="0,0,0,0"
                             Series="{x:Bind BatteryHealthViewModel.Series}"
                             XAxes="{x:Bind BatteryHealthViewModel.XAxes}"
                             YAxes="{x:Bind BatteryHealthViewModel.YAxes}" />
                     </StackPanel>
                 </Grid>
             </StackPanel>
-            <Grid Grid.Row="1" Margin="0,4,0,0">
+            <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
+                <Grid Grid.Row="0" RowSpacing="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -177,7 +177,7 @@
                         Grid.Row="1"
                         ZoomMode="None" />
                 </Grid>
-                <Grid Grid.Row="1">
+                <Grid Grid.Row="1" RowSpacing="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
