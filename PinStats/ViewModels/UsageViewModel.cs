@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
@@ -15,9 +16,9 @@ public class UsageViewModel : ObservableObject
 	private readonly ObservableCollection<DateTimePoint> _values = [];
 	private readonly DateTimeAxis _customAxis;
 
-	public ObservableCollection<ISeries> Series { get; set; }
-	public Axis[] XAxes { get; set; }
-	public Axis[] YAxes { get; set; }
+	public ObservableCollection<ISeries> Series { get; }
+	public IEnumerable<ICartesianAxis> XAxes { get; }
+	public IEnumerable<ICartesianAxis> YAxes { get; }
 	public object Sync { get; set; } = new object();
 	public bool IsReading { get; set; } = true;
 

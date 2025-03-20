@@ -65,7 +65,10 @@ public sealed partial class PopupWindow : IDisposable
 			RadioButtonGpu.IsChecked = true;
 		}
 		usageViewModel?.RefreshSync(); // Renew the "sync" of the UsageViewModel to prevent the chart from not being properly displayed.
-		CartesianChartUsage.DataContext = usageViewModel;
+		CartesianChartUsage.Series = usageViewModel.Series;
+        CartesianChartUsage.XAxes = usageViewModel.XAxes;
+        CartesianChartUsage.YAxes = usageViewModel.YAxes;
+        CartesianChartUsage.SyncContext = usageViewModel.Sync;
 
 		// If the device has more than one GPU, show the GPU selection UI.
 		var gpuNames = HardwareMonitor.GetGpuHardwareNames();
@@ -238,8 +241,11 @@ public sealed partial class PopupWindow : IDisposable
 			Configuration.SetValue("LastUsageTarget", "GPU");
 		}
 		usageViewModel?.RefreshSync(); // Renew the "sync" of the UsageViewModel to prevent the chart from not being properly displayed.
-		CartesianChartUsage.DataContext = usageViewModel;
-	}
+        CartesianChartUsage.Series = usageViewModel.Series;
+        CartesianChartUsage.XAxes = usageViewModel.XAxes;
+        CartesianChartUsage.YAxes = usageViewModel.YAxes;
+        CartesianChartUsage.SyncContext = usageViewModel.Sync;
+    }
 
 	private void OnGpuListComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
 	{

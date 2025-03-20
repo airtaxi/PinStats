@@ -23,12 +23,6 @@ public sealed partial class MonitorWindow : IDisposable
 	public readonly static UsageViewModel CpuUsageViewModel = new();
 	public readonly static UsageViewModel GpuUsageViewModel = new();
 
-	public readonly TotalUsageViewModel _memoryUsageViewModel = new();
-	public readonly TotalUsageViewModel _virtualMemoryUsageViewModel = new();
-
-	public readonly TotalUsageViewModel _batteryViewModel = new();
-	public readonly TotalUsageViewModel _batteryHealthViewModel = new();
-
 	private readonly Monitor _monitor;
 	private readonly Timer _refreshTimer;
 
@@ -66,24 +60,34 @@ public sealed partial class MonitorWindow : IDisposable
 		TextBlockCpuName.Text = HardwareMonitor.GetCpuName();
 		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
 
-		CartesianChartMemory.DataContext = _memoryUsageViewModel;
-		CartesianChartVirtualMemory.DataContext = _virtualMemoryUsageViewModel;
+		CartesianChartMemory.Series = MemoryUsageViewModel.Series;
+		CartesianChartMemory.XAxes = MemoryUsageViewModel.XAxes;
+		CartesianChartMemory.Series = MemoryUsageViewModel.Series;
+		CartesianChartVirtualMemory.DataContext = VirtualMemoryUsageViewModel;
 
 		// Setup CPU usage chart
 		CpuUsageViewModel.RefreshSync();
-		CartesianChartCpuUsage.DataContext = CpuUsageViewModel;
+		CartesianChartCpuUsage.Series = CpuUsageViewModel.Series;
+        CartesianChartCpuUsage.XAxes = CpuUsageViewModel.XAxes;
+        CartesianChartCpuUsage.YAxes = CpuUsageViewModel.YAxes;
+		CartesianChartCpuUsage.SyncContext = CpuUsageViewModel.Sync;
 
-		// Setup GPU usage chart
-		GpuUsageViewModel.RefreshSync();
-		CartesianChartGpuUsage.DataContext = GpuUsageViewModel;
-		PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
+        // Setup GPU usage chart
+        GpuUsageViewModel.RefreshSync();
+        CartesianChartGpuUsage.Series = GpuUsageViewModel.Series;
+        CartesianChartGpuUsage.XAxes = GpuUsageViewModel.XAxes;
+        CartesianChartGpuUsage.YAxes = GpuUsageViewModel.YAxes;
+        CartesianChartGpuUsage.SyncContext = GpuUsageViewModel.Sync;
 
 
-		CartesianChartBattery.DataContext = _batteryViewModel;
-		CartesianChartBatteryHealth.DataContext = _batteryHealthViewModel;
+        PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
 
-		_batteryViewModel.SetValue(100, 0, "N/A");
-		_batteryHealthViewModel.SetValue(100, 0, "N/A");
+
+		CartesianChartBattery.DataContext = BatteryViewModel;
+		CartesianChartBatteryHealth.DataContext = BatteryHealthViewModel;
+
+		BatteryViewModel.SetValue(100, 0, "N/A");
+		BatteryHealthViewModel.SetValue(100, 0, "N/A");
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -151,8 +155,8 @@ public sealed partial class MonitorWindow : IDisposable
 		{
 			TextBlockCpuInformation.Text = cpuInformationText;
 			TextBlockGpuInformation.Text = gpuInformationText;
-			_memoryUsageViewModel.SetValue(totalMemory, usedMemory, memoryInformationText);
-			_virtualMemoryUsageViewModel.SetValue(totalVirtualMemory, usedVirtualMemory, virtualMemoryInformationText);
+			MemoryUsageViewModel.SetValue(totalMemory, usedMemory, memoryInformationText);
+			VirtualMemoryUsageViewModel.SetValue(totalVirtualMemory, usedVirtualMemory, virtualMemoryInformationText);
 
             // If the device has a battery, update the battery information.
             if (HardwareMonitor.HasBattery())
@@ -175,14 +179,14 @@ public sealed partial class MonitorWindow : IDisposable
 				var batteryViewModelDataLabelText = $"{batteryPercentage:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
 
 				// Apply battery information to the view model
-				_batteryViewModel.SetValue(100, batteryPercentage, batteryViewModelDataLabelText);
+				BatteryViewModel.SetValue(100, batteryPercentage, batteryViewModelDataLabelText);
 
 				// Battery health
 				var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
 				if (batteryHealthPercent.HasValue)
 				{
 					var batteryHealthViewModelDataLabelText = $"{batteryHealthPercent:N0}%";
-					_batteryHealthViewModel.SetValue(100, batteryHealthPercent.Value, batteryHealthViewModelDataLabelText);
+					BatteryHealthViewModel.SetValue(100, batteryHealthPercent.Value, batteryHealthViewModelDataLabelText);
 				}
 			}
 

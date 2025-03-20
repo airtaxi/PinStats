@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
+using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
@@ -10,9 +11,9 @@ public class TotalUsageViewModel : ObservableObject
 {
     public string DataLabelText { get; set; }
 
-    public ISeries[] Series { get; set; }
-    public Axis[] XAxes { get; set; } = [new Axis { MinLimit = 0, MaxLimit = 100, IsVisible = false }];
-    public Axis[] YAxes { get; set; } = [new Axis { IsVisible = false }];
+    public ISeries[] Series { get; }
+    public IEnumerable<ICartesianAxis> XAxes { get; } = [new Axis { MinLimit = 0, MaxLimit = 100, IsVisible = false }];
+    public IEnumerable<ICartesianAxis> YAxes { get; } = [new Axis { IsVisible = false }];
 
     public TotalUsageViewModel()
     {
@@ -51,7 +52,7 @@ public class TotalUsageViewModel : ObservableObject
     public void SetValue(float max, float current, string dataLabelText = null)
     {
         DataLabelText = dataLabelText;
-        XAxes[0].MaxLimit = max;
+        XAxes.ElementAt(0).MaxLimit = max;
         Series[0].Values = new float[] { max };
         Series[1].Values = new float[] { current };
         Series[2].Values = new float[] { max };
