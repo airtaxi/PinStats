@@ -14,7 +14,6 @@
     IsMaximizable="False"
     IsMinimizable="False"
     IsResizable="False"
-    PresenterChanged="OnPresenterChanged"
     mc:Ignorable="d">
 
     <Grid Loaded="OnLoaded">

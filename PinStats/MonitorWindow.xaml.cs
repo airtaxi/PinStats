@@ -1,6 +1,4 @@
 using H.NotifyIcon.EfficiencyMode;
-using LibreHardwareMonitor.Hardware.Cpu;
-using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -40,8 +38,11 @@ public sealed partial class MonitorWindow : IDisposable
 		InitializeControls();
 		RefreshHardwareInformation();
 
-		// Setup the timer to refresh the hardware information
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+        // Setup the timer to refresh the hardware information
+        _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+
+        // WinUI bug workaround: Indicate this windows is full screen
+        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 	}
 
 	private void InitializeControls()
@@ -79,9 +80,7 @@ public sealed partial class MonitorWindow : IDisposable
         CartesianChartGpuUsage.YAxes = GpuUsageViewModel.YAxes;
         CartesianChartGpuUsage.SyncContext = GpuUsageViewModel.Sync;
 
-
         PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
-
 
 		CartesianChartBattery.DataContext = BatteryViewModel;
 		CartesianChartBatteryHealth.DataContext = BatteryHealthViewModel;
@@ -233,19 +232,11 @@ public sealed partial class MonitorWindow : IDisposable
 		EfficiencyModeUtilities.SetEfficiencyMode(true); // Restore efficiency mode
 	}
 
-	// Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
-	private void OnLoaded(object sender, RoutedEventArgs e)
-	{
-		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
-		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-	}
-
-	// Keep the window in full screen mode
-	private void OnPresenterChanged(object sender, AppWindowPresenter e)
-	{
-		var isFullscreen = e.Kind == AppWindowPresenterKind.FullScreen;
-		if (isFullscreen) return; // Presenter is already in full screen mode
-
-		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-	}
+    // Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+		await Task.Delay(100);
+        MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
+        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+    }
 }
