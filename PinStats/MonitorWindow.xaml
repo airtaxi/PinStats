@@ -42,13 +42,13 @@
         <Grid Grid.Row="0">
             <TextBlock
                 x:Name="TextBlockMotherboardName"
-                Margin="10,5,0,5"
+                Margin="8,4,0,4"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 FontSize="35"
                 FontWeight="Bold" />
             <Button
-                Padding="5"
+                Padding="4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 Background="Transparent"
@@ -57,13 +57,13 @@
                 <SymbolIcon Symbol="Cancel" />
             </Button>
         </Grid>
-        <Grid Grid.Row="1" Padding="10,0,10,10">
+        <Grid Grid.Row="1" Padding="8,0,8,8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0">
-                <Grid ColumnSpacing="15">
+                <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -95,13 +95,13 @@
                     </Grid>
                 </Grid>
 
-                <Grid Margin="0,5,0,0" ColumnSpacing="15">
+                <Grid Margin="0,4,0,0" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
+                    <StackPanel Grid.Column="0" Spacing="8">
                         <TextBlock FontSize="21" Text="Memory" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartMemory"
@@ -112,7 +112,7 @@
                             YAxes="{x:Bind MemoryUsageViewModel.YAxes}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1">
+                    <StackPanel Grid.Column="1" Spacing="8">
                         <TextBlock FontSize="21" Text="Virtual Memory" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartVirtualMemory"
@@ -123,13 +123,13 @@
                             YAxes="{x:Bind VirtualMemoryUsageViewModel.YAxes}" />
                     </StackPanel>
                 </Grid>
-                <Grid Margin="0,5,0,0" ColumnSpacing="15">
+                <Grid Margin="0,4,0,0" ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
+                    <StackPanel Grid.Column="0" Spacing="8">
                         <TextBlock FontSize="21" Text="Battery" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBattery"
@@ -140,7 +140,7 @@
                             YAxes="{x:Bind BatteryViewModel.YAxes}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1">
+                    <StackPanel Grid.Column="1" Spacing="8">
                         <TextBlock FontSize="21" Text="Battery Health" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBatteryHealth"
@@ -152,7 +152,7 @@
                     </StackPanel>
                 </Grid>
             </StackPanel>
-            <Grid Grid.Row="1" Margin="0,5,0,0">
+            <Grid Grid.Row="1" Margin="0,4,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
