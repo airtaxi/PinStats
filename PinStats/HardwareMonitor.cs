@@ -42,6 +42,7 @@ public static class HardwareMonitor
 	private readonly static List<IHardware> MemoryHardware = new();
 	private readonly static List<IHardware> BatteryHardware = new();
 	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
+	private readonly static SemaphoreSlim ComputerHardwareSemaphore = new(1, 1);
 	private static string FallbackCpuHardwareName;
 	private static string FallbackGpuHardwareName;
 
@@ -92,10 +93,9 @@ public static class HardwareMonitor
 		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
     }
 
-    private static int s_refreshingComputerHardware = 0;
 	public static async Task RefreshComputerHardwareAsync()
 	{
-        if (Interlocked.CompareExchange(ref s_refreshingComputerHardware, 1, 0) != 0) return;
+		await ComputerHardwareSemaphore.WaitAsync();
 		try
 		{
 			if (Computer != null)
@@ -124,7 +124,7 @@ public static class HardwareMonitor
 			Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
 			Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
 
-			if(RuntimeInformation.ProcessArchitecture != Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X64)
+			if (RuntimeInformation.ProcessArchitecture != Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X64)
 			{
 				using (var searcher = new ManagementObjectSearcher("select * from Win32_VideoController"))
 				{
@@ -149,7 +149,7 @@ public static class HardwareMonitor
 					else if (cpuCount == 1) FallbackCpuHardwareName = cpuName;
 					else FallbackCpuHardwareName = cpuName + " + " + (cpuCount - 1) + " more";
 				}
-            }
+			}
 
 			// Refresh Computer Hardware in Task.Run to prevent blocking the UI thread.
 			await Task.Run(() =>
@@ -162,7 +162,13 @@ public static class HardwareMonitor
 				RefreshHardware();
 			});
 		}
-		finally { Interlocked.Exchange(ref s_refreshingComputerHardware, 0); }
+		finally
+		{
+			if (ComputerHardwareSemaphore.CurrentCount == 0)
+			{
+				ComputerHardwareSemaphore.Release(); // Release semaphore if it is not released yet.
+			}
+		}
 	}
 
 	private static void RefreshHardware()
