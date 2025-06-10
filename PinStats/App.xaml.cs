@@ -8,6 +8,7 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.UI.Xaml.Controls;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using H.NotifyIcon.EfficiencyMode;
 
 namespace PinStats;
 
@@ -118,9 +119,6 @@ public partial class App : Application
 	{
 		base.OnLaunched(args);
 		LaunchEmptyWindowIfNotExists();
-
-        // Set the process priority to high to improve performance.
-        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High; 
     }
 
 	private static Window s_emptyWindow;
@@ -159,5 +157,11 @@ public partial class App : Application
         var resource = new TaskbarUsageResource();
         Resources.Add("TaskbarUsageResources", resource);
         await CheckForUpdateAsync();
+
+        // Disable efficiency mode to improve performance.
+        EfficiencyModeUtilities.SetEfficiencyMode(false);
+
+        // Set the process priority to high to improve performance.
+        Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
     }
 }

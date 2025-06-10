@@ -1,4 +1,3 @@
-using H.NotifyIcon.EfficiencyMode;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
