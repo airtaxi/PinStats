@@ -336,5 +336,5 @@ public partial class TaskbarUsageResource
 		await HardwareMonitor.RefreshComputerHardwareAsync();
     }
 
-    private void OnDisplaySettingsChanged(object sender, EventArgs e) => RefreshShowHardwareMonitorMenuFlyoutSubItems();
+	private void OnDisplaySettingsChanged(object sender, EventArgs e) => DispatcherQueue.TryEnqueue(RefreshShowHardwareMonitorMenuFlyoutSubItems);
 }
