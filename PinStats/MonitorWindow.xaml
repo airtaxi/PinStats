@@ -36,6 +36,7 @@
                 VerticalAlignment="Center"
                 Stretch="UniformToFill" />
             <Rectangle Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}" />
+            <Rectangle Fill="{ThemeResource LayerOnMicaBaseAltFillColorDefaultBrush}" Opacity="0.5" />
         </Grid>
 
         <Grid Grid.Row="0">
