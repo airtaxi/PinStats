@@ -42,7 +42,7 @@ public partial class TaskbarUsageResource
 
         // TODO: add a setting to change the interval of the timer.
         UpdateTimer = new(UpdateTimerCallback, null, UpdateTimerInterval, Timeout.Infinite);
-	}
+    }
 
     private static void UpdateTimerCallback(object state)
 	{
@@ -69,7 +69,10 @@ public partial class TaskbarUsageResource
 
 		// Setup the timer to update the icon image
 		UpdateTimerElapsed += (s, e) => Update();
-	}
+
+        // Listen for display settings changes to refresh the hardware monitor menu items
+        SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+    }
 
 	private void UpdateVersionNameMenuFlyoutItemTextProperty()
 	{
@@ -331,5 +334,7 @@ public partial class TaskbarUsageResource
 	{
 		RefreshShowHardwareMonitorMenuFlyoutSubItems();
 		await HardwareMonitor.RefreshComputerHardwareAsync();
-	}
+    }
+
+    private void OnDisplaySettingsChanged(object sender, EventArgs e) => RefreshShowHardwareMonitorMenuFlyoutSubItems();
 }
