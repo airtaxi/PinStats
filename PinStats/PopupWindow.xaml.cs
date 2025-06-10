@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -5,7 +7,6 @@ using Microsoft.UI.Xaml.Media;
 using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.ViewModels;
-using System.Runtime.InteropServices;
 using Windows.UI.WindowManagement;
 using WinUIEx;
 
@@ -47,6 +48,9 @@ public sealed partial class PopupWindow : IDisposable
             SystemBackdrop = new MicaBackdrop() { Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.Base };
         }
         // No need to set the backdrop to null since it is already null by default
+
+        // Set the process priority to high to improve performance.
+        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
     }
 
     private void InitializeInterface()

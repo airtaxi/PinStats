@@ -118,7 +118,10 @@ public partial class App : Application
 	{
 		base.OnLaunched(args);
 		LaunchEmptyWindowIfNotExists();
-	}
+
+        // Set the process priority to high to improve performance.
+        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High; 
+    }
 
 	private static Window s_emptyWindow;
 	// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.

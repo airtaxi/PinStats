@@ -26,8 +26,6 @@ public sealed partial class MonitorWindow : IDisposable
 
 	public MonitorWindow(Monitor monitor)
 	{
-		EfficiencyModeUtilities.SetEfficiencyMode(false); // Disable efficiency mode
-
 		Instance = this;
 		_monitor = monitor;
 		InitializeComponent();
@@ -226,11 +224,7 @@ public sealed partial class MonitorWindow : IDisposable
 
 	private void OnExitButtonClicked(object sender, RoutedEventArgs e) => Close();
 
-	private void OnClosed(object sender, WindowEventArgs args)
-	{
-		Dispose();
-		EfficiencyModeUtilities.SetEfficiencyMode(true); // Restore efficiency mode
-	}
+    private void OnClosed(object sender, WindowEventArgs args) => Dispose();
 
     // Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
     private async void OnLoaded(object sender, RoutedEventArgs e)
