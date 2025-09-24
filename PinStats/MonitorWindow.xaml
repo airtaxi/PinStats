@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <winuiex:WindowEx
     x:Class="PinStats.MonitorWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -107,6 +107,7 @@
                             x:Name="CartesianChartMemory"
                             Height="40"
                             Margin="0,0,0,0"
+                            Background="Transparent"
                             Series="{x:Bind MemoryUsageViewModel. Series}"
                             XAxes="{x:Bind MemoryUsageViewModel.XAxes}"
                             YAxes="{x:Bind MemoryUsageViewModel.YAxes}" />
@@ -118,6 +119,7 @@
                             x:Name="CartesianChartVirtualMemory"
                             Height="40"
                             Margin="0,0,0,0"
+                            Background="Transparent"
                             Series="{x:Bind VirtualMemoryUsageViewModel.Series}"
                             XAxes="{x:Bind VirtualMemoryUsageViewModel.XAxes}"
                             YAxes="{x:Bind VirtualMemoryUsageViewModel.YAxes}" />
@@ -135,6 +137,7 @@
                             x:Name="CartesianChartBattery"
                             Height="40"
                             Margin="0,0,0,0"
+                            Background="Transparent"
                             Series="{x:Bind BatteryViewModel.Series}"
                             XAxes="{x:Bind BatteryViewModel.XAxes}"
                             YAxes="{x:Bind BatteryViewModel.YAxes}" />
@@ -146,6 +149,7 @@
                             x:Name="CartesianChartBatteryHealth"
                             Height="40"
                             Margin="0,0,0,0"
+                            Background="Transparent"
                             Series="{x:Bind BatteryHealthViewModel.Series}"
                             XAxes="{x:Bind BatteryHealthViewModel.XAxes}"
                             YAxes="{x:Bind BatteryHealthViewModel.YAxes}" />
@@ -176,6 +180,7 @@
                     <lvc:CartesianChart
                         x:Name="CartesianChartCpuUsage"
                         Grid.Row="1"
+                        Background="Transparent"
                         ZoomMode="None" />
                 </Grid>
                 <Grid Grid.Row="1" RowSpacing="4">
@@ -198,6 +203,7 @@
                     <lvc:CartesianChart
                         x:Name="CartesianChartGpuUsage"
                         Grid.Row="1"
+                        Background="Transparent"
                         ZoomMode="None" />
                 </Grid>
             </Grid>
