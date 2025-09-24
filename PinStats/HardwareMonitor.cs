@@ -426,8 +426,9 @@ public static class HardwareMonitor
 		{
 			if (update) MemoryHardware.ForEach(x => x.Update());
 
-			var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
-			var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Available");
+            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+            var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
+			var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
 
 			var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
 			var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
@@ -445,10 +446,11 @@ public static class HardwareMonitor
 		{
 			if (update) MemoryHardware.ForEach(x => x.Update());
 
-			var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
-			var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Available");
+            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+            var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
+            var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
 
-			var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
+            var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
 			var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
 			var totalMemory = memoryUsed + memoryAvailable;
@@ -464,7 +466,8 @@ public static class HardwareMonitor
 		{
 			if (update) MemoryHardware.ForEach(x => x.Update());
 
-			var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == (queryVirtualMemory ? "Virtual " : string.Empty) + "Memory Used");
+            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+			var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
 			return memoryUsedSensors.Sum(x => x.Value) ?? 0;
 		}
 		finally { HardwareSemaphore.Release(); }
