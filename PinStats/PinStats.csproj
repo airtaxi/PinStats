@@ -14,7 +14,7 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
-		<Version>2.4.7</Version>
+		<Version>2.4.8</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
