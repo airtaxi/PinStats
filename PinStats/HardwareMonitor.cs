@@ -611,7 +611,7 @@ public static class HardwareMonitor
 		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 	}
 
-	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor Information", "% Processor Time", "_Total");
+	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor Information", "% Processor Utility", "_Total");
     private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If the system is in sleep or hibernate mode, don't update the hardware information.
