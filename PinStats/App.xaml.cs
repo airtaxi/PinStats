@@ -164,7 +164,7 @@ public partial class App : Application
         (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
 
         // Hide the window so it doesn't appear on the screen.
-        s_emptyWindow.Hide(); // Hide the window so it doesn't appear on the screen.
+        s_emptyWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
 
         var xamlRoot = s_emptyWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
