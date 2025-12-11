@@ -16,7 +16,6 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<Version>2.4.8</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Assets\Cpu.png" />
