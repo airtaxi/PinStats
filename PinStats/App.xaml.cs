@@ -71,8 +71,8 @@ public partial class App : Application
         var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
         var activationKind = activatedArgs.Kind;
 
-        if (activationKind != ExtendedActivationKind.AppNotification) LaunchEmptyWindowIfNotExists();
-        else HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
+		if (activationKind == ExtendedActivationKind.AppNotification)
+			HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
 
         if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
         else LiveCharts.Configure(config => config.AddDarkTheme());
