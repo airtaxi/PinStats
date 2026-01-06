@@ -11,6 +11,6 @@ public static class HttpHelper
 			response.EnsureSuccessStatusCode();
 			return await response.Content.ReadAsStringAsync();
 		}
-		catch (HttpRequestException) { return null; }
+		catch (Exception) { return null; }
 	}
 }
