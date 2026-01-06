@@ -1,14 +1,16 @@
 ﻿using H.NotifyIcon;
-using Microsoft.UI.Xaml;
-using PinStats.Helpers;
-using PinStats.Resources;
-using System.Reflection;
-using System.Diagnostics;
-using Microsoft.Toolkit.Uwp.Notifications;
-using Microsoft.UI.Xaml.Controls;
+using H.NotifyIcon.EfficiencyMode;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
-using H.NotifyIcon.EfficiencyMode;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.AppLifecycle;
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
+using PinStats.Helpers;
+using PinStats.Resources;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace PinStats;
 
@@ -17,7 +19,8 @@ public partial class App : Application
     private const int UpdateCheckIntervalInMinutes = 10;
 	private static readonly Timer UpdateCheckTimer;
 
-	static App()
+
+    static App()
 	{
 		UpdateCheckTimer = new(UpdateCheckTimerCallback, null, (int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite);
     }
@@ -42,12 +45,14 @@ public partial class App : Application
 			if (hasNotificationShownForRemoteVersion) return;
 			Configuration.SetValue(configurationKey, true);
 
-			var builder = new ToastContentBuilder()
-			.AddText(UpdateAvailableTitle)
-			.AddText($"A new version ({remoteVersion}) is available.\nDo you want to download it?")
-			.AddArgument("versionString", remoteVersionString);
-			builder.Show();
-		}
+            var builder = new AppNotificationBuilder()
+                .AddText(UpdateAvailableTitle)
+                .AddText($"A new version ({remoteVersion}) is available.\nDo you want to download it?")
+                .AddArgument("versionString", remoteVersionString);
+
+            var notificationManager = AppNotificationManager.Default;
+            notificationManager.Show(builder.BuildNotification());
+        }
 		catch (HttpRequestException) { } // Ignore 
 		finally { UpdateCheckTimer.Change((int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite); }
 	}
@@ -58,7 +63,16 @@ public partial class App : Application
 		Application.Current.UnhandledException += OnApplicationUnhandledException;
 		AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
-		ToastNotificationManagerCompat.OnActivated += OnToastNotificationActivated;
+
+        AppNotificationManager notificationManager = AppNotificationManager.Default;
+        notificationManager.NotificationInvoked += OnNotificationManagerNotificationInvoked;
+        notificationManager.Register();
+
+        var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+        var activationKind = activatedArgs.Kind;
+
+		if (activationKind == ExtendedActivationKind.AppNotification)
+			HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
 
         if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
         else LiveCharts.Configure(config => config.AddDarkTheme());
@@ -66,6 +80,18 @@ public partial class App : Application
         InitializeComponent();
 		InitializeThemeSettings();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
+    }
+
+    private static void OnNotificationManagerNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args) => HandleNotification(args);
+
+    private static void HandleNotification(AppNotificationActivatedEventArgs args)
+    {
+        var versionString = args.Arguments["versionString"];
+        if (versionString != null)
+        {
+            var url = "https://github.com/airtaxi/PinStats/releases/tag/" + versionString;
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
     }
 
     private static void InitializeThemeSettings()
@@ -77,18 +103,7 @@ public partial class App : Application
 		Configuration.SetValue("WhiteIcon", isDarkTheme);
     }
 
-	private static void OnToastNotificationActivated(ToastNotificationActivatedEventArgsCompat toastArgs)
-	{
-		ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
-		var versionString = args["versionString"];
-		if(versionString != null)
-		{
-			var url = "https://github.com/airtaxi/PinStats/releases/tag/" + versionString;
-			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-		}
-	}
-
-	private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
+    private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
 	private void OnAppDomainUnhandledException(object sender, System.UnhandledExceptionEventArgs e) => WriteException(e.ExceptionObject as Exception);
 	private void OnApplicationUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
 	{
@@ -149,7 +164,7 @@ public partial class App : Application
         (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
 
         // Hide the window so it doesn't appear on the screen.
-        s_emptyWindow.Hide(); // Hide the window so it doesn't appear on the screen.
+        s_emptyWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
 
         var xamlRoot = s_emptyWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
