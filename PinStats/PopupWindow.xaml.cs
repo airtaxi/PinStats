@@ -35,7 +35,7 @@ public sealed partial class PopupWindow : IDisposable
 
         // Set window and AppWindow properties
         this.SetIsAlwaysOnTop(true);
-		this.SetIsShownInSwitchers(false);
+        AppWindow.IsShownInSwitchers = false;
 
         // Hide the title bar
         ExtendsContentIntoTitleBar = true; // Should be set after WinUI 1.6
