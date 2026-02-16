@@ -35,12 +35,12 @@ public static class HardwareMonitor
 	private const int NetworkTimerInMilliseconds = 1000;
 
 	private static Computer Computer;
-	private readonly static List<IHardware> CpuHardware = new();
-	private readonly static List<IHardware> GpuHardware = new();
-	private readonly static List<IHardware> NetworkHardware = new();
-	private readonly static List<IHardware> StorageHardware = new();
-	private readonly static List<IHardware> MemoryHardware = new();
-	private readonly static List<IHardware> BatteryHardware = new();
+	private readonly static List<IHardware> CpuHardware = [];
+	private readonly static List<IHardware> GpuHardware = [];
+	private readonly static List<IHardware> NetworkHardware = [];
+	private readonly static List<IHardware> StorageHardware = [];
+	private readonly static List<IHardware> MemoryHardware = [];
+	private readonly static List<IHardware> BatteryHardware = [];
 	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
 	private readonly static SemaphoreSlim ComputerHardwareSemaphore = new(1, 1);
 	private static string FallbackCpuHardwareName;
@@ -55,11 +55,11 @@ public static class HardwareMonitor
 	private static long s_uploadSpeedInBytes;
 
 	private readonly static Timer CpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
-	private readonly static List<float> LastCpuUsages = new();
+    private readonly static List<float> LastCpuUsages = [];
 	private static float s_cpuUsage;
 
 	private readonly static Timer GpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
-	private readonly static List<float> LastGpuUsages = new();
+    private readonly static List<float> LastGpuUsages = [];
 	private static float s_gpuUsage;
 
     public static bool ShouldUpdate { get; set; } = true;
@@ -162,7 +162,8 @@ public static class HardwareMonitor
 				RefreshHardware();
 			});
 		}
-		finally
+        catch (Exception exception) { App.WriteException(exception); }
+        finally
 		{
 			if (ComputerHardwareSemaphore.CurrentCount == 0)
 			{
@@ -218,7 +219,8 @@ public static class HardwareMonitor
 			}
 			GpuHardware.Reverse();
 		}
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); }
+        finally { HardwareSemaphore.Release(); }
 	}
 
     private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
@@ -228,7 +230,7 @@ public static class HardwareMonitor
     public static List<string> GetGpuHardwareNames()
 	{
 		HardwareSemaphore.Wait();
-		try { return GpuHardware.Select(x => x.Name).Append(FallbackGpuHardwareName).ToList(); }
+		try { return [.. GpuHardware.Select(x => x.Name), FallbackGpuHardwareName]; }
 		finally { HardwareSemaphore.Release(); }
 	}
 
@@ -626,7 +628,6 @@ public static class HardwareMonitor
 		s_cpuUsage = LastCpuUsages.Average();
 	}
 
-	private static ManagementObjectSearcher GpuManagementObjectSearcher = new("root\\CIMV2", "SELECT * FROM Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine");
     private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
     {
         // If the system is in sleep or hibernate mode, don't update the hardware information.

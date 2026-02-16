@@ -111,7 +111,7 @@ public partial class App : Application
 		WriteException(e.Exception);
 	}
 
-	private static void WriteException(Exception exception)
+	public static void WriteException(Exception exception)
 	{
 		var baseDirectory = AppContext.BaseDirectory;
 		var path = Path.Combine(baseDirectory, "error.log");
