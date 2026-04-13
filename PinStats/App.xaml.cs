@@ -64,15 +64,17 @@ public partial class App : Application
 		AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 
-        AppNotificationManager notificationManager = AppNotificationManager.Default;
+#if !DEBUG
+		AppNotificationManager notificationManager = AppNotificationManager.Default;
         notificationManager.NotificationInvoked += OnNotificationManagerNotificationInvoked;
         notificationManager.Register();
 
-        var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+		var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
         var activationKind = activatedArgs.Kind;
 
 		if (activationKind == ExtendedActivationKind.AppNotification)
 			HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
+#endif
 
         if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
         else LiveCharts.Configure(config => config.AddDarkTheme());
@@ -82,6 +84,8 @@ public partial class App : Application
 		StartupHelper.DummyMethod(); // Force static constructor to run.
     }
 
+
+#if !DEBUG
     private static void OnNotificationManagerNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args) => HandleNotification(args);
 
     private static void HandleNotification(AppNotificationActivatedEventArgs args)
@@ -93,6 +97,7 @@ public partial class App : Application
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
     }
+#endif
 
     private static void InitializeThemeSettings()
 	{

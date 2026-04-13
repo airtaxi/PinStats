@@ -1,5 +1,6 @@
 ﻿using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
+using PinStats.Helpers;
 using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -64,11 +65,10 @@ public static class HardwareMonitor
 
     public static bool ShouldUpdate { get; set; } = true;
 
-
     static HardwareMonitor()
 	{
 		// Initialize Hardware
-		_ = RefreshComputerHardwareAsync();
+		Task.Run(RefreshComputerHardwareAsync);
 
 		// SystemEvents.PowerModeChanged is used to detect Sleep and Hibernate modes.
 		SystemEvents.PowerModeChanged += OnPowerModeChanged;
@@ -225,7 +225,7 @@ public static class HardwareMonitor
 
     private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
 
-	public static string GetMotherboardName() => Computer.Hardware.Where(x => x.HardwareType == HardwareType.Motherboard).FirstOrDefault()?.Name ?? "N/A";
+	public static string GetMotherboardName() => Computer.Hardware.FirstOrDefault(x => x.HardwareType == HardwareType.Motherboard)?.Name ?? "N/A";
 
     public static List<string> GetGpuHardwareNames()
 	{
@@ -302,11 +302,9 @@ public static class HardwareMonitor
 
 	public static string GetCpuName()
 	{
-		if (CpuHardware.Count == 0)
-		{
-			return FallbackCpuHardwareName ?? "N/A";
-		}
-		var firstCpuHardware = CpuHardware[0];
+		if (CpuHardware.Count == 0) return FallbackCpuHardwareName ?? "N/A";
+
+        var firstCpuHardware = CpuHardware[0];
 		if (CpuHardware.Count == 1) return firstCpuHardware.Name;
 		else return firstCpuHardware.Name + " + " + (CpuHardware.Count - 1) + " more";
 	}
@@ -537,42 +535,48 @@ public static class HardwareMonitor
 	{
 		HardwareSemaphore.Wait();
 		try { CpuHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed.
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateGpuHardware()
 	{
 		HardwareSemaphore.Wait();
 		try { GpuHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: unplugging external GPU).
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateNetworkHardware()
 	{
 		HardwareSemaphore.Wait();
 		try { NetworkHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: unplugging a network adapter).
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateStorageHardware()
 	{
 		HardwareSemaphore.Wait();
 		try { StorageHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: storage device failure or ejection).
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateMemoryHardware()
 	{
 		HardwareSemaphore.Wait();
 		try { MemoryHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed.
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateBatteryHardware()
 	{
 		HardwareSemaphore.Wait();
 		try { BatteryHardware.ForEach(x => x.Update()); }
-		finally { HardwareSemaphore.Release(); }
+        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: battery removal).
+        finally { HardwareSemaphore.Release(); }
 	}
 
 	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware()?.Update();
@@ -647,15 +651,16 @@ public static class HardwareMonitor
 				?? gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
 			usage = gpuLoadSensor?.Value ?? 0;
 		}
+		else usage = GpuPerformanceHelper.GetTotalUtilization();
 
-		usage = Math.Clamp(usage, 0, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+        usage = Math.Clamp(usage, 0, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
 		LastGpuUsages.Add(usage);
 
 		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
 		s_gpuUsage = LastGpuUsages.Average();
     }
 
-    private static void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+	private static void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;

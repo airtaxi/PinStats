@@ -125,8 +125,6 @@ public sealed partial class MonitorWindow : IDisposable
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64) gpuInformationText = "N/A";
-
         // Memory
         var totalMemory = HardwareMonitor.GetTotalMemory();
 		var usedMemory = HardwareMonitor.GetUsedMemory();

@@ -143,8 +143,6 @@ public sealed partial class PopupWindow : IDisposable
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm || RuntimeInformation.ProcessArchitecture == Architecture.Arm64) gpuInformationText = "N/A";
-
         // Define battery information texts
         string batteryInformationText = null;
 		string batteryHealthInformationText = null;
