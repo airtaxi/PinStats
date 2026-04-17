@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "copilot-cli-wakatime hook sessionStart",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "copilot-cli-wakatime hook postToolUse",
+        "timeoutSec": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "copilot-cli-wakatime hook sessionEnd",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
