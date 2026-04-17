@@ -8,6 +8,9 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<Platforms>x64;ARM64</Platforms>
 		<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+		<Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU' or '$(Platform)' == 'Any CPU'">x64</Platform>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+		<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' and '$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
 		<PublishProfile>win-$(Platform).pubxml</PublishProfile>
 		<WindowsPackageType>None</WindowsPackageType>
 		<UseWinUI>true</UseWinUI>
@@ -34,7 +37,8 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
-		<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+		<!-- Use the local LibreHardwareMonitor build until PR #2308 is available in a published package release. -->
+		<!--<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />-->
 		<PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
@@ -52,6 +56,14 @@
   -->
 	<ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<ProjectCapability Include="Msix" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj">
+			<SetPlatform Condition="'$(Platform)' != '' and '$(Platform)' != 'AnyCPU' and '$(Platform)' != 'Any CPU'">Platform=$(Platform)</SetPlatform>
+			<SetPlatform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU' or '$(Platform)' == 'Any CPU'">Platform=x64</SetPlatform>
+			<AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier);AppendRuntimeIdentifierToOutputPath=true</AdditionalProperties>
+			<AdditionalProperties Condition="'$(RuntimeIdentifier)' == ''">RuntimeIdentifier=win-x64;AppendRuntimeIdentifierToOutputPath=true</AdditionalProperties>
+		</ProjectReference>
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="Assets\Cpu.png">

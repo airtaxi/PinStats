@@ -4,6 +4,13 @@
     <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/TemporaryLocalDependencies/">
+    <Project Path="../LibreHardwareMonitor/LibreHardwareMonitorLib/LibreHardwareMonitorLib.csproj">
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|ARM64" Project="ARM64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
   <Project Path="PinStats/PinStats.csproj">
     <Platform Solution="*|Any CPU" Project="x64" />
     <Platform Solution="*|ARM64" Project="ARM64" />
