@@ -37,7 +37,7 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
-		<!-- Use the local LibreHardwareMonitor build until PR #2308 is available in a published package release. -->
+		<!-- Use the vendored LibreHardwareMonitor build until PR #2308 is available in a published package release. -->
 		<!--<PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />-->
 		<PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
@@ -58,7 +58,7 @@
 		<ProjectCapability Include="Msix" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj">
+		<ProjectReference Include="..\Dependencies\LibreHardwareMonitor\LibreHardwareMonitorLib\LibreHardwareMonitorLib.csproj">
 			<SetPlatform Condition="'$(Platform)' != '' and '$(Platform)' != 'AnyCPU' and '$(Platform)' != 'Any CPU'">Platform=$(Platform)</SetPlatform>
 			<SetPlatform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU' or '$(Platform)' == 'Any CPU'">Platform=x64</SetPlatform>
 			<AdditionalProperties Condition="'$(RuntimeIdentifier)' != ''">RuntimeIdentifier=$(RuntimeIdentifier);AppendRuntimeIdentifierToOutputPath=true</AdditionalProperties>
