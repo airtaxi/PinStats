@@ -5,7 +5,6 @@ using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.Resources;
 using PinStats.ViewModels;
-using System.Runtime.InteropServices;
 using WinUIEx;
 using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
 
@@ -22,6 +21,7 @@ public sealed partial class MonitorWindow : IDisposable
 
 	private readonly Monitor _monitor;
 	private readonly Timer _refreshTimer;
+	private bool _disposed;
 
 	public MonitorWindow(Monitor monitor)
 	{
@@ -35,11 +35,11 @@ public sealed partial class MonitorWindow : IDisposable
 		InitializeControls();
 		RefreshHardwareInformation();
 
-        // Setup the timer to refresh the hardware information
-        _refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
+		// Setup the timer to refresh the hardware information
+		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 
-        // WinUI bug workaround: Indicate this windows is full screen
-        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+		// WinUI bug workaround: Indicate this windows is full screen
+		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
 	}
 
 	private void InitializeControls()
@@ -60,24 +60,24 @@ public sealed partial class MonitorWindow : IDisposable
 
 		CartesianChartMemory.Series = MemoryUsageViewModel.Series;
 		CartesianChartMemory.XAxes = MemoryUsageViewModel.XAxes;
-		CartesianChartMemory.Series = MemoryUsageViewModel.Series;
+		CartesianChartMemory.YAxes = MemoryUsageViewModel.YAxes;
 		CartesianChartVirtualMemory.DataContext = VirtualMemoryUsageViewModel;
 
 		// Setup CPU usage chart
 		CpuUsageViewModel.RefreshSync();
 		CartesianChartCpuUsage.Series = CpuUsageViewModel.Series;
-        CartesianChartCpuUsage.XAxes = CpuUsageViewModel.XAxes;
-        CartesianChartCpuUsage.YAxes = CpuUsageViewModel.YAxes;
+		CartesianChartCpuUsage.XAxes = CpuUsageViewModel.XAxes;
+		CartesianChartCpuUsage.YAxes = CpuUsageViewModel.YAxes;
 		CartesianChartCpuUsage.SyncContext = CpuUsageViewModel.Sync;
 
-        // Setup GPU usage chart
-        GpuUsageViewModel.RefreshSync();
-        CartesianChartGpuUsage.Series = GpuUsageViewModel.Series;
-        CartesianChartGpuUsage.XAxes = GpuUsageViewModel.XAxes;
-        CartesianChartGpuUsage.YAxes = GpuUsageViewModel.YAxes;
-        CartesianChartGpuUsage.SyncContext = GpuUsageViewModel.Sync;
+		// Setup GPU usage chart
+		GpuUsageViewModel.RefreshSync();
+		CartesianChartGpuUsage.Series = GpuUsageViewModel.Series;
+		CartesianChartGpuUsage.XAxes = GpuUsageViewModel.XAxes;
+		CartesianChartGpuUsage.YAxes = GpuUsageViewModel.YAxes;
+		CartesianChartGpuUsage.SyncContext = GpuUsageViewModel.Sync;
 
-        PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
+		PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
 
 		CartesianChartBattery.DataContext = BatteryViewModel;
 		CartesianChartBatteryHealth.DataContext = BatteryHealthViewModel;
@@ -89,16 +89,14 @@ public sealed partial class MonitorWindow : IDisposable
 	private void RefreshTimerCallback(object state)
 	{
 		try { RefreshHardwareInformation(); }
-        catch { } // Ignore. Hardware is unpredictable.
-        finally
-		{
-			if (!_disposed)
-				_refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite);
-		}
+		catch { } // Ignore. Hardware is unpredictable.
+		finally { RestartRefreshTimer(); }
 	}
 
 	private void RefreshHardwareInformation()
 	{
+		if (_disposed) return;
+
 		HardwareMonitor.UpdateCpuHardware();
 		HardwareMonitor.UpdateMemoryHardware();
 		HardwareMonitor.UpdateNetworkHardware();
@@ -125,8 +123,8 @@ public sealed partial class MonitorWindow : IDisposable
 		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
 		gpuInformationText += gpuTemperatureText + gpuPowerText;
 
-        // Memory
-        var totalMemory = HardwareMonitor.GetTotalMemory();
+		// Memory
+		var totalMemory = HardwareMonitor.GetTotalMemory();
 		var usedMemory = HardwareMonitor.GetUsedMemory();
 		var memoryInformationText = $"{usedMemory:N2} / {totalMemory:N2} GB";
 
@@ -147,13 +145,15 @@ public sealed partial class MonitorWindow : IDisposable
 
 		DispatcherQueue.TryEnqueue(() =>
 		{
+			if (_disposed) return;
+
 			TextBlockCpuInformation.Text = cpuInformationText;
 			TextBlockGpuInformation.Text = gpuInformationText;
 			MemoryUsageViewModel.SetValue(totalMemory, usedMemory, memoryInformationText);
 			VirtualMemoryUsageViewModel.SetValue(totalVirtualMemory, usedVirtualMemory, virtualMemoryInformationText);
 
-            // If the device has a battery, update the battery information.
-            if (HardwareMonitor.HasBattery())
+			// If the device has a battery, update the battery information.
+			if (HardwareMonitor.HasBattery())
 			{
 				var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent().Value; // Assume that the device has a battery due to the if statement above.
 				var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
@@ -161,7 +161,7 @@ public sealed partial class MonitorWindow : IDisposable
 
 				// Battery information
 				var batteryChargeRateText = string.Empty;
-                if (batteryChargeRate.HasValue)
+				if (batteryChargeRate.HasValue)
 				{
 					var batteryChargeRatePrefix = string.Empty;
 					if (batteryChargeRate.Value > 0) batteryChargeRatePrefix = "+";
@@ -189,21 +189,59 @@ public sealed partial class MonitorWindow : IDisposable
 		});
 	}
 
-	private bool _disposed;
 	public void Dispose()
 	{
 		if (_disposed) return;
 		_disposed = true;
-		Instance = null;
+
+		if (Instance == this) Instance = null;
 		TaskbarUsageResource.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
 		PopupWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
-		_refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); // Stop the timer.
-		_refreshTimer.Dispose();
+		DetachCharts();
+		StopRefreshTimer();
 		GC.SuppressFinalize(this);
+	}
+
+	private void DetachCharts()
+	{
+		DetachChart(CartesianChartMemory);
+		DetachChart(CartesianChartVirtualMemory);
+		DetachChart(CartesianChartBattery);
+		DetachChart(CartesianChartBatteryHealth);
+		DetachChart(CartesianChartCpuUsage);
+		DetachChart(CartesianChartGpuUsage);
+	}
+
+	private static void DetachChart(LiveChartsCore.SkiaSharpView.WinUI.CartesianChart cartesianChart)
+	{
+		cartesianChart.AutoUpdateEnabled = false;
+		cartesianChart.Series = null;
+		cartesianChart.XAxes = null;
+		cartesianChart.YAxes = null;
+		cartesianChart.SyncContext = null;
+		cartesianChart.DataContext = null;
+	}
+
+	private void RestartRefreshTimer()
+	{
+		if (_disposed) return;
+
+		try { _refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite); }
+		catch (ObjectDisposedException) { }
+	}
+
+	private void StopRefreshTimer()
+	{
+		try { _refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); }
+		catch (ObjectDisposedException) { }
+
+		_refreshTimer.Dispose();
 	}
 
 	private void OnHardwareMonitorBackgroundImageSet(object sender, EventArgs e)
 	{
+		if (_disposed) return;
+
 		// Apply background image if available or use Mica backdrop
 		if (!BackgroundImageHelper.TrySetupBackgroundImage(BackgroundImageType.HardwareMonitor, ImageBackground))
 		{
@@ -217,17 +255,25 @@ public sealed partial class MonitorWindow : IDisposable
 		}
 	}
 
-	private void OnCurrentGpuChanged(object sender, EventArgs e) => TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
+	private void OnCurrentGpuChanged(object sender, EventArgs e)
+	{
+		if (_disposed) return;
+		TextBlockGpuName.Text = HardwareMonitor.GetCurrentGpuName();
+	}
 
 	private void OnExitButtonClicked(object sender, RoutedEventArgs e) => Close();
 
-    private void OnClosed(object sender, WindowEventArgs args) => Dispose();
+	private void OnClosed(object sender, WindowEventArgs args) => Dispose();
 
-    // Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
+	// Position and setup presenter should be done after the window is loaded (probably issue with WinUI 3)
+	private async void OnLoaded(object sender, RoutedEventArgs e)
+	{
 		await Task.Delay(100);
-        MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
-        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
-    }
+		if (_disposed) return;
+
+		MonitorHelper.PositionWindowToMonitor(this.GetWindowHandle(), _monitor);
+		AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+	}
+
+	private void OnUnloaded(object sender, RoutedEventArgs e) => Dispose();
 }
