@@ -20,6 +20,8 @@ internal static class OpCode
     private static IntPtr _codeBuffer;
     private static ulong _size;
 
+    public static bool IsSupported => RuntimeInformation.ProcessArchitecture is Architecture.X86 or Architecture.X64;
+
     // void __stdcall cpuidex(unsigned int index, unsigned int ecxValue,
     //   unsigned int* eax, unsigned int* ebx, unsigned int* ecx,
     //   unsigned int* edx)
@@ -209,6 +211,8 @@ internal static class OpCode
 
     public static unsafe void Open()
     {
+        if (!IsSupported) return;
+
         byte[] rdTscCode;
         byte[] cpuidCode;
         if (IntPtr.Size == 4)
@@ -269,6 +273,8 @@ internal static class OpCode
         Rdtsc = null;
         CpuId = null;
 
+        if (_codeBuffer == IntPtr.Zero) return;
+
         if (Software.OperatingSystem.IsUnix)
         {
 #if NETFRAMEWORK
@@ -285,5 +291,8 @@ internal static class OpCode
         {
             PInvoke.VirtualFree((void*)_codeBuffer, UIntPtr.Zero, VIRTUAL_FREE_TYPE.MEM_RELEASE);
         }
+
+        _codeBuffer = IntPtr.Zero;
+        _size = 0;
     }
 }
