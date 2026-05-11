@@ -110,13 +110,6 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		if (_disposed) return;
 
-		var isWindowInFocus = WindowHelper.GetForegroundWindow() == this.GetWindowHandle();
-		if (!isWindowInFocus)
-		{
-			DispatcherQueue.TryEnqueue(Close);
-			return;
-		}
-
 		HardwareMonitor.UpdateCpuHardware();
 		HardwareMonitor.UpdateMemoryHardware();
 		HardwareMonitor.UpdateNetworkHardware();
