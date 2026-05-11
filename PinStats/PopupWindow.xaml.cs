@@ -110,13 +110,6 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		if (_disposed) return;
 
-		var isWindowInFocus = WindowHelper.GetForegroundWindow() == this.GetWindowHandle();
-		if (!isWindowInFocus)
-		{
-			DispatcherQueue.TryEnqueue(Close);
-			return;
-		}
-
 		HardwareMonitor.UpdateCpuHardware();
 		HardwareMonitor.UpdateMemoryHardware();
 		HardwareMonitor.UpdateNetworkHardware();
@@ -284,13 +277,15 @@ public sealed partial class PopupWindow : IDisposable
 		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
 
 		// Force the window to be in the foreground
-		var windowHandle = this.GetWindowHandle();
-		var foregroundWindow = WindowHelper.GetForegroundWindow();
-		var foregroundThreadIdentifier = WindowHelper.GetWindowThreadProcessId(foregroundWindow, out _);
-		var currentThreadIdentifier = WindowHelper.GetCurrentThreadId();
-		WindowHelper.AttachThreadInput(foregroundThreadIdentifier, currentThreadIdentifier, true);
-		try { WindowHelper.SetForegroundWindow(windowHandle); }
-		finally { WindowHelper.AttachThreadInput(foregroundThreadIdentifier, currentThreadIdentifier, false); }
+		//var windowHandle = this.GetWindowHandle();
+		//var foregroundWindow = WindowHelper.GetForegroundWindow();
+		//var foregroundThreadIdentifier = WindowHelper.GetWindowThreadProcessId(foregroundWindow, out _);
+		//var currentThreadIdentifier = WindowHelper.GetCurrentThreadId();
+		//WindowHelper.AttachThreadInput(foregroundThreadIdentifier, currentThreadIdentifier, true);
+		//try { WindowHelper.SetForegroundWindow(windowHandle); }
+		//finally { WindowHelper.AttachThreadInput(foregroundThreadIdentifier, currentThreadIdentifier, false); }
+
+		BringToFront();
 
 		// Should be called after BringToFront() to prevent the window from being closed when ComboBoxGpuList.SelectedIndex is set.
 		// (RefreshHardwareInformation() calls Close() when the window is not in focus)
