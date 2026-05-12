@@ -59,7 +59,7 @@ public static class HardwareMonitor
 	private readonly static List<float> LastCpuUsages = [];
 	private static float s_cpuUsage;
 
-	private readonly static Timer GpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
+	private readonly static Timer GpuUsageTimer = new() { Interval = IsArm64Architecture ? UsageTimerIntervalInMilliseconds * 10 : UsageTimerIntervalInMilliseconds };
 	private readonly static List<float> LastGpuUsages = [];
 	private static float s_gpuUsage;
 
