@@ -41,26 +41,40 @@
             Margin="0,0,0,-8"
             Padding="8,8,8,0">
             <StackPanel>
-                <Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <TextBlock
                         x:Name="TextBlockCpuName"
-                        MaxWidth="390"
-                        HorizontalAlignment="Left"
+                        Grid.Column="0"
+                        MinWidth="0"
                         MaxLines="1"
                         TextTrimming="CharacterEllipsis" />
-                    <TextBlock x:Name="TextBlockCpuInformation" HorizontalAlignment="Right" />
+                    <TextBlock x:Name="TextBlockCpuInformation" Grid.Column="1" />
                 </Grid>
-                <Grid>
-                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0" ColumnSpacing="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <TextBlock
                             x:Name="TextBlockGpuName"
-                            MaxWidth="390"
+                            Grid.Column="0"
+                            MinWidth="0"
                             MaxLines="1"
                             TextTrimming="CharacterEllipsis" />
                         <Button
                             x:Name="ButtonSelectGpu"
+                            Grid.Column="1"
                             Height="10"
-                            Margin="4,4,0,0"
                             Padding="0"
                             VerticalAlignment="Center"
                             Background="Transparent"
@@ -78,33 +92,64 @@
                                 </Flyout>
                             </Button.Flyout>
                         </Button>
-                    </StackPanel>
-                    <TextBlock x:Name="TextBlockGpuInformation" HorizontalAlignment="Right" />
+                    </Grid>
+                    <TextBlock x:Name="TextBlockGpuInformation" Grid.Column="1" />
                 </Grid>
-                <Grid>
-                    <TextBlock HorizontalAlignment="Left" Text="Memory" />
-                    <TextBlock x:Name="TextBlockMemoryInformation" HorizontalAlignment="Right" />
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Memory" />
+                    <TextBlock x:Name="TextBlockMemoryInformation" Grid.Column="1" />
                 </Grid>
-                <Grid>
-                    <TextBlock HorizontalAlignment="Left" Text="Virtual Memory" />
-                    <TextBlock x:Name="TextBlockVirtualMemoryInformation" HorizontalAlignment="Right" />
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Virtual Memory" />
+                    <TextBlock x:Name="TextBlockVirtualMemoryInformation" Grid.Column="1" />
                 </Grid>
-                <Grid>
-                    <TextBlock HorizontalAlignment="Left" Text="Network" />
-                    <TextBlock x:Name="TextBlockNetworkInformation" HorizontalAlignment="Right" />
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Network" />
+                    <TextBlock x:Name="TextBlockNetworkInformation" Grid.Column="1" />
                 </Grid>
-                <Grid>
-                    <TextBlock HorizontalAlignment="Left" Text="Storage" />
-                    <TextBlock x:Name="TextBlockStorageInformation" HorizontalAlignment="Right" />
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Storage" />
+                    <TextBlock x:Name="TextBlockStorageInformation" Grid.Column="1" />
                 </Grid>
-                <Grid x:Name="GridBattery">
-                    <TextBlock HorizontalAlignment="Left" Text="Battery" />
-                    <TextBlock x:Name="TextBlockBatteryInformation" HorizontalAlignment="Right" />
+
+                <Grid x:Name="GridBattery" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Battery" />
+                    <TextBlock x:Name="TextBlockBatteryInformation" Grid.Column="1" />
                 </Grid>
-                <Grid x:Name="GridBatteryHealth">
-                    <TextBlock HorizontalAlignment="Left" Text="Battery Health" />
-                    <TextBlock x:Name="TextBlockBatteryHealthInformation" HorizontalAlignment="Right" />
+
+                <Grid x:Name="GridBatteryHealth" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Battery Health" />
+                    <TextBlock x:Name="TextBlockBatteryHealthInformation" Grid.Column="1" />
                 </Grid>
+
                 <StackPanel Orientation="Horizontal">
                     <RadioButton
                         x:Name="RadioButtonCpu"
