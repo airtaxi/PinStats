@@ -220,21 +220,8 @@ public sealed partial class PopupWindow : IDisposable
 		Activated -= OnActivated;
 		Closed -= OnClosed;
 
-		DetachCharts();
 		StopRefreshTimer();
 		GC.SuppressFinalize(this);
-	}
-
-	private void DetachCharts() => DetachChart(CartesianChartUsage);
-
-	private static void DetachChart(LiveChartsCore.SkiaSharpView.WinUI.CartesianChart cartesianChart)
-	{
-		cartesianChart.AutoUpdateEnabled = false;
-		cartesianChart.Series = null;
-		cartesianChart.XAxes = null;
-		cartesianChart.YAxes = null;
-		cartesianChart.SyncContext = null;
-		cartesianChart.DataContext = null;
 	}
 
 	private void RestartRefreshTimer()
