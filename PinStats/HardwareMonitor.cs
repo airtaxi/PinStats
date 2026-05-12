@@ -56,16 +56,18 @@ public static class HardwareMonitor
 	private static long s_uploadSpeedInBytes;
 
 	private readonly static Timer CpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
-    private readonly static List<float> LastCpuUsages = [];
+	private readonly static List<float> LastCpuUsages = [];
 	private static float s_cpuUsage;
 
 	private readonly static Timer GpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
-    private readonly static List<float> LastGpuUsages = [];
+	private readonly static List<float> LastGpuUsages = [];
 	private static float s_gpuUsage;
 
-    public static bool ShouldUpdate { get; set; } = true;
+	public static bool ShouldUpdate { get; set; } = true;
 
-    static HardwareMonitor()
+	public static bool IsArm64Architecture => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+
+	static HardwareMonitor()
 	{
 		// Initialize Hardware
 		Task.Run(RefreshComputerHardwareAsync);
@@ -253,7 +255,7 @@ public static class HardwareMonitor
 	private static float s_lastTotalCpuPackagePower;
 	public static float GetTotalCpuPackagePower(bool update = false)
 	{
-		if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) return Arm64PowerMeterHelper.GetTotalCpuPackagePower();
+		if (IsArm64Architecture) return Arm64PowerMeterHelper.GetTotalCpuPackagePower();
 
 		HardwareSemaphore.Wait();
 		try
@@ -273,7 +275,7 @@ public static class HardwareMonitor
 	private static float s_lastCurrentGpuPower;
 	public static float GetCurrentGpuPower(bool update = false)
 	{
-		if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) return Arm64PowerMeterHelper.GetCurrentGpuPower();
+		if (IsArm64Architecture) return Arm64PowerMeterHelper.GetCurrentGpuPower();
 
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return 0; // If there are no GPUs, return 0
@@ -289,6 +291,8 @@ public static class HardwareMonitor
 
 		return gpuPowerSensor?.Value ?? s_lastCurrentGpuPower;
 	}
+
+	public static Arm64PowerMeterValues GetArm64PowerMeterValues() => Arm64PowerMeterHelper.GetPowerMeterValues();
 
 	public static float? GetCurrentGpuTemperature(bool update = false)
 	{

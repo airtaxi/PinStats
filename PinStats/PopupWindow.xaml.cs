@@ -118,22 +118,38 @@ public sealed partial class PopupWindow : IDisposable
 
 		// CPU
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
-		var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
+		var arm64PowerMeterValues = HardwareMonitor.IsArm64Architecture ? HardwareMonitor.GetArm64PowerMeterValues() : default;
 
 		var cpuInformationText = $"{cpuUsage:N0}%";
-		var cpuTemperatureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
-		var cpuPowerText = HardwareMonitor.GetTotalCpuPackagePower() != 0 ? (" / " + HardwareMonitor.GetTotalCpuPackagePower().ToString("N0") + " W") : "";
-		cpuInformationText += cpuTemperatureText + cpuPowerText;
+		if (HardwareMonitor.IsArm64Architecture)
+		{
+			cpuInformationText += $" / CPU {arm64PowerMeterValues.TotalCpuPackagePower:N0} W / SoC {arm64PowerMeterValues.SystemOnChipPower:N0} W / Sys {arm64PowerMeterValues.SystemPower:N0} W";
+		}
+		else
+		{
+			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
+			var cpuPower = HardwareMonitor.GetTotalCpuPackagePower();
+			var cpuTemperatureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
+			var cpuPowerText = cpuPower != 0 ? (" / " + cpuPower.ToString("N0") + " W") : "";
+			cpuInformationText += cpuTemperatureText + cpuPowerText;
+		}
 
 		// GPU
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
-		var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
-		var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 
 		var gpuInformationText = $"{gpuUsage:N0}%";
-		var gpuTemperatureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
-		var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
-		gpuInformationText += gpuTemperatureText + gpuPowerText;
+		if (HardwareMonitor.IsArm64Architecture)
+		{
+			gpuInformationText += $" / GPU {arm64PowerMeterValues.CurrentGpuPower:N0} W / MM {arm64PowerMeterValues.MultimediaPower:N0} W";
+		}
+		else
+		{
+			var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
+			var gpuPower = HardwareMonitor.GetCurrentGpuPower();
+			var gpuTemperatureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
+			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
+			gpuInformationText += gpuTemperatureText + gpuPowerText;
+		}
 
 		// Define battery information texts
 		var batteryInformationText = default(string);

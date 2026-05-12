@@ -11,39 +11,33 @@ public static class Arm64PowerMeterHelper
 	private const string EnergyMeterQuery = "SELECT Name, Power FROM Win32_PerfFormattedData_PowerMeterCounter_EnergyMeter";
 	private const string CpuClusterNamePrefix = "CPU_CLUSTER_";
 	private const string GpuName = "GPU";
+	private const string MultimediaName = "MULTIMEDIA";
+	private const string SystemName = "SYSTEM";
+	private const string SystemOnChipName = "SOC";
 	private const float MilliwattsPerWatt = 1000f;
 
-	public static float GetTotalCpuPackagePower()
+	public static float GetTotalCpuPackagePower() => GetPowerMeterValues().TotalCpuPackagePower;
+
+	public static float GetCurrentGpuPower() => GetPowerMeterValues().CurrentGpuPower;
+
+	public static Arm64PowerMeterValues GetPowerMeterValues()
 	{
 		try
 		{
-			var cpuPowerValues = GetPowerValues().Where(x => x.Name.StartsWith(CpuClusterNamePrefix, StringComparison.OrdinalIgnoreCase)).ToList();
-			if (cpuPowerValues.Count == 0) return 0;
+			var powerValues = GetPowerValues();
+			var cpuPowerValues = powerValues.Where(x => x.Name.StartsWith(CpuClusterNamePrefix, StringComparison.OrdinalIgnoreCase)).ToList();
+			var totalCpuPowerInWatts = ConvertMilliwattsToWatts(cpuPowerValues.Sum(x => x.PowerInMilliwatts));
+			var currentGpuPowerInWatts = GetPowerInWatts(powerValues, GpuName);
+			var multimediaPowerInWatts = GetPowerInWatts(powerValues, MultimediaName);
+			var systemPowerInWatts = GetPowerInWatts(powerValues, SystemName);
+			var systemOnChipPowerInWatts = GetPowerInWatts(powerValues, SystemOnChipName);
 
-			var totalCpuPowerInMilliwatts = cpuPowerValues.Sum(x => x.PowerInMilliwatts);
-			return totalCpuPowerInMilliwatts / MilliwattsPerWatt;
+			return new(totalCpuPowerInWatts, currentGpuPowerInWatts, multimediaPowerInWatts, systemOnChipPowerInWatts, systemPowerInWatts);
 		}
 		catch (Exception exception)
 		{
 			App.WriteException(exception);
-			return 0;
-		}
-	}
-
-	public static float GetCurrentGpuPower()
-	{
-		try
-		{
-			var gpuPowerValues = GetPowerValues().Where(x => string.Equals(x.Name, GpuName, StringComparison.OrdinalIgnoreCase)).ToList();
-			if (gpuPowerValues.Count == 0) return 0;
-
-			var gpuPowerInMilliwatts = gpuPowerValues[0].PowerInMilliwatts;
-			return gpuPowerInMilliwatts / MilliwattsPerWatt;
-		}
-		catch (Exception exception)
-		{
-			App.WriteException(exception);
-			return 0;
+			return default;
 		}
 	}
 
@@ -77,5 +71,20 @@ public static class Arm64PowerMeterHelper
 		return Convert.ToSingle(value, CultureInfo.InvariantCulture);
 	}
 
+	private static float GetPowerInWatts(List<PowerValue> powerValues, string name)
+	{
+		var powerInMilliwatts = powerValues.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)).PowerInMilliwatts;
+		return ConvertMilliwattsToWatts(powerInMilliwatts);
+	}
+
+	private static float ConvertMilliwattsToWatts(float powerInMilliwatts) => powerInMilliwatts / MilliwattsPerWatt;
+
 	private readonly record struct PowerValue(string Name, float PowerInMilliwatts);
 }
+
+public readonly record struct Arm64PowerMeterValues(
+	float TotalCpuPackagePower,
+	float CurrentGpuPower,
+	float MultimediaPower,
+	float SystemOnChipPower,
+	float SystemPower);
