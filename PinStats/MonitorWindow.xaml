@@ -16,9 +16,7 @@
     IsResizable="False"
     mc:Ignorable="d">
 
-    <Grid
-        Loaded="OnLoaded"
-        Unloaded="OnUnloaded">
+    <Grid Loaded="OnLoaded" Unloaded="OnUnloaded">
         <Grid.Resources>
             <vm:TotalUsageViewModel x:Name="MemoryUsageViewModel" />
             <vm:TotalUsageViewModel x:Name="VirtualMemoryUsageViewModel" />
