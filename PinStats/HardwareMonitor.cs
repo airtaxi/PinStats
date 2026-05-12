@@ -253,6 +253,8 @@ public static class HardwareMonitor
 	private static float s_lastTotalCpuPackagePower;
 	public static float GetTotalCpuPackagePower(bool update = false)
 	{
+		if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) return Arm64PowerMeterHelper.GetTotalCpuPackagePower();
+
 		HardwareSemaphore.Wait();
 		try
 		{
@@ -262,15 +264,17 @@ public static class HardwareMonitor
 			var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value);
 			if (cpuPackagePower.HasValue) s_lastTotalCpuPackagePower = cpuPackagePower.Value;
 			return cpuPackagePower ?? s_lastTotalCpuPackagePower;
-        }
+		}
 		finally { HardwareSemaphore.Release(); }
 	}
 
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
 
-    private static float s_lastCurrentGpuPower;
-    public static float GetCurrentGpuPower(bool update = false)
+	private static float s_lastCurrentGpuPower;
+	public static float GetCurrentGpuPower(bool update = false)
 	{
+		if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64) return Arm64PowerMeterHelper.GetCurrentGpuPower();
+
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return 0; // If there are no GPUs, return 0
 
