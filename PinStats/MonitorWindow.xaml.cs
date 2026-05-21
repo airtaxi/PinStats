@@ -16,9 +16,8 @@ public sealed partial class MonitorWindow : IDisposable
 
 	public static MonitorWindow Instance { get; set; }
 
-	public readonly static UsageViewModel CpuUsageViewModel = new();
-	public readonly static UsageViewModel GpuUsageViewModel = new();
-
+	private readonly UsageViewModel _cpuUsageViewModel = new(UsageHistoryMetric.CpuUsage);
+	private readonly UsageViewModel _gpuUsageViewModel = new(UsageHistoryMetric.GpuUsage);
 	private readonly Monitor _monitor;
 	private readonly Timer _refreshTimer;
 	private bool _disposed;
@@ -31,6 +30,9 @@ public sealed partial class MonitorWindow : IDisposable
 
 		ExtendsContentIntoTitleBar = true;
 		AppWindow.IsShownInSwitchers = false;
+
+		LoadUsageHistory();
+		UsageHistoryBuffer.UsageInformationAdded += OnUsageInformationAdded;
 
 		InitializeControls();
 		RefreshHardwareInformation();
@@ -64,18 +66,14 @@ public sealed partial class MonitorWindow : IDisposable
 		CartesianChartVirtualMemory.DataContext = VirtualMemoryUsageViewModel;
 
 		// Setup CPU usage chart
-		CpuUsageViewModel.RefreshSync();
-		CartesianChartCpuUsage.Series = CpuUsageViewModel.Series;
-		CartesianChartCpuUsage.XAxes = CpuUsageViewModel.XAxes;
-		CartesianChartCpuUsage.YAxes = CpuUsageViewModel.YAxes;
-		CartesianChartCpuUsage.SyncContext = CpuUsageViewModel.Sync;
+		CartesianChartCpuUsage.Series = _cpuUsageViewModel.Series;
+		CartesianChartCpuUsage.XAxes = _cpuUsageViewModel.XAxes;
+		CartesianChartCpuUsage.YAxes = _cpuUsageViewModel.YAxes;
 
 		// Setup GPU usage chart
-		GpuUsageViewModel.RefreshSync();
-		CartesianChartGpuUsage.Series = GpuUsageViewModel.Series;
-		CartesianChartGpuUsage.XAxes = GpuUsageViewModel.XAxes;
-		CartesianChartGpuUsage.YAxes = GpuUsageViewModel.YAxes;
-		CartesianChartGpuUsage.SyncContext = GpuUsageViewModel.Sync;
+		CartesianChartGpuUsage.Series = _gpuUsageViewModel.Series;
+		CartesianChartGpuUsage.XAxes = _gpuUsageViewModel.XAxes;
+		CartesianChartGpuUsage.YAxes = _gpuUsageViewModel.YAxes;
 
 		PopupWindow.OnCurrentGpuChanged += OnCurrentGpuChanged;
 
@@ -84,6 +82,24 @@ public sealed partial class MonitorWindow : IDisposable
 
 		BatteryViewModel.SetValue(100, 0, "N/A");
 		BatteryHealthViewModel.SetValue(100, 0, "N/A");
+	}
+
+	private void LoadUsageHistory()
+	{
+		var usageInformationHistory = UsageHistoryBuffer.GetSnapshot();
+		_cpuUsageViewModel.LoadUsageInformation(usageInformationHistory);
+		_gpuUsageViewModel.LoadUsageInformation(usageInformationHistory);
+	}
+
+	private void OnUsageInformationAdded(object sender, UsageInformation usageInformation)
+	{
+		DispatcherQueue.TryEnqueue(() =>
+		{
+			if (_disposed) return;
+
+			_cpuUsageViewModel.AddUsageInformation(usageInformation);
+			_gpuUsageViewModel.AddUsageInformation(usageInformation);
+		});
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -213,6 +229,7 @@ public sealed partial class MonitorWindow : IDisposable
 		if (Instance == this) Instance = null;
 		TaskbarUsageResource.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
 		PopupWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
+		UsageHistoryBuffer.UsageInformationAdded -= OnUsageInformationAdded;
 		StopRefreshTimer();
 		GC.SuppressFinalize(this);
 	}

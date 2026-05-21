@@ -4,6 +4,7 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+using PinStats.Enums;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -11,22 +12,23 @@ using System.Collections.ObjectModel;
 
 namespace PinStats.ViewModels;
 
-public class UsageViewModel : ObservableObject
+public partial class UsageViewModel : ObservableObject
 {
+	private readonly UsageHistoryMetric _usageHistoryMetric;
 	private readonly ObservableCollection<DateTimePoint> _values = [];
 	private readonly DateTimeAxis _customAxis;
 
 	public ObservableCollection<ISeries> Series { get; }
 	public IEnumerable<ICartesianAxis> XAxes { get; }
 	public IEnumerable<ICartesianAxis> YAxes { get; }
-	public object Sync { get; set; } = new object();
 	public bool IsReading { get; set; } = true;
 
-	public UsageViewModel()
+	public UsageViewModel(UsageHistoryMetric usageHistoryMetric)
 	{
+		_usageHistoryMetric = usageHistoryMetric;
 		Series =
-        [
-            new LineSeries<DateTimePoint>
+		[
+			new LineSeries<DateTimePoint>
 			{
 				Values = _values,
 				Fill = null,
@@ -51,40 +53,53 @@ public class UsageViewModel : ObservableObject
 		];
 	}
 
-	public void RefreshSync() => Sync = new object();
-
 	private static double[] GetSeparators()
 	{
 		var now = DateTime.Now;
 
-		var seperators = new List<double> { now.Ticks };
-		for (int i = 0; i < 20; i++)
-		{
-			seperators.Add(now.AddSeconds(-i * 5).Ticks);
-		}
+		var separators = new List<double>();
+		for (var secondsAgo = (int)UsageHistoryBuffer.HistoryDuration.TotalSeconds; secondsAgo >= 0; secondsAgo -= 5) separators.Add(now.AddSeconds(-secondsAgo).Ticks);
 
-		seperators.Reverse();
-		return [.. seperators];
+		return [.. separators];
 	}
 
 	private static string Formatter(DateTime date)
 	{
-		var secsAgo = (DateTime.Now - date).TotalSeconds;
+		var secondsAgo = (DateTime.Now - date).TotalSeconds;
 
-		return secsAgo < 1
-			? "now"
-			: $"{secsAgo:N0}s";
+		return secondsAgo < 1 ? "now" : $"{secondsAgo:N0}s";
 	}
 
-	public void AddUsageInformation(int percent)
+	public void LoadUsageInformation(IEnumerable<UsageInformation> usageInformationHistory)
 	{
-		lock (Sync)
-		{
-			_values.Add(new DateTimePoint(DateTime.Now, percent));
-			while (_values.Count > 100) _values.RemoveAt(0);
+		_values.Clear();
+		foreach (var usageInformation in usageInformationHistory) _values.Add(CreateDateTimePoint(usageInformation));
 
-			// we need to update the separators every time we add a new point 
-			_customAxis.CustomSeparators = GetSeparators();
-		}
+		TrimUsageInformation(DateTime.Now);
+		_customAxis.CustomSeparators = GetSeparators();
+	}
+
+	public void AddUsageInformation(UsageInformation usageInformation)
+	{
+		_values.Add(CreateDateTimePoint(usageInformation));
+		TrimUsageInformation(usageInformation.Time);
+
+		// we need to update the separators every time we add a new point
+		_customAxis.CustomSeparators = GetSeparators();
+	}
+
+	private DateTimePoint CreateDateTimePoint(UsageInformation usageInformation) => new(usageInformation.Time, GetUsage(usageInformation));
+
+	private int GetUsage(UsageInformation usageInformation) => _usageHistoryMetric switch
+	{
+		UsageHistoryMetric.CpuUsage => usageInformation.CpuUsage,
+		UsageHistoryMetric.GpuUsage => usageInformation.GpuUsage,
+		_ => 0
+	};
+
+	private void TrimUsageInformation(DateTime now)
+	{
+		var minimumTime = now - UsageHistoryBuffer.HistoryDuration;
+		while (_values.Count > 0 && _values[0].DateTime < minimumTime) _values.RemoveAt(0);
 	}
 }

@@ -14,11 +14,10 @@ public sealed partial class PopupWindow : IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
 
-	public readonly static UsageViewModel CpuUsageViewModel = new();
-	public readonly static UsageViewModel GpuUsageViewModel = new();
-
 	public static event EventHandler OnCurrentGpuChanged;
 
+	private readonly UsageViewModel _cpuUsageViewModel = new(UsageHistoryMetric.CpuUsage);
+	private readonly UsageViewModel _gpuUsageViewModel = new(UsageHistoryMetric.GpuUsage);
 	private Timer _refreshTimer;
 	private bool _disposed;
 
@@ -50,15 +49,18 @@ public sealed partial class PopupWindow : IDisposable
 
 		// Set the process priority to high to improve performance.
 		Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+
+		LoadUsageHistory();
+		UsageHistoryBuffer.UsageInformationAdded += OnUsageInformationAdded;
 	}
 
 	private void InitializeInterface()
 	{
 		// Setup saved usage target
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
-		var usageViewModel = lastUsageTarget == "GPU" ? GpuUsageViewModel : CpuUsageViewModel;
-		RadioButtonCpu.IsChecked = usageViewModel == CpuUsageViewModel;
-		RadioButtonGpu.IsChecked = usageViewModel == GpuUsageViewModel;
+		var usageViewModel = lastUsageTarget == "GPU" ? _gpuUsageViewModel : _cpuUsageViewModel;
+		RadioButtonCpu.IsChecked = usageViewModel == _cpuUsageViewModel;
+		RadioButtonGpu.IsChecked = usageViewModel == _gpuUsageViewModel;
 		ApplyUsageViewModel(usageViewModel);
 
 		// If the device has more than one GPU, show the GPU selection UI.
@@ -91,12 +93,28 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void ApplyUsageViewModel(UsageViewModel usageViewModel)
 	{
-		usageViewModel.RefreshSync(); // Renew the "sync" of the UsageViewModel to prevent the chart from not being properly displayed.
 		CartesianChartUsage.AutoUpdateEnabled = true;
 		CartesianChartUsage.Series = usageViewModel.Series;
 		CartesianChartUsage.XAxes = usageViewModel.XAxes;
 		CartesianChartUsage.YAxes = usageViewModel.YAxes;
-		CartesianChartUsage.SyncContext = usageViewModel.Sync;
+	}
+
+	private void LoadUsageHistory()
+	{
+		var usageInformationHistory = UsageHistoryBuffer.GetSnapshot();
+		_cpuUsageViewModel.LoadUsageInformation(usageInformationHistory);
+		_gpuUsageViewModel.LoadUsageInformation(usageInformationHistory);
+	}
+
+	private void OnUsageInformationAdded(object sender, UsageInformation usageInformation)
+	{
+		DispatcherQueue.TryEnqueue(() =>
+		{
+			if (_disposed) return;
+
+			_cpuUsageViewModel.AddUsageInformation(usageInformation);
+			_gpuUsageViewModel.AddUsageInformation(usageInformation);
+		});
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -219,6 +237,7 @@ public sealed partial class PopupWindow : IDisposable
 
 		Activated -= OnActivated;
 		Closed -= OnClosed;
+		UsageHistoryBuffer.UsageInformationAdded -= OnUsageInformationAdded;
 
 		StopRefreshTimer();
 		GC.SuppressFinalize(this);
@@ -257,7 +276,7 @@ public sealed partial class PopupWindow : IDisposable
 		RadioButtonGpu.IsChecked = false;
 		radioButton.IsChecked = true;
 
-		var usageViewModel = radioButton == RadioButtonGpu ? GpuUsageViewModel : CpuUsageViewModel;
+		var usageViewModel = radioButton == RadioButtonGpu ? _gpuUsageViewModel : _cpuUsageViewModel;
 		Configuration.SetValue("LastUsageTarget", radioButton == RadioButtonGpu ? "GPU" : "CPU");
 		ApplyUsageViewModel(usageViewModel);
 	}

@@ -173,11 +173,14 @@ public partial class TaskbarUsageResource
 		if (!HardwareMonitor.ShouldUpdate) return;
 
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
-        var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
+		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 
-        var usage = 0f;
-		if (lastUsageTarget == "CPU") usage = HardwareMonitor.GetAverageCpuUsage();
-		else if (lastUsageTarget == "GPU") usage = HardwareMonitor.GetCurrentGpuUsage();
+		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
+		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
+
+		var usage = 0f;
+		if (lastUsageTarget == "CPU") usage = cpuUsage;
+		else if (lastUsageTarget == "GPU") usage = gpuUsage;
 		string usageText = GenerateUsageText(usage);
 
 		DispatcherQueue.TryEnqueue(() =>
@@ -211,13 +214,7 @@ public partial class TaskbarUsageResource
 			}
 		});
 
-		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
-		PopupWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
-		MonitorWindow.CpuUsageViewModel.AddUsageInformation((int)cpuUsage);
-
-		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
-		PopupWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
-		MonitorWindow.GpuUsageViewModel.AddUsageInformation((int)gpuUsage);
+		UsageHistoryBuffer.AddUsageInformation((int)cpuUsage, (int)gpuUsage);
 	}
 
 
