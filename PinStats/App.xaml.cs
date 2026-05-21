@@ -11,50 +11,72 @@ using PinStats.Helpers;
 using PinStats.Resources;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
 
 namespace PinStats;
 
 public partial class App : Application
 {
-    private const int UpdateCheckIntervalInMinutes = 10;
+	private const int UpdateCheckIntervalInMinutes = 10;
+	private const string GitHubLatestReleaseApiUrl = "https://api.github.com/repos/airtaxi/PinStats/releases/latest";
+	private const string GitHubReleaseTagUrl = "https://github.com/airtaxi/PinStats/releases/tag/";
+	private const string GitHubApiUserAgent = "PinStats";
+	private const string UpdateAvailableTitle = "Update Available";
+
+	private static readonly HttpClient UpdateCheckHttpClient = CreateUpdateCheckHttpClient();
 	private static readonly Timer UpdateCheckTimer;
 
-
-    static App()
+	static App()
 	{
 		UpdateCheckTimer = new(UpdateCheckTimerCallback, null, (int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite);
-    }
+	}
 
-	private const string UpdateAvailableTitle = "Update Available";
 	private static async void UpdateCheckTimerCallback(object state) => await CheckForUpdateAsync();
+
+	private static HttpClient CreateUpdateCheckHttpClient()
+	{
+		var httpClient = new HttpClient();
+		httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(GitHubApiUserAgent);
+		return httpClient;
+	}
 
 	private static async Task CheckForUpdateAsync()
 	{
 		try
 		{
-			var url = "https://raw.githubusercontent.com/airtaxi/PinStats/master/latest";
-			var remoteVersionString = await HttpHelper.GetContentFromUrlAsync(url);
-			if (remoteVersionString is null) return;
+			var remoteVersionTagName = await GetLatestReleaseTagNameAsync();
+			if (string.IsNullOrWhiteSpace(remoteVersionTagName)) return;
+
+			var remoteVersionString = remoteVersionTagName.Trim().TrimStart('v', 'V');
+			if (!Version.TryParse(remoteVersionString, out var remoteVersion)) return;
 
 			var localVersion = Assembly.GetExecutingAssembly().GetName().Version;
-			var remoteVersion = new Version(remoteVersionString);
 			if (localVersion >= remoteVersion) return;
 
-			var configurationKey = "versionChecked" + remoteVersionString;
+			var configurationKey = "versionChecked" + remoteVersionTagName;
 			var hasNotificationShownForRemoteVersion = Configuration.GetValue<bool?>(configurationKey) ?? false;
 			if (hasNotificationShownForRemoteVersion) return;
 			Configuration.SetValue(configurationKey, true);
 
-            var builder = new AppNotificationBuilder()
-                .AddText(UpdateAvailableTitle)
-                .AddText($"A new version ({remoteVersion}) is available.\nDo you want to download it?")
-                .AddArgument("versionString", remoteVersionString);
+			var builder = new AppNotificationBuilder()
+				.AddText(UpdateAvailableTitle)
+				.AddText($"A new version ({remoteVersion}) is available.\nDo you want to download it?")
+				.AddArgument("versionString", remoteVersionTagName);
 
-            var notificationManager = AppNotificationManager.Default;
-            notificationManager.Show(builder.BuildNotification());
-        }
-		catch (HttpRequestException) { } // Ignore 
+			var notificationManager = AppNotificationManager.Default;
+			notificationManager.Show(builder.BuildNotification());
+		}
+		catch (HttpRequestException) { } // Ignore
+		catch (TaskCanceledException) { } // Ignore
+		catch (JsonException) { } // Ignore
 		finally { UpdateCheckTimer.Change((int)TimeSpan.FromMinutes(UpdateCheckIntervalInMinutes).TotalMilliseconds, Timeout.Infinite); }
+	}
+
+	private static async Task<string> GetLatestReleaseTagNameAsync()
+	{
+		var json = await UpdateCheckHttpClient.GetStringAsync(GitHubLatestReleaseApiUrl);
+		using var document = JsonDocument.Parse(json);
+		return document.RootElement.TryGetProperty("tag_name", out var tagNameElement) ? tagNameElement.GetString() : null;
 	}
 
 	public App()
@@ -65,50 +87,49 @@ public partial class App : Application
 		TaskScheduler.UnobservedTaskException += OnTaskSchedulerUnobservedTaskException;
 
 #if !DEBUG
-		AppNotificationManager notificationManager = AppNotificationManager.Default;
-        notificationManager.NotificationInvoked += OnNotificationManagerNotificationInvoked;
-        notificationManager.Register();
+		var notificationManager = AppNotificationManager.Default;
+		notificationManager.NotificationInvoked += OnNotificationManagerNotificationInvoked;
+		notificationManager.Register();
 
 		var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
-        var activationKind = activatedArgs.Kind;
+		var activationKind = activatedArgs.Kind;
 
-		if (activationKind == ExtendedActivationKind.AppNotification)
-			HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
+		if (activationKind == ExtendedActivationKind.AppNotification) HandleNotification((AppNotificationActivatedEventArgs)activatedArgs.Data);
 #endif
 
-        if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
-        else LiveCharts.Configure(config => config.AddDarkTheme());
+		if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
+		else LiveCharts.Configure(config => config.AddDarkTheme());
 
-        InitializeComponent();
+		InitializeComponent();
 		InitializeThemeSettings();
 		StartupHelper.DummyMethod(); // Force static constructor to run.
-    }
+	}
 
 
 #if !DEBUG
-    private static void OnNotificationManagerNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args) => HandleNotification(args);
+	private static void OnNotificationManagerNotificationInvoked(AppNotificationManager sender, AppNotificationActivatedEventArgs args) => HandleNotification(args);
 
-    private static void HandleNotification(AppNotificationActivatedEventArgs args)
-    {
-        var versionString = args.Arguments["versionString"];
-        if (versionString != null)
-        {
-            var url = "https://github.com/airtaxi/PinStats/releases/tag/" + versionString;
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-        }
-    }
+	private static void HandleNotification(AppNotificationActivatedEventArgs args)
+	{
+		var versionString = args.Arguments["versionString"];
+		if (versionString != null)
+		{
+			var url = GitHubReleaseTagUrl + versionString;
+			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+		}
+	}
 #endif
 
-    private static void InitializeThemeSettings()
+	private static void InitializeThemeSettings()
 	{
 		var hasThemeSettingsApplied = Configuration.GetValue<bool?>("WhiteIcon") != null;
 		if (hasThemeSettingsApplied) return;
 
 		var isDarkTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark;
 		Configuration.SetValue("WhiteIcon", isDarkTheme);
-    }
+	}
 
-    private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
+	private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
 	private void OnAppDomainUnhandledException(object sender, System.UnhandledExceptionEventArgs e) => WriteException(e.ExceptionObject as Exception);
 	private void OnApplicationUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
 	{
@@ -139,7 +160,7 @@ public partial class App : Application
 	{
 		base.OnLaunched(args);
 		LaunchEmptyWindowIfNotExists();
-    }
+	}
 
 	private static Window s_emptyWindow;
 	// WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
@@ -149,39 +170,39 @@ public partial class App : Application
 
 		s_emptyWindow = new() { Content = new Frame() };
 
-        // TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
-        (s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
-        (s_emptyWindow.Content as Frame).ActualThemeChanged += OnActualThemeChanged;
-        s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
-        s_emptyWindow.Activate();
-    }
+		// TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
+		(s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
+		(s_emptyWindow.Content as Frame).ActualThemeChanged += OnActualThemeChanged;
+		s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
+		s_emptyWindow.Activate();
+	}
 
-    private void OnActualThemeChanged(FrameworkElement sender, object args)
-    {
-        if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
-        else LiveCharts.Configure(config => config.AddDarkTheme());
-    }
+	private void OnActualThemeChanged(FrameworkElement sender, object args)
+	{
+		if (RequestedTheme == ApplicationTheme.Light) LiveCharts.Configure(config => config.AddLightTheme());
+		else LiveCharts.Configure(config => config.AddDarkTheme());
+	}
 
-    public static float MainWindowRasterizationScale { get; private set; }
-    private async void OnEmptyWindowContentLoaded(object sender, RoutedEventArgs e)
-    {
-        // Unsubscribe the event to prevent memory leak.
-        (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
+	public static float MainWindowRasterizationScale { get; private set; }
+	private async void OnEmptyWindowContentLoaded(object sender, RoutedEventArgs e)
+	{
+		// Unsubscribe the event to prevent memory leak.
+		(s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
 
-        // Hide the window so it doesn't appear on the screen.
-        s_emptyWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
+		// Hide the window so it doesn't appear on the screen.
+		s_emptyWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
 
-        var xamlRoot = s_emptyWindow.Content.XamlRoot;
-        MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
+		var xamlRoot = s_emptyWindow.Content.XamlRoot;
+		MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
 
-        var resource = new TaskbarUsageResource();
-        Resources.Add("TaskbarUsageResources", resource);
-        await CheckForUpdateAsync();
+		var resource = new TaskbarUsageResource();
+		Resources.Add("TaskbarUsageResources", resource);
+		await CheckForUpdateAsync();
 
-        // Disable efficiency mode to improve performance.
-        EfficiencyModeUtilities.SetEfficiencyMode(false);
+		// Disable efficiency mode to improve performance.
+		EfficiencyModeUtilities.SetEfficiencyMode(false);
 
-        // Set the process priority to high to improve performance.
-        Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-    }
+		// Set the process priority to high to improve performance.
+		Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+	}
 }
