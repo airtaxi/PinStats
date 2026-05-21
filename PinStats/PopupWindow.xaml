@@ -169,5 +169,17 @@
                 Background="Transparent"
                 ZoomMode="None" />
         </Grid>
+        <Grid x:Name="GdLoading" Grid.RowSpan="2">
+            <Grid.Background>
+                <AcrylicBrush Opacity="0.5" TintColor="{ThemeResource LayerOnMicaBaseAltFillColorDefault}" />
+            </Grid.Background>
+
+            <ProgressRing
+                Width="80"
+                Height="80"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsIndeterminate="True" />
+        </Grid>
     </Grid>
 </winuiex:WindowEx>

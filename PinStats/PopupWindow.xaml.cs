@@ -18,12 +18,18 @@ public sealed partial class PopupWindow : IDisposable
 
 	private readonly UsageViewModel _cpuUsageViewModel = new(UsageHistoryMetric.CpuUsage);
 	private readonly UsageViewModel _gpuUsageViewModel = new(UsageHistoryMetric.GpuUsage);
+	private CancellationTokenSource _refreshCancellationTokenSource;
 	private Timer _refreshTimer;
+	private int _refreshInProgress;
 	private bool _disposed;
+	private bool _loadingVisible;
 
-	public PopupWindow()
+    public PopupWindow()
 	{
 		InitializeComponent();
+
+        // Fetch initial status of loading indicator visibility
+        _loadingVisible = GdLoading.Visibility == Visibility.Visible;
 
 		// Disable window animations and set dark mode if
 		WindowHelper.DisableWindowAnimations(this);
@@ -119,20 +125,42 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void RefreshTimerCallback(object state)
 	{
-		try { RefreshHardwareInformation(); }
+		var refreshCancellationTokenSource = _refreshCancellationTokenSource;
+		if (_disposed || refreshCancellationTokenSource == null) return;
+		if (Interlocked.Exchange(ref _refreshInProgress, 1) == 1) return;
+
+		var cancellationToken = refreshCancellationTokenSource.Token;
+
+		try { RefreshHardwareInformation(cancellationToken); }
+		catch (OperationCanceledException) { }
 		catch { } // Ignore. Hardware is unpredictable.
-		finally { RestartRefreshTimer(); }
+		finally
+		{
+			Interlocked.Exchange(ref _refreshInProgress, 0);
+			if (_loadingVisible)
+			{
+				DispatcherQueue.TryEnqueue(() => GdLoading.Visibility = Visibility.Collapsed);
+				_loadingVisible = false;
+			}
+            if (!cancellationToken.IsCancellationRequested) RestartRefreshTimer();
+		}
 	}
 
-	private void RefreshHardwareInformation()
+	private void RefreshHardwareInformation(CancellationToken cancellationToken)
 	{
 		if (_disposed) return;
 
+		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateCpuHardware();
+		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateMemoryHardware();
+		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateNetworkHardware();
+		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateStorageHardware();
+		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateCurrentGpuHardware();
+		cancellationToken.ThrowIfCancellationRequested();
 
 		// CPU
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
@@ -176,7 +204,9 @@ public sealed partial class PopupWindow : IDisposable
 		// If the device has a battery, update the battery information.
 		if (HardwareMonitor.HasBattery())
 		{
+			cancellationToken.ThrowIfCancellationRequested();
 			HardwareMonitor.UpdateBatteryHardware();
+			cancellationToken.ThrowIfCancellationRequested();
 
 			var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent().Value; // Assume that the device has a battery due to the if statement above.
 			var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
@@ -215,9 +245,10 @@ public sealed partial class PopupWindow : IDisposable
 		var storageWriteRate = HardwareMonitor.GetStorageWriteRatePerSecondInBytes() / 1024;
 		var storageInformationText = $"R: {storageReadRate:N0} KB/s W: {storageWriteRate:N0} KB/s";
 
+		cancellationToken.ThrowIfCancellationRequested();
 		DispatcherQueue.TryEnqueue(() =>
 		{
-			if (_disposed) return;
+			if (_disposed || cancellationToken.IsCancellationRequested) return;
 
 			TextBlockCpuInformation.Text = cpuInformationText;
 			TextBlockGpuInformation.Text = gpuInformationText;
@@ -253,16 +284,21 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void StopRefreshTimer()
 	{
-		if (_refreshTimer == null) return;
+		_refreshCancellationTokenSource?.Cancel();
 
-		try { _refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); }
-		catch (ObjectDisposedException) { }
+		if (_refreshTimer != null)
+		{
+			try { _refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); }
+			catch (ObjectDisposedException) { }
 
-		_refreshTimer.Dispose();
-		_refreshTimer = null;
+			_refreshTimer.Dispose();
+			_refreshTimer = null;
+		}
+		_refreshCancellationTokenSource?.Dispose();
+		_refreshCancellationTokenSource = null;
 	}
 
-	private void OnActivated(object sender, WindowActivatedEventArgs args)
+    private void OnActivated(object sender, WindowActivatedEventArgs args)
 	{
 		// Close the window when the window lost its focus.
 		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
@@ -295,9 +331,6 @@ public sealed partial class PopupWindow : IDisposable
 	{
 		if (_disposed || _refreshTimer != null) return;
 
-		// Setup the timer to refresh the hardware information
-		_refreshTimer = new(RefreshTimerCallback, null, RefreshTimerIntervalInMilliseconds, Timeout.Infinite); // 1 second (1000 ms)
-
 		// Force the window to be in the foreground
 		//var windowHandle = this.GetWindowHandle();
 		//var foregroundWindow = WindowHelper.GetForegroundWindow();
@@ -310,11 +343,11 @@ public sealed partial class PopupWindow : IDisposable
 		BringToFront();
 
 		// Should be called after BringToFront() to prevent the window from being closed when ComboBoxGpuList.SelectedIndex is set.
-		// (RefreshHardwareInformation() calls Close() when the window is not in focus)
 		InitializeInterface();
 
-		// Refresh the hardware information immediately
-		RefreshHardwareInformation();
+		// Setup the timer to refresh the hardware information.
+		_refreshCancellationTokenSource = new();
+		_refreshTimer = new(RefreshTimerCallback, null, 0, Timeout.Infinite);
 	}
 
 	private void OnClosed(object sender, WindowEventArgs args) => Dispose();
