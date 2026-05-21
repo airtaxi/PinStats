@@ -19,11 +19,11 @@ public sealed class UpdateVisitor : IVisitor
 	public void VisitHardware(IHardware hardware)
 	{
 		hardware.Update();
-		foreach (IHardware subHardware in hardware.SubHardware) subHardware.Accept(this);
+		foreach (var subHardware in hardware.SubHardware) subHardware.Accept(this);
 	}
 
-	public void VisitSensor(ISensor sensor) { }
-	public void VisitParameter(IParameter parameter) { }
+	public void VisitSensor(ISensor sensor) => _ = sensor; // Do nothing. Sensor values are updated in VisitHardware method.
+    public void VisitParameter(IParameter parameter) => _ = parameter; // Do nothing. Parameters are not used in this application.
 }
 
 public static class HardwareMonitor
@@ -35,37 +35,55 @@ public static class HardwareMonitor
 	private const int StorageTimerInMilliseconds = 1000;
 	private const int NetworkTimerInMilliseconds = 1000;
 
-	private static Computer Computer;
-	private readonly static List<IHardware> CpuHardware = [];
-	private readonly static List<IHardware> GpuHardware = [];
-	private readonly static List<IHardware> NetworkHardware = [];
-	private readonly static List<IHardware> StorageHardware = [];
-	private readonly static List<IHardware> MemoryHardware = [];
-	private readonly static List<IHardware> BatteryHardware = [];
-	private readonly static SemaphoreSlim HardwareSemaphore = new(1, 1);
-	private readonly static SemaphoreSlim ComputerHardwareSemaphore = new(1, 1);
-	private static string FallbackCpuHardwareName;
-	private static string FallbackGpuHardwareName;
+	private static Computer s_computer;
+	private static IHardware[] s_cpuHardwares = [];
+	private static IHardware[] s_gpuHardwares = [];
+	private static IHardware[] s_networkHardwares = [];
+	private static IHardware[] s_storageHardwares = [];
+	private static IHardware[] s_memoryHardwares = [];
+	private static IHardware[] s_batteryHardwares = [];
+	private static int s_refreshComputerHardwareInProgress;
+	private static int s_cpuHardwareUpdateInProgress;
+	private static int s_gpuHardwareUpdateInProgress;
+	private static int s_networkHardwareUpdateInProgress;
+	private static int s_storageHardwareUpdateInProgress;
+	private static int s_memoryHardwareUpdateInProgress;
+	private static int s_batteryHardwareUpdateInProgress;
+	private static int s_networkTimerInProgress;
+	private static int s_storageTimerInProgress;
+	private static int s_cpuUsageTimerInProgress;
+	private static int s_gpuUsageTimerInProgress;
+	private static string s_fallbackCpuHardwareName;
+	private static string s_fallbackGpuHardwareName;
 
-	private readonly static Timer StorageTimer = new() { Interval = StorageTimerInMilliseconds };
+	private static readonly Timer s_storageTimer = new() { Interval = StorageTimerInMilliseconds };
 	private static float s_storageReadRatePerSecondInBytes;
 	private static float s_storageWriteRatePerSecondInBytes;
 
-	private readonly static Timer NetworkTimer = new() { Interval = NetworkTimerInMilliseconds };
+	private static readonly Timer s_networkTimer = new() { Interval = NetworkTimerInMilliseconds };
 	private static long s_downloadSpeedInBytes;
 	private static long s_uploadSpeedInBytes;
 
-	private readonly static Timer CpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
-	private readonly static List<float> LastCpuUsages = [];
+	private static readonly Timer s_cpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
+	private static readonly List<float> s_lastCpuUsages = [];
 	private static float s_cpuUsage;
 
-	private readonly static Timer GpuUsageTimer = new() { Interval = IsArm64Architecture ? UsageTimerIntervalInMilliseconds * 10 : UsageTimerIntervalInMilliseconds };
-	private readonly static List<float> LastGpuUsages = [];
+	private static readonly Timer s_gpuUsageTimer = new() { Interval = IsArm64Architecture ? UsageTimerIntervalInMilliseconds * 10 : UsageTimerIntervalInMilliseconds };
+	private static readonly List<float> s_lastGpuUsages = [];
 	private static float s_gpuUsage;
 
 	public static bool ShouldUpdate { get; set; } = true;
 
 	public static bool IsArm64Architecture => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+
+	private static bool IsX86OrX64Architecture => RuntimeInformation.ProcessArchitecture is Architecture.X86 or Architecture.X64;
+
+	private static IHardware[] CpuHardwares => Volatile.Read(ref s_cpuHardwares);
+	private static IHardware[] GpuHardwares => Volatile.Read(ref s_gpuHardwares);
+	private static IHardware[] NetworkHardwares => Volatile.Read(ref s_networkHardwares);
+	private static IHardware[] StorageHardwares => Volatile.Read(ref s_storageHardwares);
+	private static IHardware[] MemoryHardwares => Volatile.Read(ref s_memoryHardwares);
+	private static IHardware[] BatteryHardwares => Volatile.Read(ref s_batteryHardwares);
 
 	static HardwareMonitor()
 	{
@@ -78,68 +96,60 @@ public static class HardwareMonitor
 		SystemEvents.SessionSwitch += OnSessionSwitch;
 
 		// Initialize Timers
-		NetworkTimer.Elapsed += OnNetworkTimerElapsed;
-		NetworkTimer.Start();
-		OnNetworkTimerElapsed(NetworkTimer, null);
+		s_networkTimer.Elapsed += OnNetworkTimerElapsed;
+		s_networkTimer.Start();
+		OnNetworkTimerElapsed(s_networkTimer, null);
 
-		StorageTimer.Elapsed += OnStorageTimerElapsed;
-		StorageTimer.Start();
-		OnStorageTimerElapsed(StorageTimer, null);
+		s_storageTimer.Elapsed += OnStorageTimerElapsed;
+		s_storageTimer.Start();
+		OnStorageTimerElapsed(s_storageTimer, null);
 
-		CpuUsageTimer.Elapsed += OnCpuUsageTimerElapsed;
-		CpuUsageTimer.Start();
-		OnCpuUsageTimerElapsed(CpuUsageTimer, null);
+		s_cpuUsageTimer.Elapsed += OnCpuUsageTimerElapsed;
+		s_cpuUsageTimer.Start();
+		OnCpuUsageTimerElapsed(s_cpuUsageTimer, null);
 
-		GpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
-		GpuUsageTimer.Start();
-		OnGpuUsageTimerElapsed(GpuUsageTimer, null);
-    }
+		s_gpuUsageTimer.Elapsed += OnGpuUsageTimerElapsed;
+		s_gpuUsageTimer.Start();
+		OnGpuUsageTimerElapsed(s_gpuUsageTimer, null);
+	}
 
 	public static async Task RefreshComputerHardwareAsync()
 	{
-		await ComputerHardwareSemaphore.WaitAsync();
+		if (Interlocked.Exchange(ref s_refreshComputerHardwareInProgress, 1) == 1) return;
+
 		try
 		{
-			if (Computer != null)
-			{
-				// Closing computer takes a lot of time.
-				// Caching Computer and closing it in a separate thread improves performance.
-				_ = Task.Run(() =>
-				{
-					var computer = Computer;
-					computer.HardwareAdded -= OnComputerHardwareAddedOrRemoved;
-					computer.HardwareRemoved -= OnComputerHardwareAddedOrRemoved;
-					computer.Close();
-				});
-			}
+			var previousComputer = Volatile.Read(ref s_computer);
+
 			// Configure new Computer
-			Computer = new Computer
+			var computer = new Computer
 			{
-				IsCpuEnabled = RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64,
-				IsGpuEnabled = RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64,
+				IsCpuEnabled = IsX86OrX64Architecture,
+				IsGpuEnabled = IsX86OrX64Architecture,
 				IsMemoryEnabled = true,
 				IsNetworkEnabled = true,
 				IsBatteryEnabled = true,
 				IsStorageEnabled = true,
 				IsMotherboardEnabled = true,
 			};
-			Computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
-			Computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
+			computer.HardwareRemoved += OnComputerHardwareAddedOrRemoved;
+			computer.HardwareAdded += OnComputerHardwareAddedOrRemoved;
+			Volatile.Write(ref s_computer, computer);
 
-			if (RuntimeInformation.ProcessArchitecture != Architecture.X86 && RuntimeInformation.ProcessArchitecture != Architecture.X64)
+			if (!IsX86OrX64Architecture)
 			{
 				using (var searcher = new ManagementObjectSearcher("select * from Win32_VideoController"))
 				{
-					var gpuName = searcher.Get().Cast<ManagementObject>().Where(d => d["VideoProcessor"] != null).FirstOrDefault()["Name"].ToString();
-					FallbackGpuHardwareName = gpuName;
+					var gpuName = searcher.Get().Cast<ManagementObject>().FirstOrDefault(managementObject => managementObject["VideoProcessor"] != null)?["Name"]?.ToString();
+					s_fallbackGpuHardwareName = gpuName;
 				}
 
 				using (var searcher = new ManagementObjectSearcher("select Name from Win32_Processor"))
 				{
 					var managementObjects = searcher.Get();
 
-					string cpuName = null;
-					int cpuCount = 0;
+					var cpuName = default(string);
+					var cpuCount = 0;
 					foreach (var managementObject in managementObjects)
 					{
 						if (string.IsNullOrEmpty(cpuName)) cpuName = managementObject["Name"].ToString();
@@ -147,9 +157,9 @@ public static class HardwareMonitor
 						managementObject.Dispose();
 					}
 
-					if (cpuCount == 0) FallbackCpuHardwareName = "N/A";
-					else if (cpuCount == 1) FallbackCpuHardwareName = cpuName;
-					else FallbackCpuHardwareName = cpuName + " + " + (cpuCount - 1) + " more";
+					if (cpuCount == 0) s_fallbackCpuHardwareName = "N/A";
+					else if (cpuCount == 1) s_fallbackCpuHardwareName = cpuName;
+					else s_fallbackCpuHardwareName = cpuName + " + " + (cpuCount - 1) + " more";
 				}
 			}
 
@@ -157,99 +167,177 @@ public static class HardwareMonitor
 			await Task.Run(() =>
 			{
 				// Close (Optional) and Open Computer to refresh Hardware.
-				Computer.Open(); // This method takes a lot of time. It is recommended to call this method in a separate thread.
-				Computer.Accept(new UpdateVisitor());
+				computer.Open(); // This method takes a lot of time. It is recommended to call this method in a separate thread.
+				computer.Accept(new UpdateVisitor());
 
 				// Refresh Hardware
-				RefreshHardware();
+				RefreshHardware(computer);
 			});
+
+			CloseComputerAsync(previousComputer);
 		}
-        catch (Exception exception) { App.WriteException(exception); }
-        finally
-		{
-			if (ComputerHardwareSemaphore.CurrentCount == 0)
-			{
-				ComputerHardwareSemaphore.Release(); // Release semaphore if it is not released yet.
-			}
-		}
+		catch (Exception exception) { App.WriteException(exception); }
+		finally { Volatile.Write(ref s_refreshComputerHardwareInProgress, 0); }
 	}
 
-	private static void RefreshHardware()
+	private static void CloseComputerAsync(Computer computer)
 	{
-		HardwareSemaphore.Wait();
+		if (computer == null) return;
+
+		// Closing computer takes a lot of time.
+		// Caching Computer and closing it in a separate thread improves performance.
+		_ = Task.Run(() =>
+		{
+			try
+			{
+				computer.HardwareAdded -= OnComputerHardwareAddedOrRemoved;
+				computer.HardwareRemoved -= OnComputerHardwareAddedOrRemoved;
+				computer.Close();
+			}
+			catch (Exception exception) { App.WriteException(exception); }
+		});
+	}
+
+	private static void RefreshHardware() => RefreshHardware(Volatile.Read(ref s_computer));
+
+	private static void RefreshHardware(Computer computer)
+	{
 		try
 		{
-			CpuHardware.Clear();
-			GpuHardware.Clear();
-			NetworkHardware.Clear();
-			StorageHardware.Clear();
-			MemoryHardware.Clear();
-			BatteryHardware.Clear();
+			if (computer == null) return;
 
-			foreach (var hardware in Computer.Hardware)
+			var cpuHardwares = new List<IHardware>();
+			var gpuHardwares = new List<IHardware>();
+			var networkHardwares = new List<IHardware>();
+			var storageHardwares = new List<IHardware>();
+			var memoryHardwares = new List<IHardware>();
+			var batteryHardwares = new List<IHardware>();
+
+			foreach (var hardware in computer.Hardware)
 			{
 				if (hardware.HardwareType == HardwareType.Cpu)
 				{
-					CpuHardware.Add(hardware);
+					cpuHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel)
 				{
-					GpuHardware.Add(hardware);
+					gpuHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.Network)
 				{
-					NetworkHardware.Add(hardware);
+					networkHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.Storage)
 				{
-					StorageHardware.Add(hardware);
+					storageHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.Memory)
 				{
-					MemoryHardware.Add(hardware);
+					memoryHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.Battery)
 				{
-					BatteryHardware.Add(hardware);
+					batteryHardwares.Add(hardware);
 					continue;
 				}
 			}
-			GpuHardware.Reverse();
+			gpuHardwares.Reverse();
+
+			Volatile.Write(ref s_cpuHardwares, cpuHardwares.ToArray());
+			Volatile.Write(ref s_gpuHardwares, gpuHardwares.ToArray());
+			Volatile.Write(ref s_networkHardwares, networkHardwares.ToArray());
+			Volatile.Write(ref s_storageHardwares, storageHardwares.ToArray());
+			Volatile.Write(ref s_memoryHardwares, memoryHardwares.ToArray());
+			Volatile.Write(ref s_batteryHardwares, batteryHardwares.ToArray());
 		}
-        catch (Exception exception) { App.WriteException(exception); }
-        finally { HardwareSemaphore.Release(); }
+		catch (Exception exception) { App.WriteException(exception); }
 	}
 
-    private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
+	private static void OnComputerHardwareAddedOrRemoved(IHardware hardware) => RefreshHardware();
 
-	public static string GetMotherboardName() => Computer.Hardware.FirstOrDefault(x => x.HardwareType == HardwareType.Motherboard)?.Name ?? "N/A";
-
-    public static List<string> GetGpuHardwareNames()
+	public static string GetMotherboardName()
 	{
-		HardwareSemaphore.Wait();
-		try { return [.. GpuHardware.Select(x => x.Name), FallbackGpuHardwareName]; }
-		finally { HardwareSemaphore.Release(); }
+		try { return Volatile.Read(ref s_computer)?.Hardware.FirstOrDefault(x => x.HardwareType == HardwareType.Motherboard)?.Name ?? "N/A"; }
+		catch (Exception exception)
+		{
+			App.WriteException(exception);
+			return "N/A";
+		}
 	}
+
+	private static bool TryUpdateHardware(IHardware[] hardwares, ref int updateInProgress)
+	{
+		if (hardwares.Length == 0) return true;
+		if (Interlocked.Exchange(ref updateInProgress, 1) == 1) return false;
+
+		try
+		{
+			foreach (var hardware in hardwares) hardware.Update();
+			return true;
+		}
+		catch (Exception exception)
+		{
+			App.WriteException(exception);
+			return false;
+		}
+		finally { Volatile.Write(ref updateInProgress, 0); }
+	}
+
+	private static bool TryUpdateHardware(IHardware hardware, ref int updateInProgress)
+	{
+		if (Interlocked.Exchange(ref updateInProgress, 1) == 1) return false;
+
+		try
+		{
+			hardware.Update();
+			return true;
+		}
+		catch (Exception exception)
+		{
+			App.WriteException(exception);
+			return false;
+		}
+		finally { Volatile.Write(ref updateInProgress, 0); }
+	}
+
+	private static ISensor[] GetSensors(IHardware[] hardwares)
+	{
+		try { return [.. hardwares.SelectMany(x => x.Sensors)]; }
+		catch (Exception exception)
+		{
+			App.WriteException(exception);
+			return [];
+		}
+	}
+
+	private static ISensor[] GetSensors(IHardware hardware)
+	{
+		try { return [.. hardware.Sensors]; }
+		catch (Exception exception)
+		{
+			App.WriteException(exception);
+			return [];
+		}
+	}
+
+	public static List<string> GetGpuHardwareNames() => [.. GpuHardwares.Select(x => x.Name), s_fallbackGpuHardwareName];
 
 	public static float GetAverageCpuUsage() => s_cpuUsage;
 
 	public static float? GetAverageCpuTemperature(bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (update) CpuHardware.ForEach(x => x.Update());
-			var cpuTemperatureSensors = CpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Temperature);
+		var cpuHardwares = CpuHardwares;
+		if (update) TryUpdateHardware(cpuHardwares, ref s_cpuHardwareUpdateInProgress);
 
-			var temperature = cpuTemperatureSensors.Where(x => x.Value != null && x.Value != float.NaN).Average(x => x.Value) ?? 0;
-			return temperature > 0 ? temperature : null;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var cpuTemperatureSensors = GetSensors(cpuHardwares).Where(x => x.SensorType == SensorType.Temperature);
+
+		var temperature = cpuTemperatureSensors.Where(x => x.Value != null && x.Value != float.NaN).Average(x => x.Value) ?? 0;
+		return temperature > 0 ? temperature : null;
 	}
 
 	private static float s_lastTotalCpuPackagePower;
@@ -257,17 +345,14 @@ public static class HardwareMonitor
 	{
 		if (IsArm64Architecture) return Arm64PowerMeterHelper.GetTotalCpuPackagePower();
 
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (update) CpuHardware.ForEach(x => x.Update());
-			var cpuPowerSensors = CpuHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power);
+		var cpuHardwares = CpuHardwares;
+		if (update) TryUpdateHardware(cpuHardwares, ref s_cpuHardwareUpdateInProgress);
 
-			var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value);
-			if (cpuPackagePower.HasValue) s_lastTotalCpuPackagePower = cpuPackagePower.Value;
-			return cpuPackagePower ?? s_lastTotalCpuPackagePower;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var cpuPowerSensors = GetSensors(cpuHardwares).Where(x => x.SensorType == SensorType.Power);
+
+		var cpuPackagePower = cpuPowerSensors.Where(x => x.Name.EndsWith("Package")).Sum(x => x.Value);
+		if (cpuPackagePower.HasValue) s_lastTotalCpuPackagePower = cpuPackagePower.Value;
+		return cpuPackagePower ?? s_lastTotalCpuPackagePower;
 	}
 
 	public static float GetCurrentGpuUsage() => s_gpuUsage;
@@ -280,12 +365,13 @@ public static class HardwareMonitor
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return 0; // If there are no GPUs, return 0
 
-		if (update) gpuHardware.Update();
+		if (update) TryUpdateHardware(gpuHardware, ref s_gpuHardwareUpdateInProgress);
 
-		ISensor gpuPowerSensor = null;
-		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Core");
-		else if (gpuHardware.HardwareType == HardwareType.GpuNvidia) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
-		else if (gpuHardware.HardwareType == HardwareType.GpuIntel) gpuPowerSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Power");
+		var gpuPowerSensor = default(ISensor);
+		var gpuSensors = GetSensors(gpuHardware);
+		if (gpuHardware.HardwareType == HardwareType.GpuAmd) gpuPowerSensor = gpuSensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Core");
+		else if (gpuHardware.HardwareType == HardwareType.GpuNvidia) gpuPowerSensor = gpuSensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Package");
+		else if (gpuHardware.HardwareType == HardwareType.GpuIntel) gpuPowerSensor = gpuSensors.FirstOrDefault(x => x.SensorType == SensorType.Power && x.Name == "GPU Power");
 
 		if (gpuPowerSensor?.Value.HasValue ?? false) s_lastCurrentGpuPower = gpuPowerSensor.Value.Value;
 
@@ -299,9 +385,9 @@ public static class HardwareMonitor
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null) return null; // If there are no GPUs, return null
 
-		if (update) gpuHardware.Update();
+		if (update) TryUpdateHardware(gpuHardware, ref s_gpuHardwareUpdateInProgress);
 
-		var gpuTemperatureSensors = gpuHardware.Sensors.Where(x => x.SensorType == SensorType.Temperature && x.Value != float.NaN).ToList();
+		var gpuTemperatureSensors = GetSensors(gpuHardware).Where(x => x.SensorType == SensorType.Temperature && x.Value != float.NaN).ToList();
 		if (gpuTemperatureSensors.Count == 0) return null;
 
 		var temperature = gpuTemperatureSensors.Average(x => x.Value);
@@ -310,11 +396,12 @@ public static class HardwareMonitor
 
 	public static string GetCpuName()
 	{
-		if (CpuHardware.Count == 0) return FallbackCpuHardwareName ?? "N/A";
+		var cpuHardwares = CpuHardwares;
+		if (cpuHardwares.Length == 0) return s_fallbackCpuHardwareName ?? "N/A";
 
-        var firstCpuHardware = CpuHardware[0];
-		if (CpuHardware.Count == 1) return firstCpuHardware.Name;
-		else return firstCpuHardware.Name + " + " + (CpuHardware.Count - 1) + " more";
+		var firstCpuHardware = cpuHardwares[0];
+		if (cpuHardwares.Length == 1) return firstCpuHardware.Name;
+		else return firstCpuHardware.Name + " + " + (cpuHardwares.Length - 1) + " more";
 	}
 
 	public static string GetCurrentGpuName()
@@ -322,7 +409,7 @@ public static class HardwareMonitor
 		var gpuHardware = GetCurrentGpuHardware();
 		if (gpuHardware == null)
 		{
-			if (!string.IsNullOrEmpty(FallbackGpuHardwareName)) return FallbackGpuHardwareName;
+			if (!string.IsNullOrEmpty(s_fallbackGpuHardwareName)) return s_fallbackGpuHardwareName;
 			return "N/A"; // If there are no GPUs, return N/A.
 		}
 
@@ -336,175 +423,143 @@ public static class HardwareMonitor
 
 	public static float? GetTotalBatteryPercent(bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (BatteryHardware == null) return null;
-			if (update) BatteryHardware.ForEach(x => x.Update());
+		var batteryHardwares = BatteryHardwares;
+		if (batteryHardwares.Length == 0) return null;
+		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
 
-			var fullyChargedCapacity = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity").Sum(x => x.Value) ?? 0;
-			if (fullyChargedCapacity == 0) return null;
+		var batterySensors = GetSensors(batteryHardwares);
+		var fullyChargedCapacity = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity").Sum(x => x.Value) ?? 0;
+		if (fullyChargedCapacity == 0) return null;
 
-			var remainingCapacity = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity").Sum(x => x.Value) ?? 0;
+		var remainingCapacity = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity").Sum(x => x.Value) ?? 0;
 
-			return remainingCapacity / fullyChargedCapacity * 100;
-		}
-		finally { HardwareSemaphore.Release(); }
+		return remainingCapacity / fullyChargedCapacity * 100;
 	}
 
 	public static float? GetTotalBatteryChargeRate(bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (BatteryHardware == null) return null;
-			if (update) BatteryHardware.ForEach(x => x.Update());
+		var batteryHardwares = BatteryHardwares;
+		if (batteryHardwares.Length == 0) return null;
+		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
 
-			var dischargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name == "Discharge Rate");
-			var chargeRateSensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Power && x.Name == "Charge Rate");
+		var batterySensors = GetSensors(batteryHardwares);
+		var dischargeRateSensors = batterySensors.Where(x => x.SensorType == SensorType.Power && x.Name == "Discharge Rate");
+		var chargeRateSensors = batterySensors.Where(x => x.SensorType == SensorType.Power && x.Name == "Charge Rate");
 
-			var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
-			var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
+		var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
+		var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
 
-			var result = chargeRate + dischargeRate;
-			return result;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var result = chargeRate + dischargeRate;
+		return result;
 	}
 
 	public static TimeSpan? GetTotalBatteryEstimatedTime(bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (BatteryHardware == null) return null;
-			if (update) BatteryHardware.ForEach(x => x.Update());
+		var batteryHardwares = BatteryHardwares;
+		if (batteryHardwares.Length == 0) return null;
+		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
 
-			var sensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.TimeSpan);
-			var remainingSeconds = sensors.Sum(x => x.Value) ?? 0;
-			if (remainingSeconds == 0) return null;
+		var sensors = GetSensors(batteryHardwares).Where(x => x.SensorType == SensorType.TimeSpan);
+		var remainingSeconds = sensors.Sum(x => x.Value) ?? 0;
+		if (remainingSeconds == 0) return null;
 
-			var result = TimeSpan.FromSeconds(remainingSeconds);
-			return result;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var result = TimeSpan.FromSeconds(remainingSeconds);
+		return result;
 	}
 
 	public static float? GetAverageBatteryHealthPercent(bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (BatteryHardware == null) return null;
-			if (update) BatteryHardware.ForEach(x => x.Update());
+		var batteryHardwares = BatteryHardwares;
+		if (batteryHardwares.Length == 0) return null;
+		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
 
-			var designedCapacitySensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Designed Capacity");
-			var fullyChargedCapacitySensors = BatteryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity");
+		var batterySensors = GetSensors(batteryHardwares);
+		var designedCapacitySensors = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Designed Capacity");
+		var fullyChargedCapacitySensors = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity");
 
-			var designedCapacitySum = designedCapacitySensors.Sum(x => x.Value) ?? 0;
-			var fullyChargedCapacitySum = fullyChargedCapacitySensors.Sum(x => x.Value) ?? 0;
-			if (designedCapacitySum == 0 || fullyChargedCapacitySum == 0) return null;
+		var designedCapacitySum = designedCapacitySensors.Sum(x => x.Value) ?? 0;
+		var fullyChargedCapacitySum = fullyChargedCapacitySensors.Sum(x => x.Value) ?? 0;
+		if (designedCapacitySum == 0 || fullyChargedCapacitySum == 0) return null;
 
-			var percent = fullyChargedCapacitySum / designedCapacitySum * 100;
-			return percent;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var percent = fullyChargedCapacitySum / designedCapacitySum * 100;
+		return percent;
 	}
 
 	private static IHardware GetCurrentGpuHardware()
 	{
 		var gpuIndex = Configuration.GetValue<int?>("GpuIndex") ?? 0;
+		var gpuHardwares = GpuHardwares;
 
 		// If there are no GPUs, return null.
-		if (GpuHardware.Count == 0) return null;
+		if (gpuHardwares.Length == 0) return null;
 
-		if (gpuIndex > GpuHardware.Count) // User might have removed a GPU.
+		if (gpuIndex < 0 || gpuIndex >= gpuHardwares.Length) // User might have removed a GPU.
 		{
 			gpuIndex = 0;
 			Configuration.SetValue("GpuIndex", gpuIndex);
 		}
 
-		return GpuHardware[gpuIndex];
+		return gpuHardwares[gpuIndex];
 	}
 
 	public static string GetMemoryInformationText(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (update) MemoryHardware.ForEach(x => x.Update());
+		var memoryHardwares = MemoryHardwares;
+		if (update) TryUpdateHardware(memoryHardwares, ref s_memoryHardwareUpdateInProgress);
 
-            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
-            var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
-			var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
+		var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+		var memorySensors = GetSensors(memoryHardwares);
+		var memoryUsedSensors = memorySensors.Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
+		var memoryAvailableSensors = memorySensors.Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
 
-			var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
-			var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
+		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
+		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
-			var totalMemory = memoryUsed + memoryAvailable;
-			return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
-		}
-		finally { HardwareSemaphore.Release(); }
+		var totalMemory = memoryUsed + memoryAvailable;
+		return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
 	}
 
 	public static float GetTotalMemory(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (update) MemoryHardware.ForEach(x => x.Update());
+		var memoryHardwares = MemoryHardwares;
+		if (update) TryUpdateHardware(memoryHardwares, ref s_memoryHardwareUpdateInProgress);
 
-            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
-            var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
-            var memoryAvailableSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
+		var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+		var memorySensors = GetSensors(memoryHardwares);
+		var memoryUsedSensors = memorySensors.Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
+		var memoryAvailableSensors = memorySensors.Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Available" && x.Hardware.Name == memoryHardwareName);
 
-            var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
-			var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
+		var memoryUsed = memoryUsedSensors.Sum(x => x.Value) ?? 0;
+		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
-			var totalMemory = memoryUsed + memoryAvailable;
-			return totalMemory;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var totalMemory = memoryUsed + memoryAvailable;
+		return totalMemory;
 	}
 
 	public static float GetUsedMemory(bool queryVirtualMemory = false, bool update = false)
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			if (update) MemoryHardware.ForEach(x => x.Update());
+		var memoryHardwares = MemoryHardwares;
+		if (update) TryUpdateHardware(memoryHardwares, ref s_memoryHardwareUpdateInProgress);
 
-            var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
-			var memoryUsedSensors = MemoryHardware.SelectMany(x => x.Sensors).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
-			return memoryUsedSensors.Sum(x => x.Value) ?? 0;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var memoryHardwareName = queryVirtualMemory ? "Virtual Memory" : "Total Memory";
+		var memoryUsedSensors = GetSensors(memoryHardwares).Where(x => x.SensorType == SensorType.Data && x.Name == "Memory Used" && x.Hardware.Name == memoryHardwareName);
+		return memoryUsedSensors.Sum(x => x.Value) ?? 0;
 	}
 
 	private static float GetStorageReadRateInBytes()
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			var sensors = StorageHardware.SelectMany(x => x.Sensors).Where(x => x.Name == "Read Rate");
+		var sensors = GetSensors(StorageHardwares).Where(x => x.Name == "Read Rate");
 
-			var total = sensors.Sum(x => x.Value) ?? 0;
-			return total;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return total;
 	}
 
 	private static float GetStorageWriteRateInBytes()
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			var sensors = StorageHardware.SelectMany(x => x.Sensors).Where(x => x.Name == "Write Rate");
+		var sensors = GetSensors(StorageHardwares).Where(x => x.Name == "Write Rate");
 
-			var total = sensors.Sum(x => x.Value) ?? 0;
-			return total;
-		}
-		finally { HardwareSemaphore.Release(); }
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return total;
 	}
 
 	public static float GetStorageReadRatePerSecondInBytes() => s_storageReadRatePerSecondInBytes;
@@ -515,161 +570,143 @@ public static class HardwareMonitor
 
 	private static long GetNetworkTotalUploadedInBytes()
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			var sensors = NetworkHardware.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Uploaded");
+		var sensors = GetSensors(NetworkHardwares).Where(x => x.Name == "Data Uploaded");
 
-			var total = sensors.Sum(x => x.Value) ?? 0;
-			return (long)(total * (double)0x40000000);
-		}
-		finally { HardwareSemaphore.Release(); }
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return (long)(total * (double)0x40000000);
 	}
 
 	private static long GetNetworkTotalDownloadedInBytes()
 	{
-		HardwareSemaphore.Wait();
-		try
-		{
-			var sensors = NetworkHardware.SelectMany(x => x.Sensors).Where(x => x.Name == "Data Downloaded");
+		var sensors = GetSensors(NetworkHardwares).Where(x => x.Name == "Data Downloaded");
 
-			var total = sensors.Sum(x => x.Value) ?? 0;
-			return (long)(total * (double)0x40000000);
-		}
-		finally { HardwareSemaphore.Release(); }
+		var total = sensors.Sum(x => x.Value) ?? 0;
+		return (long)(total * (double)0x40000000);
 	}
 
-	public static void UpdateCpuHardware()
+	public static void UpdateCpuHardware() => TryUpdateHardware(CpuHardwares, ref s_cpuHardwareUpdateInProgress);
+
+	public static void UpdateGpuHardware() => TryUpdateHardware(GpuHardwares, ref s_gpuHardwareUpdateInProgress);
+
+	public static void UpdateNetworkHardware() => TryUpdateHardware(NetworkHardwares, ref s_networkHardwareUpdateInProgress);
+
+	public static void UpdateStorageHardware() => TryUpdateHardware(StorageHardwares, ref s_storageHardwareUpdateInProgress);
+
+	public static void UpdateMemoryHardware() => TryUpdateHardware(MemoryHardwares, ref s_memoryHardwareUpdateInProgress);
+
+	public static void UpdateBatteryHardware() => TryUpdateHardware(BatteryHardwares, ref s_batteryHardwareUpdateInProgress);
+
+	public static void UpdateCurrentGpuHardware()
 	{
-		HardwareSemaphore.Wait();
-		try { CpuHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed.
-        finally { HardwareSemaphore.Release(); }
+		var gpuHardware = GetCurrentGpuHardware();
+		if (gpuHardware != null) TryUpdateHardware(gpuHardware, ref s_gpuHardwareUpdateInProgress);
 	}
-
-	public static void UpdateGpuHardware()
-	{
-		HardwareSemaphore.Wait();
-		try { GpuHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: unplugging external GPU).
-        finally { HardwareSemaphore.Release(); }
-	}
-
-	public static void UpdateNetworkHardware()
-	{
-		HardwareSemaphore.Wait();
-		try { NetworkHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: unplugging a network adapter).
-        finally { HardwareSemaphore.Release(); }
-	}
-
-	public static void UpdateStorageHardware()
-	{
-		HardwareSemaphore.Wait();
-		try { StorageHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: storage device failure or ejection).
-        finally { HardwareSemaphore.Release(); }
-	}
-
-	public static void UpdateMemoryHardware()
-	{
-		HardwareSemaphore.Wait();
-		try { MemoryHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed.
-        finally { HardwareSemaphore.Release(); }
-	}
-
-	public static void UpdateBatteryHardware()
-	{
-		HardwareSemaphore.Wait();
-		try { BatteryHardware.ForEach(x => x.Update()); }
-        catch (Exception exception) { App.WriteException(exception); } // Can throw exception when hardware is changed (eg: battery removal).
-        finally { HardwareSemaphore.Release(); }
-	}
-
-	public static void UpdateCurrentGpuHardware() => GetCurrentGpuHardware()?.Update();
 
 	private static long s_bytesUploaded;
 	private static long s_bytesDownloaded;
 
 	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
-    {
-        // If the system is in sleep or hibernate mode, don't update the hardware information.
-        if (!ShouldUpdate) return;
-
-        UpdateNetworkHardware();
-		var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
-		var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
-
-		// Values can reset back at zero (eg: after waking from sleep).
-		if (totalUploadedBytes < s_bytesUploaded || totalDownloadedBytes < s_bytesDownloaded)
+	{
+		if (Interlocked.Exchange(ref s_networkTimerInProgress, 1) == 1) return;
+		try
 		{
-			s_bytesUploaded = 0;
-			s_bytesDownloaded = 0;
+			// If the system is in sleep or hibernate mode, don't update the hardware information.
+			if (!ShouldUpdate) return;
+
+			UpdateNetworkHardware();
+			var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
+			var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
+
+			// Values can reset back at zero (eg: after waking from sleep).
+			if (totalUploadedBytes < s_bytesUploaded || totalDownloadedBytes < s_bytesDownloaded)
+			{
+				s_bytesUploaded = 0;
+				s_bytesDownloaded = 0;
+			}
+
+			s_uploadSpeedInBytes = totalUploadedBytes - s_bytesUploaded;
+			s_downloadSpeedInBytes = totalDownloadedBytes - s_bytesDownloaded;
+
+			s_bytesUploaded = totalUploadedBytes;
+			s_bytesDownloaded = totalDownloadedBytes;
 		}
-
-		s_uploadSpeedInBytes = totalUploadedBytes - s_bytesUploaded;
-		s_downloadSpeedInBytes = totalDownloadedBytes - s_bytesDownloaded;
-
-		s_bytesUploaded = totalUploadedBytes;
-		s_bytesDownloaded = totalDownloadedBytes;
+		catch (Exception exception) { App.WriteException(exception); }
+		finally { Volatile.Write(ref s_networkTimerInProgress, 0); }
 	}
 
 	private static void OnStorageTimerElapsed(object sender, ElapsedEventArgs e)
-    {
-        // If the system is in sleep or hibernate mode, don't update the hardware information.
-        if (!ShouldUpdate) return;
-
-        UpdateStorageHardware();
-		s_storageReadRatePerSecondInBytes = GetStorageReadRateInBytes();
-		s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
-	}
-
-	private readonly static PerformanceCounter CpuPerformanceCounter = new("Processor Information", "% Processor Utility", "_Total");
-    private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
-    {
-        // If the system is in sleep or hibernate mode, don't update the hardware information.
-        if (!ShouldUpdate) return;
-
-        var usage = CpuPerformanceCounter.NextValue();
-        usage = Math.Clamp(usage, 0, 100);
-
-        LastCpuUsages.Add(usage);
-		if (LastCpuUsages.Count > UsageCacheCount) LastCpuUsages.RemoveAt(0);
-
-		s_cpuUsage = LastCpuUsages.Average();
-	}
-
-    private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
-    {
-        // If the system is in sleep or hibernate mode, don't update the hardware information.
-        if (!ShouldUpdate) return;
-
-		float usage = 0;
-
-		if (RuntimeInformation.ProcessArchitecture == Architecture.X86 || RuntimeInformation.ProcessArchitecture == Architecture.X64)
+	{
+		if (Interlocked.Exchange(ref s_storageTimerInProgress, 1) == 1) return;
+		try
 		{
+			// If the system is in sleep or hibernate mode, don't update the hardware information.
+			if (!ShouldUpdate) return;
 
-			var gpuHardware = GetCurrentGpuHardware();
-			if (gpuHardware == null) return; // If there are no GPUs, return.
-
-			gpuHardware.Update();
-
-			var gpuLoadSensor = gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core")
-				?? gpuHardware.Sensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
-			usage = gpuLoadSensor?.Value ?? 0;
+			UpdateStorageHardware();
+			s_storageReadRatePerSecondInBytes = GetStorageReadRateInBytes();
+			s_storageWriteRatePerSecondInBytes = GetStorageWriteRateInBytes();
 		}
-		else usage = GpuPerformanceHelper.GetTotalUtilization();
+		catch (Exception exception) { App.WriteException(exception); }
+		finally { Volatile.Write(ref s_storageTimerInProgress, 0); }
+	}
 
-        usage = Math.Clamp(usage, 0, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
-		LastGpuUsages.Add(usage);
+	private static readonly PerformanceCounter s_cpuPerformanceCounter = new("Processor Information", "% Processor Utility", "_Total");
+	private static void OnCpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		if (Interlocked.Exchange(ref s_cpuUsageTimerInProgress, 1) == 1) return;
+		try
+		{
+			// If the system is in sleep or hibernate mode, don't update the hardware information.
+			if (!ShouldUpdate) return;
 
-		if (LastGpuUsages.Count > UsageCacheCount) LastGpuUsages.RemoveAt(0);
-		s_gpuUsage = LastGpuUsages.Average();
-    }
+			var usage = s_cpuPerformanceCounter.NextValue();
+			usage = Math.Clamp(usage, 0, 100);
+
+			s_lastCpuUsages.Add(usage);
+			if (s_lastCpuUsages.Count > UsageCacheCount) s_lastCpuUsages.RemoveAt(0);
+
+			s_cpuUsage = s_lastCpuUsages.Average();
+		}
+		catch (Exception exception) { App.WriteException(exception); }
+		finally { Volatile.Write(ref s_cpuUsageTimerInProgress, 0); }
+	}
+
+	private static void OnGpuUsageTimerElapsed(object sender, ElapsedEventArgs e)
+	{
+		if (Interlocked.Exchange(ref s_gpuUsageTimerInProgress, 1) == 1) return;
+		try
+		{
+			// If the system is in sleep or hibernate mode, don't update the hardware information.
+			if (!ShouldUpdate) return;
+
+			var usage = 0f;
+
+			if (IsX86OrX64Architecture)
+			{
+				var gpuHardware = GetCurrentGpuHardware();
+				if (gpuHardware == null) return; // If there are no GPUs, return.
+
+				TryUpdateHardware(gpuHardware, ref s_gpuHardwareUpdateInProgress);
+
+				var gpuSensors = GetSensors(gpuHardware);
+				var gpuLoadSensor = gpuSensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "GPU Core")
+					?? gpuSensors.FirstOrDefault(x => x.SensorType == SensorType.Load && x.Name == "D3D 3D");
+				usage = gpuLoadSensor?.Value ?? 0;
+			}
+			else usage = GpuPerformanceHelper.GetTotalUtilization();
+
+			usage = Math.Clamp(usage, 0, 100); // Intel GPU load sensor returns 0-100, but it can exceed 100. Clamp it to 100.
+			s_lastGpuUsages.Add(usage);
+
+			if (s_lastGpuUsages.Count > UsageCacheCount) s_lastGpuUsages.RemoveAt(0);
+			s_gpuUsage = s_lastGpuUsages.Average();
+		}
+		catch (Exception exception) { App.WriteException(exception); }
+		finally { Volatile.Write(ref s_gpuUsageTimerInProgress, 0); }
+	}
 
 	private static void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
-    {
+	{
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
 		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
@@ -677,12 +714,12 @@ public static class HardwareMonitor
 		{
 			Task.Run(RefreshComputerHardwareAsync);
 		}
-    }
+	}
 
-    private static void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
-    {
+	private static void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+	{
 		// If the system is in modern standby sleep mode, don't update the hardware information.
-        if (e.Reason == SessionSwitchReason.SessionLock) ShouldUpdate = false;
+		if (e.Reason == SessionSwitchReason.SessionLock) ShouldUpdate = false;
 		else if (e.Reason == SessionSwitchReason.SessionUnlock) ShouldUpdate = true;
-    }
+	}
 }
