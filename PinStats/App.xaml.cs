@@ -12,6 +12,7 @@ using PinStats.Resources;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
+using ProcessPriorityClass = System.Diagnostics.ProcessPriorityClass;
 
 namespace PinStats;
 
