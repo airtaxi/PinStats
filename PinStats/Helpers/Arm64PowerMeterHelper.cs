@@ -13,23 +13,23 @@ public static class Arm64PowerMeterHelper
 	private const string GpuName = "GPU";
 	private const string MultimediaName = "MULTIMEDIA";
 	private const string SystemName = "SYSTEM";
+	private const string SystemFallbackName = "SYS";
 	private const string SystemOnChipName = "SOC";
 	private const float MilliwattsPerWatt = 1000f;
 
-	public static float GetTotalCpuPackagePower() => GetPowerMeterValues().TotalCpuPackagePower;
+	public static float GetTotalCpuPackagePower() => GetPowerMeterValues().TotalCpuPackagePower ?? 0;
 
-	public static float GetCurrentGpuPower() => GetPowerMeterValues().CurrentGpuPower;
+	public static float GetCurrentGpuPower() => GetPowerMeterValues().CurrentGpuPower ?? 0;
 
 	public static Arm64PowerMeterValues GetPowerMeterValues()
 	{
 		try
 		{
 			var powerValues = GetPowerValues();
-			var cpuPowerValues = powerValues.Where(x => x.Name.StartsWith(CpuClusterNamePrefix, StringComparison.OrdinalIgnoreCase)).ToList();
-			var totalCpuPowerInWatts = ConvertMilliwattsToWatts(cpuPowerValues.Sum(x => x.PowerInMilliwatts));
+			var totalCpuPowerInWatts = GetTotalCpuPowerInWatts(powerValues);
 			var currentGpuPowerInWatts = GetPowerInWatts(powerValues, GpuName);
 			var multimediaPowerInWatts = GetPowerInWatts(powerValues, MultimediaName);
-			var systemPowerInWatts = GetPowerInWatts(powerValues, SystemName);
+			var systemPowerInWatts = GetPowerInWatts(powerValues, SystemName, SystemFallbackName);
 			var systemOnChipPowerInWatts = GetPowerInWatts(powerValues, SystemOnChipName);
 
 			return new(totalCpuPowerInWatts, currentGpuPowerInWatts, multimediaPowerInWatts, systemOnChipPowerInWatts, systemPowerInWatts);
@@ -65,16 +65,34 @@ public static class Arm64PowerMeterHelper
 		return powerValues;
 	}
 
+	private static float? GetTotalCpuPowerInWatts(List<PowerValue> powerValues)
+	{
+		var cpuPowerValues = powerValues.Where(x => x.Name.StartsWith(CpuClusterNamePrefix, StringComparison.OrdinalIgnoreCase)).ToList();
+		if (cpuPowerValues.Count == 0) return null;
+
+		return ConvertMilliwattsToWatts(cpuPowerValues.Sum(x => x.PowerInMilliwatts));
+	}
+
 	private static float ConvertToSingle(object value)
 	{
 		if (value == null || value == DBNull.Value) return 0;
 		return Convert.ToSingle(value, CultureInfo.InvariantCulture);
 	}
 
-	private static float GetPowerInWatts(List<PowerValue> powerValues, string name)
+	private static float? GetPowerInWatts(List<PowerValue> powerValues, params string[] names)
 	{
-		var powerInMilliwatts = powerValues.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)).PowerInMilliwatts;
-		return ConvertMilliwattsToWatts(powerInMilliwatts);
+		foreach (var name in names)
+		{
+			foreach (var powerValue in powerValues)
+			{
+				if (string.Equals(powerValue.Name, name, StringComparison.OrdinalIgnoreCase))
+				{
+					return ConvertMilliwattsToWatts(powerValue.PowerInMilliwatts);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	private static float ConvertMilliwattsToWatts(float powerInMilliwatts) => powerInMilliwatts / MilliwattsPerWatt;
@@ -82,9 +100,29 @@ public static class Arm64PowerMeterHelper
 	private readonly record struct PowerValue(string Name, float PowerInMilliwatts);
 }
 
-public readonly record struct Arm64PowerMeterValues(
-	float TotalCpuPackagePower,
-	float CurrentGpuPower,
-	float MultimediaPower,
-	float SystemOnChipPower,
-	float SystemPower);
+public readonly record struct Arm64PowerMeterValues(float? TotalCpuPackagePower, float? CurrentGpuPower, float? MultimediaPower, float? SystemOnChipPower, float? SystemPower)
+{
+	public string GetCpuPowerInformationText()
+	{
+		var powerInformationTexts = new List<string>();
+		AddPowerInformationText(powerInformationTexts, "CPU", TotalCpuPackagePower);
+		AddPowerInformationText(powerInformationTexts, "SoC", SystemOnChipPower);
+		AddPowerInformationText(powerInformationTexts, "Sys", SystemPower);
+		return JoinPowerInformationTexts(powerInformationTexts);
+	}
+
+	public string GetGpuPowerInformationText()
+	{
+		var powerInformationTexts = new List<string>();
+		AddPowerInformationText(powerInformationTexts, "GPU", CurrentGpuPower);
+		AddPowerInformationText(powerInformationTexts, "MM", MultimediaPower);
+		return JoinPowerInformationTexts(powerInformationTexts);
+	}
+
+	private static void AddPowerInformationText(List<string> powerInformationTexts, string label, float? powerInWatts)
+	{
+		if (powerInWatts.HasValue) powerInformationTexts.Add($"{label} {powerInWatts.Value:N0} W");
+	}
+
+	private static string JoinPowerInformationTexts(List<string> powerInformationTexts) => powerInformationTexts.Count == 0 ? string.Empty : " / " + string.Join(" / ", powerInformationTexts);
+}

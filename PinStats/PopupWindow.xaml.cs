@@ -167,10 +167,7 @@ public sealed partial class PopupWindow : IDisposable
 		var arm64PowerMeterValues = HardwareMonitor.IsArm64Architecture ? HardwareMonitor.GetArm64PowerMeterValues() : default;
 
 		var cpuInformationText = $"{cpuUsage:N0}%";
-		if (HardwareMonitor.IsArm64Architecture)
-		{
-			cpuInformationText += $" / CPU {arm64PowerMeterValues.TotalCpuPackagePower:N0} W / SoC {arm64PowerMeterValues.SystemOnChipPower:N0} W / Sys {arm64PowerMeterValues.SystemPower:N0} W";
-		}
+		if (HardwareMonitor.IsArm64Architecture) cpuInformationText += arm64PowerMeterValues.GetCpuPowerInformationText();
 		else
 		{
 			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
@@ -184,10 +181,7 @@ public sealed partial class PopupWindow : IDisposable
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 
 		var gpuInformationText = $"{gpuUsage:N0}%";
-		if (HardwareMonitor.IsArm64Architecture)
-		{
-			gpuInformationText += $" / GPU {arm64PowerMeterValues.CurrentGpuPower:N0} W / MM {arm64PowerMeterValues.MultimediaPower:N0} W";
-		}
+		if (HardwareMonitor.IsArm64Architecture) gpuInformationText += arm64PowerMeterValues.GetGpuPowerInformationText();
 		else
 		{
 			var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
