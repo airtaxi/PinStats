@@ -23,6 +23,10 @@ public sealed partial class PopupWindow : IDisposable
 	private int _refreshInProgress;
 	private bool _disposed;
 	private bool _loadingVisible;
+	private string _latestCpuBaseText = string.Empty;
+	private string _latestGpuBaseText = string.Empty;
+	private Arm64PowerMeterValues _cachedArm64PowerMeterValues;
+	private int _powerFetchInProgress;
 
     public PopupWindow()
 	{
@@ -163,33 +167,42 @@ public sealed partial class PopupWindow : IDisposable
 		cancellationToken.ThrowIfCancellationRequested();
 
 		// CPU
+		var isArm64 = HardwareMonitor.IsArm64Architecture;
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
-		var arm64PowerMeterValues = HardwareMonitor.IsArm64Architecture ? HardwareMonitor.GetArm64PowerMeterValues() : default;
-
-		var cpuInformationText = $"{cpuUsage:N0}%";
-		if (HardwareMonitor.IsArm64Architecture) cpuInformationText += arm64PowerMeterValues.GetCpuPowerInformationText();
-		else
+		var cpuBaseText = $"{cpuUsage:N0}%";
+		if (!isArm64)
 		{
 			var cpuTemperature = HardwareMonitor.GetAverageCpuTemperature();
 			var cpuPower = HardwareMonitor.GetTotalCpuPackagePower();
 			var cpuTemperatureText = cpuTemperature != null ? (" / " + cpuTemperature.Value.ToString("N0") + "°C") : "";
 			var cpuPowerText = cpuPower != 0 ? (" / " + cpuPower.ToString("N0") + " W") : "";
-			cpuInformationText += cpuTemperatureText + cpuPowerText;
+			cpuBaseText += cpuTemperatureText + cpuPowerText;
 		}
 
 		// GPU
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
-
-		var gpuInformationText = $"{gpuUsage:N0}%";
-		if (HardwareMonitor.IsArm64Architecture) gpuInformationText += arm64PowerMeterValues.GetGpuPowerInformationText();
-		else
+		var gpuBaseText = $"{gpuUsage:N0}%";
+		if (!isArm64)
 		{
 			var gpuTemperature = HardwareMonitor.GetCurrentGpuTemperature();
 			var gpuPower = HardwareMonitor.GetCurrentGpuPower();
 			var gpuTemperatureText = gpuTemperature != null ? (" / " + gpuTemperature.Value.ToString("N0") + "°C") : "";
 			var gpuPowerText = gpuPower != 0 ? (" / " + gpuPower.ToString("N0") + " W") : "";
-			gpuInformationText += gpuTemperatureText + gpuPowerText;
+			gpuBaseText += gpuTemperatureText + gpuPowerText;
 		}
+
+		// On ARM64, append the cached power meter text so the UI does not flicker while the next power reading is fetched asynchronously.
+		var cpuInformationText = cpuBaseText;
+		var gpuInformationText = gpuBaseText;
+		if (isArm64)
+		{
+			var cachedPowerMeterValues = _cachedArm64PowerMeterValues;
+			cpuInformationText += cachedPowerMeterValues.GetCpuPowerInformationText();
+			gpuInformationText += cachedPowerMeterValues.GetGpuPowerInformationText();
+		}
+
+		_latestCpuBaseText = cpuBaseText;
+		_latestGpuBaseText = gpuBaseText;
 
 		// Define battery information texts
 		var batteryInformationText = default(string);
@@ -253,6 +266,31 @@ public sealed partial class PopupWindow : IDisposable
 			if (batteryInformationText != null) TextBlockBatteryInformation.Text = batteryInformationText;
 			if (batteryHealthInformationText != null) TextBlockBatteryHealthInformation.Text = batteryHealthInformationText;
 		});
+
+		if (isArm64 && Interlocked.Exchange(ref _powerFetchInProgress, 1) == 0)
+		{
+			_ = Task.Run(() =>
+			{
+				try
+				{
+					if (_disposed || cancellationToken.IsCancellationRequested) return;
+					var powerMeterValues = HardwareMonitor.GetArm64PowerMeterValues();
+					_cachedArm64PowerMeterValues = powerMeterValues;
+					var cpuPowerText = powerMeterValues.GetCpuPowerInformationText();
+					var gpuPowerText = powerMeterValues.GetGpuPowerInformationText();
+					var latestCpuBaseText = _latestCpuBaseText;
+					var latestGpuBaseText = _latestGpuBaseText;
+					DispatcherQueue.TryEnqueue(() =>
+					{
+						if (_disposed) return;
+						TextBlockCpuInformation.Text = latestCpuBaseText + cpuPowerText;
+						TextBlockGpuInformation.Text = latestGpuBaseText + gpuPowerText;
+					});
+				}
+				catch { } // Ignore. Hardware is unpredictable.
+				finally { Interlocked.Exchange(ref _powerFetchInProgress, 0); }
+			});
+		}
 	}
 
 	public void Dispose()
