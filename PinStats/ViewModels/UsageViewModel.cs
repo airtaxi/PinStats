@@ -5,6 +5,7 @@ using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using PinStats.Enums;
+using PinStats.Services;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace PinStats.ViewModels;
 public partial class UsageViewModel : ObservableObject
 {
 	private readonly UsageHistoryMetric _usageHistoryMetric;
+	private readonly LocalizationService _localizationService;
 	private readonly ObservableCollection<DateTimePoint> _values = [];
 	private readonly DateTimeAxis _customAxis;
 
@@ -23,9 +25,10 @@ public partial class UsageViewModel : ObservableObject
 	public IEnumerable<ICartesianAxis> YAxes { get; }
 	public bool IsReading { get; set; } = true;
 
-	public UsageViewModel(UsageHistoryMetric usageHistoryMetric)
+	public UsageViewModel(UsageHistoryMetric usageHistoryMetric, LocalizationService localizationService)
 	{
 		_usageHistoryMetric = usageHistoryMetric;
+		_localizationService = localizationService;
 		Series =
 		[
 			new LineSeries<DateTimePoint>
@@ -63,11 +66,11 @@ public partial class UsageViewModel : ObservableObject
 		return [.. separators];
 	}
 
-	private static string Formatter(DateTime date)
+	private string Formatter(DateTime date)
 	{
-		var secondsAgo = (DateTime.Now - date).TotalSeconds;
+		var secondsAgo = (int)(DateTime.Now - date).TotalSeconds;
 
-		return secondsAgo < 1 ? "now" : $"{secondsAgo:N0}s";
+		return secondsAgo < 1 ? _localizationService.GetLocalizedString("Chart.Now") : _localizationService.GetFormattedString("Chart.SecondsAgoFormat", secondsAgo);
 	}
 
 	public void LoadUsageInformation(IEnumerable<UsageInformation> usageInformationHistory)

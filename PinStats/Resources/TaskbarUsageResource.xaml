@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary
     x:Class="PinStats.Resources.TaskbarUsageResource"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -14,36 +14,38 @@
         <tb:TaskbarIcon.ContextFlyout>
             <MenuFlyout AreOpenCloseAnimationsEnabled="False">
                 <MenuFlyoutItem x:Name="MenuFlyoutItemVersionName" IsEnabled="False" />
-                <MenuFlyoutItem IsEnabled="False" Text="Author: Howon Lee" />
+                <MenuFlyoutItem x:Uid="Menu_Author" IsEnabled="False" />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem Text="Popup Background Image">
-                    <MenuFlyoutItem Text="Select Image">
+                <MenuFlyoutSubItem x:Uid="Menu_PopupBackgroundImage">
+                    <MenuFlyoutItem x:Uid="Menu_SelectImage">
                         <MenuFlyoutItem.Command>
                             <XamlUICommand ExecuteRequested="OnSelectPopupBackgroundImageMenuFlyoutItemClicked" />
                         </MenuFlyoutItem.Command>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetPopupBackgroundImage" Text="Reset">
+                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetPopupBackgroundImage" x:Uid="Menu_Reset">
                         <MenuFlyoutItem.Command>
                             <XamlUICommand ExecuteRequested="OnResetPopupBackgroundImageMenuFlyoutItemClicked" />
                         </MenuFlyoutItem.Command>
                     </MenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem Text="Hardware Monitor Background Image">
-                    <MenuFlyoutItem Text="Select Image">
+                <MenuFlyoutSubItem x:Uid="Menu_HardwareMonitorBackgroundImage">
+                    <MenuFlyoutItem x:Uid="Menu_SelectImage">
                         <MenuFlyoutItem.Command>
                             <XamlUICommand ExecuteRequested="OnSelectHardwareMonitorBackgroundImageMenuFlyoutItemClicked" />
                         </MenuFlyoutItem.Command>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetHardwareMonitorBackgroundImage" Text="Reset">
+                    <MenuFlyoutItem x:Name="MenuFlyoutItemResetHardwareMonitorBackgroundImage" x:Uid="Menu_Reset">
                         <MenuFlyoutItem.Command>
                             <XamlUICommand ExecuteRequested="OnResetHardwareMonitorBackgroundImageMenuFlyoutItemClicked" />
                         </MenuFlyoutItem.Command>
                     </MenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem x:Name="MenuFlyoutSubItemMonitors" Text="Show Hardware Monitor" />
+                <MenuFlyoutSubItem x:Name="MenuFlyoutSubItemMonitors" x:Uid="Menu_ShowHardwareMonitor" />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="MenuFlyoutItemRefreshHardwares" Text="Refresh Hardwares">
+                <MenuFlyoutSubItem x:Name="MenuFlyoutSubItemLanguage" x:Uid="Menu_Language" />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="MenuFlyoutItemRefreshHardwares" x:Uid="Menu_RefreshHardwares">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnRefreshHardwareMenuFlyoutItemClicked" />
                     </MenuFlyoutItem.Command>
@@ -58,7 +60,7 @@
                         <XamlUICommand ExecuteRequested="OnSetupStartupProgramMenuFlyoutItemClicked" />
                     </MenuFlyoutItem.Command>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem Text="Close">
+                <MenuFlyoutItem x:Uid="Menu_Close">
                     <MenuFlyoutItem.Command>
                         <XamlUICommand ExecuteRequested="OnCloseProgramMenuFlyoutItemClicked" />
                     </MenuFlyoutItem.Command>

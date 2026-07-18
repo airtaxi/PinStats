@@ -71,9 +71,9 @@
 
                     <Grid Grid.Column="0">
                         <TextBlock
+                            x:Uid="MonitorSection_Network"
                             HorizontalAlignment="Left"
-                            FontSize="21"
-                            Text="Network" />
+                            FontSize="21" />
                         <TextBlock
                             x:Name="TextBlockNetworkInformation"
                             HorizontalAlignment="Right"
@@ -84,9 +84,9 @@
 
                     <Grid Grid.Column="1">
                         <TextBlock
+                            x:Uid="MonitorSection_Storage"
                             HorizontalAlignment="Left"
-                            FontSize="21"
-                            Text="Storage" />
+                            FontSize="21" />
                         <TextBlock
                             x:Name="TextBlockStorageInformation"
                             HorizontalAlignment="Right"
@@ -102,7 +102,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="21" Text="Memory" />
+                        <TextBlock x:Uid="MonitorSection_Memory" FontSize="21" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartMemory"
                             Height="40"
@@ -114,7 +114,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock FontSize="21" Text="Virtual Memory" />
+                        <TextBlock x:Uid="MonitorSection_VirtualMemory" FontSize="21" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartVirtualMemory"
                             Height="40"
@@ -132,7 +132,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="21" Text="Battery" />
+                        <TextBlock x:Uid="MonitorSection_Battery" FontSize="21" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBattery"
                             Height="40"
@@ -144,7 +144,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock FontSize="21" Text="Battery Health" />
+                        <TextBlock x:Uid="MonitorSection_BatteryHealth" FontSize="21" />
                         <lvc:CartesianChart
                             x:Name="CartesianChartBatteryHealth"
                             Height="40"

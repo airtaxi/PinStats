@@ -1,10 +1,12 @@
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using PinStats.Enums;
 using PinStats.Helpers;
+using PinStats.Services;
 using PinStats.ViewModels;
 using WinUIEx;
 
@@ -16,8 +18,9 @@ public sealed partial class PopupWindow : IDisposable
 
 	public static event EventHandler OnCurrentGpuChanged;
 
-	private readonly UsageViewModel _cpuUsageViewModel = new(UsageHistoryMetric.CpuUsage);
-	private readonly UsageViewModel _gpuUsageViewModel = new(UsageHistoryMetric.GpuUsage);
+	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
+	private readonly UsageViewModel _cpuUsageViewModel;
+	private readonly UsageViewModel _gpuUsageViewModel;
 	private CancellationTokenSource _refreshCancellationTokenSource;
 	private Timer _refreshTimer;
 	private int _refreshInProgress;
@@ -30,6 +33,8 @@ public sealed partial class PopupWindow : IDisposable
 
     public PopupWindow()
 	{
+		_cpuUsageViewModel = new(UsageHistoryMetric.CpuUsage, _localizationService);
+		_gpuUsageViewModel = new(UsageHistoryMetric.GpuUsage, _localizationService);
 		InitializeComponent();
 
         // Fetch initial status of loading indicator visibility
@@ -228,7 +233,7 @@ public sealed partial class PopupWindow : IDisposable
 				batteryChargeRateText = " / " + batteryChargeRatePrefix + batteryChargeRate.Value.ToString("N1") + " W";
 			}
 			var batteryEstimatedTimeText = string.Empty;
-			if (batteryEstimatedTime.HasValue) batteryEstimatedTimeText = " / " + batteryEstimatedTime.Value.ToString(@"hh\:mm\:ss") + " left";
+			if (batteryEstimatedTime.HasValue) batteryEstimatedTimeText = _localizationService.GetFormattedString("Info.BatteryTimeLeft", batteryEstimatedTime.Value.ToString(@"hh\:mm\:ss"));
 
 			// Battery information text
 			batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
@@ -245,12 +250,12 @@ public sealed partial class PopupWindow : IDisposable
 		// Network
 		var networkUploadSpeed = (float)HardwareMonitor.GetNetworkTotalUploadSpeedInBytes() / 1024;
 		var networkDownloadSpeed = (float)HardwareMonitor.GetNetworkTotalDownloadSpeedInBytes() / 1024;
-		var networkInformationText = $"U: {networkUploadSpeed:N0} KB/s D: {networkDownloadSpeed:N0} KB/s";
+		var networkInformationText = _localizationService.GetFormattedString("Info.NetworkFormat", $"{networkUploadSpeed:N0}", $"{networkDownloadSpeed:N0}");
 
 		// Storage
 		var storageReadRate = HardwareMonitor.GetStorageReadRatePerSecondInBytes() / 1024;
 		var storageWriteRate = HardwareMonitor.GetStorageWriteRatePerSecondInBytes() / 1024;
-		var storageInformationText = $"R: {storageReadRate:N0} KB/s W: {storageWriteRate:N0} KB/s";
+		var storageInformationText = _localizationService.GetFormattedString("Info.StorageFormat", $"{storageReadRate:N0}", $"{storageWriteRate:N0}");
 
 		cancellationToken.ThrowIfCancellationRequested();
 		DispatcherQueue.TryEnqueue(() =>

@@ -157,9 +157,9 @@ public static class HardwareMonitor
 						managementObject.Dispose();
 					}
 
-					if (cpuCount == 0) s_fallbackCpuHardwareName = "N/A";
-					else if (cpuCount == 1) s_fallbackCpuHardwareName = cpuName;
-					else s_fallbackCpuHardwareName = cpuName + " + " + (cpuCount - 1) + " more";
+				if (cpuCount == 0) s_fallbackCpuHardwareName = App.Localization.GetLocalizedString("Info.NotAvailable");
+				else if (cpuCount == 1) s_fallbackCpuHardwareName = cpuName;
+				else s_fallbackCpuHardwareName = App.Localization.GetFormattedString("Hardware.MultiCpuFormat", cpuName, cpuCount - 1);
 				}
 			}
 
@@ -262,11 +262,11 @@ public static class HardwareMonitor
 
 	public static string GetMotherboardName()
 	{
-		try { return Volatile.Read(ref s_computer)?.Hardware.FirstOrDefault(x => x.HardwareType == HardwareType.Motherboard)?.Name ?? "N/A"; }
+		try { return Volatile.Read(ref s_computer)?.Hardware.FirstOrDefault(x => x.HardwareType == HardwareType.Motherboard)?.Name ?? App.Localization.GetLocalizedString("Info.NotAvailable"); }
 		catch (Exception exception)
 		{
 			App.WriteException(exception);
-			return "N/A";
+			return App.Localization.GetLocalizedString("Info.NotAvailable");
 		}
 	}
 
@@ -397,11 +397,11 @@ public static class HardwareMonitor
 	public static string GetCpuName()
 	{
 		var cpuHardwares = CpuHardwares;
-		if (cpuHardwares.Length == 0) return s_fallbackCpuHardwareName ?? "N/A";
+		if (cpuHardwares.Length == 0) return s_fallbackCpuHardwareName ?? App.Localization.GetLocalizedString("Info.NotAvailable");
 
 		var firstCpuHardware = cpuHardwares[0];
 		if (cpuHardwares.Length == 1) return firstCpuHardware.Name;
-		else return firstCpuHardware.Name + " + " + (cpuHardwares.Length - 1) + " more";
+		else return App.Localization.GetFormattedString("Hardware.MultiCpuFormat", firstCpuHardware.Name, cpuHardwares.Length - 1);
 	}
 
 	public static string GetCurrentGpuName()
@@ -410,7 +410,7 @@ public static class HardwareMonitor
 		if (gpuHardware == null)
 		{
 			if (!string.IsNullOrEmpty(s_fallbackGpuHardwareName)) return s_fallbackGpuHardwareName;
-			return "N/A"; // If there are no GPUs, return N/A.
+			return App.Localization.GetLocalizedString("Info.NotAvailable"); // If there are no GPUs, return N/A.
 		}
 
 		return gpuHardware.Name;
@@ -516,7 +516,7 @@ public static class HardwareMonitor
 		var memoryAvailable = memoryAvailableSensors.Sum(x => x.Value) ?? 0;
 
 		var totalMemory = memoryUsed + memoryAvailable;
-		return $"{memoryUsed:N2} GB (Total: {totalMemory:N2} GB) / {memoryAvailable:N2} GB Left";
+		return App.Localization.GetFormattedString("Info.MemoryInfoFormat", $"{memoryUsed:N2}", $"{totalMemory:N2}", $"{memoryAvailable:N2}");
 	}
 
 	public static float GetTotalMemory(bool queryVirtualMemory = false, bool update = false)

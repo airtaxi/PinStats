@@ -101,7 +101,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Memory" />
+                    <TextBlock x:Uid="MonitorSection_Memory" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockMemoryInformation" Grid.Column="1" />
                 </Grid>
 
@@ -110,7 +110,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Virtual Memory" />
+                    <TextBlock x:Uid="MonitorSection_VirtualMemory" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockVirtualMemoryInformation" Grid.Column="1" />
                 </Grid>
 
@@ -119,7 +119,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Network" />
+                    <TextBlock x:Uid="MonitorSection_Network" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockNetworkInformation" Grid.Column="1" />
                 </Grid>
 
@@ -128,7 +128,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Storage" />
+                    <TextBlock x:Uid="MonitorSection_Storage" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockStorageInformation" Grid.Column="1" />
                 </Grid>
 
@@ -137,7 +137,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Battery" />
+                    <TextBlock x:Uid="MonitorSection_Battery" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockBatteryInformation" Grid.Column="1" />
                 </Grid>
 
@@ -146,19 +146,19 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Battery Health" />
+                    <TextBlock x:Uid="MonitorSection_BatteryHealth" Grid.Column="0" />
                     <TextBlock x:Name="TextBlockBatteryHealthInformation" Grid.Column="1" />
                 </Grid>
 
                 <StackPanel Orientation="Horizontal">
                     <RadioButton
                         x:Name="RadioButtonCpu"
-                        Click="OnRadioButtonClicked"
-                        Content="CPU Usage" />
+                        x:Uid="UsageTarget_CpuUsage"
+                        Click="OnRadioButtonClicked" />
                     <RadioButton
                         x:Name="RadioButtonGpu"
-                        Click="OnRadioButtonClicked"
-                        Content="GPU Usage" />
+                        x:Uid="UsageTarget_GpuUsage"
+                        Click="OnRadioButtonClicked" />
                 </StackPanel>
             </StackPanel>
         </Grid>

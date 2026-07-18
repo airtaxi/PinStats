@@ -1,0 +1,176 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Chart.Now" xml:space="preserve">
+    <value>现在</value>
+  </data>
+  <data name="Chart.SecondsAgoFormat" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="Dialog.ImageFileFilter" xml:space="preserve">
+    <value>图片文件</value>
+  </data>
+  <data name="Hardware.MultiCpuFormat" xml:space="preserve">
+    <value>{0} + {1} 个</value>
+  </data>
+  <data name="Info.BatteryTimeLeft" xml:space="preserve">
+    <value> / 剩余 {0}</value>
+  </data>
+  <data name="Info.MemoryInfoFormat" xml:space="preserve">
+    <value>{0} GB (总计: {1} GB) / 剩余 {2} GB</value>
+  </data>
+  <data name="Info.MemoryUsageFormat" xml:space="preserve">
+    <value>{0} / {1} GB</value>
+  </data>
+  <data name="Info.NetworkFormat" xml:space="preserve">
+    <value>上传: {0} KB/s 下载: {1} KB/s</value>
+  </data>
+  <data name="Info.NotAvailable" xml:space="preserve">
+    <value>N/A</value>
+  </data>
+  <data name="Info.StorageFormat" xml:space="preserve">
+    <value>读取: {0} KB/s 写入: {1} KB/s</value>
+  </data>
+  <data name="Menu.AddToStartup" xml:space="preserve">
+    <value>添加到启动项</value>
+  </data>
+  <data name="Menu.ChangeToBlackIcon" xml:space="preserve">
+    <value>更改为黑色图标</value>
+  </data>
+  <data name="Menu.ChangeToWhiteIcon" xml:space="preserve">
+    <value>更改为白色图标</value>
+  </data>
+  <data name="Menu.LanguageSystem" xml:space="preserve">
+    <value>系统默认</value>
+  </data>
+  <data name="Menu.MonitorEntry" xml:space="preserve">
+    <value>显示器 {0}: {1} ({2})</value>
+  </data>
+  <data name="Menu.ReinitializingStartup" xml:space="preserve">
+    <value>正在重新初始化启动程序...</value>
+  </data>
+  <data name="Menu.RemoveFromStartup" xml:space="preserve">
+    <value>从启动项移除</value>
+  </data>
+  <data name="Menu.Version" xml:space="preserve">
+    <value>版本 {0}</value>
+  </data>
+  <data name="Menu_Author.Text" xml:space="preserve">
+    <value>作者: Howon Lee</value>
+  </data>
+  <data name="Menu_Close.Text" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Menu_HardwareMonitorBackgroundImage.Text" xml:space="preserve">
+    <value>硬件监控背景图片</value>
+  </data>
+  <data name="Menu_Language.Text" xml:space="preserve">
+    <value>语言 (更改后需要重启)</value>
+  </data>
+  <data name="Menu_PopupBackgroundImage.Text" xml:space="preserve">
+    <value>弹窗背景图片</value>
+  </data>
+  <data name="Menu_RefreshHardwares.Text" xml:space="preserve">
+    <value>刷新硬件</value>
+  </data>
+  <data name="Menu_Reset.Text" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Menu_SelectImage.Text" xml:space="preserve">
+    <value>选择图片</value>
+  </data>
+  <data name="Menu_ShowHardwareMonitor.Text" xml:space="preserve">
+    <value>显示硬件监控</value>
+  </data>
+  <data name="MonitorSection_Battery.Text" xml:space="preserve">
+    <value>电池</value>
+  </data>
+  <data name="MonitorSection_BatteryHealth.Text" xml:space="preserve">
+    <value>电池健康</value>
+  </data>
+  <data name="MonitorSection_Memory.Text" xml:space="preserve">
+    <value>内存</value>
+  </data>
+  <data name="MonitorSection_Network.Text" xml:space="preserve">
+    <value>网络</value>
+  </data>
+  <data name="MonitorSection_Storage.Text" xml:space="preserve">
+    <value>存储</value>
+  </data>
+  <data name="MonitorSection_VirtualMemory.Text" xml:space="preserve">
+    <value>虚拟内存</value>
+  </data>
+  <data name="Tooltip.UsageFormat" xml:space="preserve">
+    <value>{0} 使用率: {1}%</value>
+  </data>
+  <data name="Update.MessageFormat" xml:space="preserve">
+    <value>有新版本 ({0}) 可用。
+是否要下载?</value>
+  </data>
+  <data name="Update.Title" xml:space="preserve">
+    <value>有可用更新</value>
+  </data>
+  <data name="UsageTarget_CpuUsage.Content" xml:space="preserve">
+    <value>CPU 使用率</value>
+  </data>
+  <data name="UsageTarget_GpuUsage.Content" xml:space="preserve">
+    <value>GPU 使用率</value>
+  </data>
+</root>

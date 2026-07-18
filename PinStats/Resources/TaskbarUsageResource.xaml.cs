@@ -1,9 +1,11 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using PinStats.Enums;
 using PinStats.Helpers;
+using PinStats.Services;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Reflection;
@@ -25,6 +27,7 @@ public partial class TaskbarUsageResource
 	private static readonly Timer UpdateTimer;
 	private static event EventHandler UpdateTimerElapsed;
 
+	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
 	private Image _iconImage;
     private string _iconImagePath;
 
@@ -60,6 +63,7 @@ public partial class TaskbarUsageResource
 		UpdateSetupIconColorMenuFlyoutItemTextProperty();
 		UpdateVersionNameMenuFlyoutItemTextProperty();
 		UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty();
+		RefreshLanguageMenuFlyoutSubItems();
 
 		// Update the icon image
 		UpdateIconImageByIconColor();
@@ -77,7 +81,7 @@ public partial class TaskbarUsageResource
 	private void UpdateVersionNameMenuFlyoutItemTextProperty()
 	{
 		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
-		MenuFlyoutItemVersionName.Text = $"Version {localVersion}";
+		MenuFlyoutItemVersionName.Text = _localizationService.GetFormattedString("Menu.Version", localVersion);
 	}
 
 	private void UpdateBackgroundImageRelatedMenuFlyoutItemsIsEnabledProperty()
@@ -100,7 +104,7 @@ public partial class TaskbarUsageResource
 		foreach(var monitor in monitors)
 		{
 			var resolutionText = $"{monitor.SizeAndPosition.Width}x{monitor.SizeAndPosition.Height}";
-			var menuFlyoutItem = new MenuFlyoutItem { Text = $"Monitor {++index}: {monitor.MonitorName} ({resolutionText})", Tag = monitor };
+			var menuFlyoutItem = new MenuFlyoutItem { Text = _localizationService.GetFormattedString("Menu.MonitorEntry", ++index, monitor.MonitorName, resolutionText), Tag = monitor };
 
 			// Setup the command to show the hardware monitor window.
 			var command = new XamlUICommand();
@@ -134,7 +138,7 @@ public partial class TaskbarUsageResource
 			{
 				// Disable the menu item to prevent the user from clicking the menu item multiple times.
 				MenuFlyoutItemSetupStartupProgram.IsEnabled = false;
-				MenuFlyoutItemSetupStartupProgram.Text = "Reinitializing Startup Program...";
+				MenuFlyoutItemSetupStartupProgram.Text = _localizationService.GetLocalizedString("Menu.ReinitializingStartup");
 
 				// Reinitialize the startup program by calling the SetupStartupProgram method twice.
 				StartupHelper.SetupStartupProgram(); // Delete the existing startup program
@@ -143,16 +147,50 @@ public partial class TaskbarUsageResource
 				// Reenable the menu item to allow the user to click the menu item again.
 				MenuFlyoutItemSetupStartupProgram.IsEnabled = true;
 			}
-			MenuFlyoutItemSetupStartupProgram.Text = "Remove from Startup";
+			MenuFlyoutItemSetupStartupProgram.Text = _localizationService.GetLocalizedString("Menu.RemoveFromStartup");
 		}
 		// If the startup program is not set up, change the menu item text to "Add to Startup".
-		else MenuFlyoutItemSetupStartupProgram.Text = "Add to Startup";
+		else MenuFlyoutItemSetupStartupProgram.Text = _localizationService.GetLocalizedString("Menu.AddToStartup");
+	}
+
+	private void RefreshLanguageMenuFlyoutSubItems()
+	{
+		// Clear the existing menu items.
+		MenuFlyoutSubItemLanguage.Items.Clear();
+
+		var currentOverride = Configuration.GetValue<string>("LanguageOverride") ?? string.Empty;
+
+		var systemItem = new ToggleMenuFlyoutItem
+		{
+			Text = _localizationService.GetLanguageDisplayName(string.Empty),
+			IsChecked = string.IsNullOrEmpty(currentOverride)
+		};
+		systemItem.Click += (_, _) => ApplyLanguageOverride(string.Empty);
+		MenuFlyoutSubItemLanguage.Items.Add(systemItem);
+
+		foreach (var languageTag in _localizationService.SupportedLanguageTags)
+		{
+			var languageItem = new ToggleMenuFlyoutItem
+			{
+				Text = _localizationService.GetLanguageDisplayName(languageTag),
+				IsChecked = string.Equals(currentOverride, languageTag, StringComparison.Ordinal)
+			};
+			languageItem.Click += (_, _) => ApplyLanguageOverride(languageTag);
+			MenuFlyoutSubItemLanguage.Items.Add(languageItem);
+		}
+	}
+
+	private void ApplyLanguageOverride(string languageTag)
+	{
+		_localizationService.ApplyLanguageTag(languageTag);
+		Configuration.SetValue("LanguageOverride", string.IsNullOrEmpty(languageTag) ? null : languageTag);
+		RefreshLanguageMenuFlyoutSubItems();
 	}
 
 	private void UpdateSetupIconColorMenuFlyoutItemTextProperty()
 	{
 		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
-		MenuFlyoutItemSetupIconColor.Text = useWhiteIcon ? "Change to Black Icon" : "Change to White Icon";
+		MenuFlyoutItemSetupIconColor.Text = useWhiteIcon ? _localizationService.GetLocalizedString("Menu.ChangeToBlackIcon") : _localizationService.GetLocalizedString("Menu.ChangeToWhiteIcon");
 	}
 
 	private void UpdateIconImageByIconColor()
@@ -205,7 +243,7 @@ public partial class TaskbarUsageResource
 					try
 					{
 						TaskbarIconCpuUsage.Icon = System.Drawing.Icon.FromHandle(icon);
-						TaskbarIconCpuUsage.ToolTipText = $"{lastUsageTarget} Usage: {usage:N0}%";
+						TaskbarIconCpuUsage.ToolTipText = _localizationService.GetFormattedString("Tooltip.UsageFormat", lastUsageTarget, $"{usage:N0}");
 					}
 					finally { DestroyIcon(icon); } // Destroying the icon handle manually since it's not automatically destroyed.
 				}
@@ -232,7 +270,7 @@ public partial class TaskbarUsageResource
 		// WinUI's FileOpenPicker won't work with elevated application binary for now
 		// Use WindowsAPICodePack's CommonOpenFileDialog instead
 		var dialog = new CommonOpenFileDialog();
-		dialog.Filters.Add(new CommonFileDialogFilter("Image File", "*.png;*.jpg;*.jpeg"));
+		dialog.Filters.Add(new CommonFileDialogFilter(App.Localization.GetLocalizedString("Dialog.ImageFileFilter"), "*.png;*.jpg;*.jpeg"));
 		if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
 
 		// Configure background image path with prefix string
