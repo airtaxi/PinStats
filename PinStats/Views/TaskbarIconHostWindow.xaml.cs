@@ -23,7 +23,7 @@ using PopupWindow = PinStats.Views.PopupWindow;
 namespace PinStats.Views;
 
 [SupportedOSPlatform("windows10.0.22000.0")]
-public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorListRefreshRequested>, IRecipient<LanguageListRefreshRequested>, IRecipient<TaskbarWidgetMonitorListRefreshRequested>, IRecipient<PopupBackgroundImageSelectionRequested>, IRecipient<HardwareMonitorBackgroundImageSelectionRequested>, IRecipient<IconColorChangedMessage>
+public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorListRefreshRequested>, IRecipient<LanguageListRefreshRequested>, IRecipient<TaskbarWidgetMonitorListRefreshRequested>, IRecipient<PopupBackgroundImageSelectionRequested>, IRecipient<HardwareMonitorBackgroundImageSelectionRequested>
 {
 	private const int UpdateTimerInterval = 250;
 	private const int TrayIconImageSize = 64;
@@ -33,6 +33,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 	private static readonly string AssetsDirectory = Path.Combine(BinaryDirectory, "Assets");
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
+	private readonly SystemThemeService _systemThemeService = App.Services.GetRequiredService<SystemThemeService>();
 	private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 	private readonly Timer _updateTimer;
 
@@ -74,8 +75,9 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		RefreshLanguageMenuItems();
 		RefreshTaskbarWidgetMonitorMenuItems();
 
-		// Setup the icon image based on the current icon color setting.
-		UpdateIconImageByIconColor();
+		// Setup the icon image based on the current system theme and keep it in sync with system theme changes.
+		UpdateIconImageBySystemTheme();
+		_systemThemeService.SystemThemeChanged += OnSystemThemeChanged;
 
 		// Start the update timer to refresh the icon image.
 		_updateTimer.Change(UpdateTimerInterval, Timeout.Infinite);
@@ -84,6 +86,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 	private void OnClosed(object sender, WindowEventArgs args)
 	{
 		_updateTimer?.Dispose();
+		_systemThemeService.SystemThemeChanged -= OnSystemThemeChanged;
 		WeakReferenceMessenger.Default.UnregisterAll(this);
 		SystemEvents.DisplaySettingsChanged -= ViewModel.OnDisplaySettingsChanged;
 	}
@@ -98,10 +101,13 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 	[return: MarshalAs(UnmanagedType.Bool)]
 	private static partial bool DestroyIcon(IntPtr handle);
 
-	private void UpdateIconImageByIconColor()
+	private void OnSystemThemeChanged(object sender, SystemThemeChangedEventArgs args) => _dispatcherQueue.TryEnqueue(UpdateIconImageBySystemTheme);
+
+	private void UpdateIconImageBySystemTheme()
 	{
-		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
-		var imageFileName = useWhiteIcon ? "Cpu_white.png" : "Cpu.png";
+		// The taskbar uses a dark surface when the system is in dark theme, so a white icon is used there and vice versa.
+		var useWhiteIcon = !_systemThemeService.IsSystemLightTheme;
+		var imageFileName = useWhiteIcon ? "Cpu_White.png" : "Cpu.png";
 		_iconImagePath = Path.Combine(AssetsDirectory, imageFileName);
 		_iconImage = Image.FromFile(_iconImagePath).GetThumbnailImage(TrayIconImageSize, TrayIconImageSize, null, IntPtr.Zero);
 	}
@@ -112,7 +118,6 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		if (!HardwareMonitor.ShouldUpdate) return;
 
 		var lastUsageTarget = Configuration.GetValue<string>("LastUsageTarget") ?? "CPU";
-		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
 
 		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
 		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
@@ -121,6 +126,9 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		if (lastUsageTarget == "CPU") usage = cpuUsage;
 		else if (lastUsageTarget == "GPU") usage = gpuUsage;
 		var usageText = GenerateUsageText(usage);
+
+		// The icon text color follows the system theme so that the usage value stays readable on the taskbar.
+		var useWhiteText = !_systemThemeService.IsSystemLightTheme;
 
 		lock (_iconImage)
 		{
@@ -134,7 +142,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 				LineAlignment = StringAlignment.Center
 			};
 			var rect = new RectangleF(0, 2, image.Width, image.Height);
-			graphics.DrawString(usageText, font, useWhiteIcon ? Brushes.White : Brushes.Black, rect, stringFormat);
+			graphics.DrawString(usageText, font, useWhiteText ? Brushes.White : Brushes.Black, rect, stringFormat);
 
 			try
 			{
@@ -265,6 +273,4 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 	public void Receive(PopupBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(async () => await ShowBackgroundImagePickerAsync(BackgroundImageType.Popup));
 
 	public void Receive(HardwareMonitorBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(async () => await ShowBackgroundImagePickerAsync(BackgroundImageType.HardwareMonitor));
-
-	public void Receive(IconColorChangedMessage message) => _dispatcherQueue.TryEnqueue(UpdateIconImageByIconColor);
 }

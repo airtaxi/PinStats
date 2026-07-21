@@ -37,7 +37,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		// Setup menu item states via observable properties (bound through x:Bind).
 		RefreshShowHardwareMonitorMenuRequest();
 		UpdateSetupStartupProgramMenuItem();
-		UpdateSetupIconColorMenuItem();
 		UpdateVersionNameMenuItem();
 		UpdateBackgroundImageRelatedMenuItemsEnabled();
 		RefreshLanguageMenuRequest();
@@ -60,9 +59,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial bool IsSetupStartupProgramMenuItemEnabled { get; set; } = true;
-
-	[ObservableProperty]
-	public partial string SetupIconColorMenuItemText { get; set; }
 
 	[ObservableProperty]
 	public partial bool IsResetPopupBackgroundImageMenuItemEnabled { get; set; }
@@ -163,12 +159,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		RefreshLanguageMenuRequest();
 	}
 
-	private void UpdateSetupIconColorMenuItem()
-	{
-		var useWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
-		SetupIconColorMenuItemText = useWhiteIcon ? _localizationService.GetLocalizedString("Menu.ChangeToBlackIcon") : _localizationService.GetLocalizedString("Menu.ChangeToWhiteIcon");
-	}
-
 	[RelayCommand]
 	private void ShowPopup() => PopupWindow.ShowNearTaskbar();
 
@@ -220,15 +210,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 	{
 		StartupHelper.SetupStartupProgram();
 		UpdateSetupStartupProgramMenuItem();
-	}
-
-	[RelayCommand]
-	private void SetupIconColor()
-	{
-		var wasWhiteIcon = Configuration.GetValue<bool?>("WhiteIcon") ?? false;
-		Configuration.SetValue("WhiteIcon", !wasWhiteIcon);
-		UpdateSetupIconColorMenuItem();
-		WeakReferenceMessenger.Default.Send(new IconColorChangedMessage());
 	}
 
 	private void UpdateResetPopupBackgroundImageMenuItemEnabled()

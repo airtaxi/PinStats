@@ -88,12 +88,6 @@
   <data name="Menu.AddToStartup" xml:space="preserve">
     <value>시작 프로그램에 추가</value>
   </data>
-  <data name="Menu.ChangeToBlackIcon" xml:space="preserve">
-    <value>검은색 아이콘으로 변경</value>
-  </data>
-  <data name="Menu.ChangeToWhiteIcon" xml:space="preserve">
-    <value>흰색 아이콘으로 변경</value>
-  </data>
   <data name="Menu.LanguageSystem" xml:space="preserve">
     <value>시스템 기본값</value>
   </data>

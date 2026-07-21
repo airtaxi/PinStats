@@ -88,12 +88,6 @@
   <data name="Menu.AddToStartup" xml:space="preserve">
     <value>Add to Startup</value>
   </data>
-  <data name="Menu.ChangeToBlackIcon" xml:space="preserve">
-    <value>Change to Black Icon</value>
-  </data>
-  <data name="Menu.ChangeToWhiteIcon" xml:space="preserve">
-    <value>Change to White Icon</value>
-  </data>
   <data name="Menu.LanguageSystem" xml:space="preserve">
     <value>System default</value>
   </data>

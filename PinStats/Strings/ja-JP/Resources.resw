@@ -88,12 +88,6 @@
   <data name="Menu.AddToStartup" xml:space="preserve">
     <value>スタートアップに追加</value>
   </data>
-  <data name="Menu.ChangeToBlackIcon" xml:space="preserve">
-    <value>黒アイコンに変更</value>
-  </data>
-  <data name="Menu.ChangeToWhiteIcon" xml:space="preserve">
-    <value>白アイコンに変更</value>
-  </data>
   <data name="Menu.LanguageSystem" xml:space="preserve">
     <value>システム標準</value>
   </data>

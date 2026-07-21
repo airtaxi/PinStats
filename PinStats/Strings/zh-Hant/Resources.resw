@@ -88,12 +88,6 @@
   <data name="Menu.AddToStartup" xml:space="preserve">
     <value>新增到啟動項目</value>
   </data>
-  <data name="Menu.ChangeToBlackIcon" xml:space="preserve">
-    <value>變更為黑色圖示</value>
-  </data>
-  <data name="Menu.ChangeToWhiteIcon" xml:space="preserve">
-    <value>變更為白色圖示</value>
-  </data>
   <data name="Menu.LanguageSystem" xml:space="preserve">
     <value>系統預設</value>
   </data>

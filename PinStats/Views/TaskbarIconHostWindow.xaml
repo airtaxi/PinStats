@@ -139,11 +139,6 @@
                     x:FieldModifier="public"
                     Command="{x:Bind ViewModel.RefreshHardwaresCommand, Mode=OneTime}" />
                 <MenuFlyoutItem
-                    x:Name="MenuFlyoutItemSetupIconColor"
-                    x:FieldModifier="public"
-                    Command="{x:Bind ViewModel.SetupIconColorCommand, Mode=OneTime}"
-                    Text="{x:Bind ViewModel.SetupIconColorMenuItemText, Mode=OneWay}" />
-                <MenuFlyoutItem
                     x:Name="MenuFlyoutItemSetupStartupProgram"
                     x:FieldModifier="public"
                     Command="{x:Bind ViewModel.SetupStartupProgramCommand, Mode=OneTime}"

@@ -114,7 +114,6 @@ public partial class App : Application
         else LiveCharts.Configure(config => config.AddDarkTheme());
 
         InitializeComponent();
-        InitializeThemeSettings();
         StartupHelper.DummyMethod(); // Force static constructor to run.
     }
 
@@ -142,7 +141,11 @@ public partial class App : Application
         Configuration.SetValue("WhiteIcon", isDarkTheme);
     }
 
-    private static void ConfigureServices(IServiceCollection serviceCollection) => serviceCollection.AddSingleton<LocalizationService>(_ => new LocalizationService(Configuration.GetValue<string>("LanguageOverride") ?? string.Empty));
+    private static void ConfigureServices(IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddSingleton<LocalizationService>(_ => new LocalizationService(Configuration.GetValue<string>("LanguageOverride") ?? string.Empty));
+        serviceCollection.AddSingleton<SystemThemeService>();
+    }
 
     private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
     private void OnAppDomainUnhandledException(object sender, System.UnhandledExceptionEventArgs e) => WriteException(e.ExceptionObject as Exception);
