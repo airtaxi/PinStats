@@ -33,7 +33,8 @@ public sealed partial class PopupWindow : IDisposable
 	private int _powerFetchInProgress;
 
 	// Show the popup window near the taskbar. (eg: above the taskbar when the taskbar is at the bottom)
-	public static PopupWindow ShowNearTaskbar()
+	// When anchorToCursor is true and the cursor is over the taskbar, the popup is centered on the cursor instead of the tray icon area.
+	public static PopupWindow ShowNearTaskbar(bool anchorToCursor = false)
 	{
 		var reportWindow = new PopupWindow();
 		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
@@ -41,6 +42,16 @@ public sealed partial class PopupWindow : IDisposable
 		var taskbarRect = TaskbarHelper.GetTaskbarRect();
 		var taskbarPosition = TaskbarHelper.GetTaskbarPosition();
 
+		if (anchorToCursor && TaskbarHelper.TryGetCursorAnchorPoint(taskbarRect, out var anchorPoint)) MoveNearCursor(reportWindow, scale, taskbarRect, taskbarPosition, anchorPoint);
+		else MoveNearTrayIcon(reportWindow, scale, taskbarRect, taskbarPosition);
+
+		reportWindow.Activate();
+		return reportWindow;
+	}
+
+	// Anchor the popup near the tray icon at the right side of the taskbar.
+	private static void MoveNearTrayIcon(PopupWindow reportWindow, double scale, TaskbarHelper.RECT taskbarRect, TaskbarPosition taskbarPosition)
+	{
 		// Default position is bottom.
 		var positionX = taskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
 		var positionY = taskbarRect.Top - (reportWindow.Height * scale);
@@ -62,8 +73,44 @@ public sealed partial class PopupWindow : IDisposable
 		}
 
 		reportWindow.Move((int)positionX, (int)positionY);
-		reportWindow.Activate();
-		return reportWindow;
+	}
+
+	// Center the popup on the cursor position and clamp it within the taskbar bounds. (eg: used when the taskbar widget is clicked)
+	private static void MoveNearCursor(PopupWindow reportWindow, double scale, TaskbarHelper.RECT taskbarRect, TaskbarPosition taskbarPosition, TaskbarHelper.POINT anchorPoint)
+	{
+		var windowWidth = reportWindow.Width * scale;
+		var windowHeight = reportWindow.Height * scale;
+
+		// Default position is bottom.
+		var positionX = anchorPoint.X - (windowWidth / 2);
+		var positionY = taskbarRect.Top - windowHeight;
+
+		switch (taskbarPosition)
+		{
+			case TaskbarPosition.Top:
+				positionY = taskbarRect.Bottom;
+				break;
+			case TaskbarPosition.Left:
+				positionX = taskbarRect.Right;
+				positionY = anchorPoint.Y - (windowHeight / 2);
+				break;
+			case TaskbarPosition.Right:
+				positionX = taskbarRect.Left - windowWidth;
+				positionY = anchorPoint.Y - (windowHeight / 2);
+				break;
+		}
+
+		// Clamp the popup within the taskbar bounds so it stays on screen.
+		if (taskbarPosition is TaskbarPosition.Top or TaskbarPosition.Bottom) positionX = ClampToRange(positionX, taskbarRect.Left, taskbarRect.Right - windowWidth);
+		else positionY = ClampToRange(positionY, taskbarRect.Top, taskbarRect.Bottom - windowHeight);
+
+		reportWindow.Move((int)positionX, (int)positionY);
+	}
+
+	private static double ClampToRange(double value, double minimum, double maximum)
+	{
+		if (maximum < minimum) return minimum;
+		return Math.Clamp(value, minimum, maximum);
 	}
 
     public PopupWindow()

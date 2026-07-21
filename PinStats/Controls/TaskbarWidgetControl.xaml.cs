@@ -149,7 +149,7 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		return $"{megabytesPerSecond / 1024:N1} GB/s";
 	}
 
-	private void OnRootButtonClicked(object sender, RoutedEventArgs e) => PopupWindow.ShowNearTaskbar();
+	private void OnRootButtonClicked(object sender, RoutedEventArgs e) => PopupWindow.ShowNearTaskbar(anchorToCursor: true);
 
 	public void Dispose()
 	{

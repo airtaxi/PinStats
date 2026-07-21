@@ -12,6 +12,10 @@ public static partial class TaskbarHelper
 	[LibraryImport("shell32.dll")]
 	private static partial IntPtr SHAppBarMessage(int msg, ref APPBARDATA data);
 
+	[LibraryImport("user32.dll")]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static partial bool GetCursorPos(out POINT point);
+
 	private struct APPBARDATA
 	{
 		public int cbSize;
@@ -30,11 +34,30 @@ public static partial class TaskbarHelper
 		public int Bottom;
 	}
 
+	public struct POINT
+	{
+		public int X;
+		public int Y;
+	}
+
 	public static RECT GetTaskbarRect()
 	{
 		var appBarData = GetAppbarData();
 		return appBarData.rc;
 	}
+
+	// Returns the cursor position as the anchor point only when the cursor is over the taskbar. (eg: right after the taskbar widget is clicked)
+	public static bool TryGetCursorAnchorPoint(RECT taskbarRectangle, out POINT anchorPoint)
+	{
+		anchorPoint = default;
+		if (!GetCursorPos(out var cursorPoint)) return false;
+		if (!IsPointInsideRectangle(cursorPoint, taskbarRectangle)) return false;
+
+		anchorPoint = cursorPoint;
+		return true;
+	}
+
+	private static bool IsPointInsideRectangle(POINT point, RECT rectangle) => point.X >= rectangle.Left && point.X <= rectangle.Right && point.Y >= rectangle.Top && point.Y <= rectangle.Bottom;
 
 	private static APPBARDATA GetAppbarData()
 	{
