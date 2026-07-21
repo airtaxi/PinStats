@@ -1,0 +1,58 @@
+﻿using PinStats.Enums;
+using PinStats.Helpers;
+
+namespace PinStats;
+
+public static class TaskbarWidgetSettings
+{
+	// Item widths must match the layout of TaskbarWidgetControl.
+	public const double PercentItemWidth = 36;
+	public const double SpeedItemWidth = 64;
+	public const double BatteryPowerItemWidth = 44;
+	public const double ItemSpacing = 4;
+	public const double RootVerticalMargin = 4;
+	public const double RootHorizontalMargin = 4;
+	public const double RootVerticalPadding = 2;
+	public const double RootHorizontalPadding = 2;
+
+	private const string ConfigurationKeyPrefix = "TaskbarWidget.";
+	private const string MonitorIdentityConfigurationKey = ConfigurationKeyPrefix + "MonitorIdentity";
+
+	private static readonly TaskbarWidgetItemType[] s_defaultEnabledItemTypes = [TaskbarWidgetItemType.CpuUsage, TaskbarWidgetItemType.MemoryUsage];
+
+	public static bool IsSupported => TaskbarHelper.IsWindows11OrGreater();
+
+	public static int PreferredMonitorIdentity
+	{
+		get => Configuration.GetValue<int?>(MonitorIdentityConfigurationKey) ?? 0;
+		set => Configuration.SetValue(MonitorIdentityConfigurationKey, value);
+	}
+
+	public static bool HasAnyItemEnabled => GetEnabledItemTypes().Count > 0;
+
+	public static bool IsItemEnabled(TaskbarWidgetItemType itemType) => Configuration.GetValue<bool?>(GetItemConfigurationKey(itemType)) ?? s_defaultEnabledItemTypes.Contains(itemType);
+
+	public static void SetItemEnabled(TaskbarWidgetItemType itemType, bool isEnabled) => Configuration.SetValue(GetItemConfigurationKey(itemType), isEnabled);
+
+	public static List<TaskbarWidgetItemType> GetEnabledItemTypes() =>
+	[.. Enum.GetValues<TaskbarWidgetItemType>().Where(IsItemEnabled)];
+
+	public static double GetPreferredWidth()
+	{
+		var enabledItemTypes = GetEnabledItemTypes();
+		if (enabledItemTypes.Count == 0) return 0;
+
+		var preferredWidth = (RootHorizontalMargin * 2) + (RootHorizontalPadding * 2) + (ItemSpacing * (enabledItemTypes.Count - 1));
+		foreach (var itemType in enabledItemTypes) preferredWidth += GetItemWidth(itemType);
+		return preferredWidth;
+	}
+
+	private static double GetItemWidth(TaskbarWidgetItemType itemType) => itemType switch
+	{
+		TaskbarWidgetItemType.NetworkSpeed or TaskbarWidgetItemType.StorageSpeed => SpeedItemWidth,
+		TaskbarWidgetItemType.BatteryPower => BatteryPowerItemWidth,
+		_ => PercentItemWidth
+	};
+
+	private static string GetItemConfigurationKey(TaskbarWidgetItemType itemType) => ConfigurationKeyPrefix + itemType.ToString();
+}

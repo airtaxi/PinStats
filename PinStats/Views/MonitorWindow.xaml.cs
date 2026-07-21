@@ -4,13 +4,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using PinStats.Enums;
 using PinStats.Helpers;
-using PinStats.Resources;
 using PinStats.Services;
 using PinStats.ViewModels;
 using WinUIEx;
 using Monitor = PinStats.Helpers.MonitorHelper.Monitor;
 
-namespace PinStats;
+namespace PinStats.Views;
 
 public sealed partial class MonitorWindow : IDisposable
 {
@@ -63,7 +62,7 @@ public sealed partial class MonitorWindow : IDisposable
         }
         // No need to set the backdrop to null since it is already null by default
 
-        TaskbarUsageResource.HardwareMonitorBackgroundImageSet += OnHardwareMonitorBackgroundImageSet;
+        TaskbarIconHostWindowViewModel.HardwareMonitorBackgroundImageSet += OnHardwareMonitorBackgroundImageSet;
 
         TextBlockMotherboardName.Text = HardwareMonitor.GetMotherboardName();
         TextBlockCpuName.Text = HardwareMonitor.GetCpuName();
@@ -264,7 +263,7 @@ public sealed partial class MonitorWindow : IDisposable
         _disposed = true;
 
         if (Instance == this) Instance = null;
-        TaskbarUsageResource.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
+        TaskbarIconHostWindowViewModel.HardwareMonitorBackgroundImageSet -= OnHardwareMonitorBackgroundImageSet;
         PopupWindow.OnCurrentGpuChanged -= OnCurrentGpuChanged;
         UsageHistoryBuffer.UsageInformationAdded -= OnUsageInformationAdded;
         StopRefreshTimer();

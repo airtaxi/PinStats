@@ -4,13 +4,12 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppLifecycle;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
 using PinStats.Helpers;
-using PinStats.Resources;
 using PinStats.Services;
+using PinStats.Views;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
@@ -175,22 +174,23 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-        LaunchEmptyWindowIfNotExists();
+        LaunchTaskbarIconHostWindowIfNotExists();
     }
 
-    private static Window s_emptyWindow;
-    // WinUI3 will exit when the last window is closed, so we need to create a dummy window to keep the app running.
-    private void LaunchEmptyWindowIfNotExists()
+    private static TaskbarIconHostWindow s_iconHostWindow;
+    // WinUI3 will exit when the last window is closed, so we need to create a host window to keep the app running.
+    // The host window is hidden and hosts the H.NotifyIcon TaskbarIcon that would otherwise live in a ResourceDictionary.
+    private void LaunchTaskbarIconHostWindowIfNotExists()
     {
-        if (s_emptyWindow != null) return;
+        if (s_iconHostWindow != null) return;
 
-        s_emptyWindow = new() { Content = new Frame() };
+        s_iconHostWindow = new TaskbarIconHostWindow();
 
-        // TaskbarUsageResources depends XamlRoot of the window, so we need to wait until the window is loaded.
-        (s_emptyWindow.Content as Frame).Loaded += OnEmptyWindowContentLoaded;
-        (s_emptyWindow.Content as Frame).ActualThemeChanged += OnActualThemeChanged;
-        s_emptyWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
-        s_emptyWindow.Activate();
+        // TaskbarIcon depends on XamlRoot of the window, so we need to wait until the content is loaded.
+        (s_iconHostWindow.Content as FrameworkElement).Loaded += OnTaskbarIconHostContentLoaded;
+        (s_iconHostWindow.Content as FrameworkElement).ActualThemeChanged += OnActualThemeChanged;
+        s_iconHostWindow.AppWindow.IsShownInSwitchers = false; // This window should not be shown in the Taskbar.
+        s_iconHostWindow.Activate();
     }
 
     private void OnActualThemeChanged(FrameworkElement sender, object args)
@@ -200,25 +200,99 @@ public partial class App : Application
     }
 
     public static float MainWindowRasterizationScale { get; private set; }
-    private async void OnEmptyWindowContentLoaded(object sender, RoutedEventArgs e)
+    private async void OnTaskbarIconHostContentLoaded(object sender, RoutedEventArgs e)
     {
         // Unsubscribe the event to prevent memory leak.
-        (s_emptyWindow.Content as Frame).Loaded -= OnEmptyWindowContentLoaded;
+        (s_iconHostWindow.Content as FrameworkElement).Loaded -= OnTaskbarIconHostContentLoaded;
 
-        // Hide the window so it doesn't appear on the screen.
-        s_emptyWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
+        s_iconHostWindow.Hide(false); // Hide the window so it doesn't appear on the screen.
 
-        var xamlRoot = s_emptyWindow.Content.XamlRoot;
+        var xamlRoot = s_iconHostWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
 
-        var resource = new TaskbarUsageResource();
-        Resources.Add("TaskbarUsageResources", resource);
         await CheckForUpdateAsync();
+
+        // Attach the taskbar widget window if any widget items are enabled.
+        try { await InitializeTaskbarWidgetWindowAsync(); }
+        catch (Exception exception) { WriteException(exception); }
 
         // Disable efficiency mode to improve performance.
         EfficiencyModeUtilities.SetEfficiencyMode(false);
 
         // Set the process priority to high to improve performance.
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+    }
+
+    private static TaskbarWidgetWindow s_taskbarWidgetWindow;
+
+    public static async Task InitializeTaskbarWidgetWindowAsync()
+    {
+        // The taskbar widget is only supported on Windows 11 and later.
+        if (!TaskbarHelper.IsWindows11OrGreater()) return;
+        if (!TaskbarWidgetSettings.HasAnyItemEnabled) return;
+        if (s_taskbarWidgetWindow is not null) return;
+
+        var taskbarWidgetWindow = new TaskbarWidgetWindow();
+        s_taskbarWidgetWindow = taskbarWidgetWindow;
+        taskbarWidgetWindow.Closed += OnTaskbarWidgetWindowClosed;
+        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated += OnTaskbarContentHostTaskbarWindowRecreated;
+
+        try
+        {
+            await taskbarWidgetWindow.PrepareTaskbarContentAsync();
+            taskbarWidgetWindow.Activate();
+        }
+        catch
+        {
+            ReleaseTaskbarWidgetWindow(taskbarWidgetWindow);
+            taskbarWidgetWindow.Close();
+            throw;
+        }
+    }
+
+    // Recreate the taskbar widget window to apply configuration changes such as enabled items or the preferred monitor.
+    // The old window must be closed after the new window is ready since closing it first can terminate the app if it is the last remaining window.
+    public static async void RelaunchTaskbarWidgetWindow()
+    {
+        if (!TaskbarHelper.IsWindows11OrGreater()) return;
+
+        var oldTaskbarWidgetWindow = s_taskbarWidgetWindow;
+        if (oldTaskbarWidgetWindow is not null) ReleaseTaskbarWidgetWindow(oldTaskbarWidgetWindow);
+
+        try { await InitializeTaskbarWidgetWindowAsync(); }
+        catch (Exception exception) { WriteException(exception); }
+        finally { oldTaskbarWidgetWindow?.Close(); }
+    }
+
+    private static void OnTaskbarWidgetWindowClosed(object sender, WindowEventArgs args)
+    {
+        if (sender is TaskbarWidgetWindow taskbarWidgetWindow)
+        {
+            ReleaseTaskbarWidgetWindow(taskbarWidgetWindow);
+        }
+    }
+
+    // The taskbar window is recreated when Explorer restarts, so the widget window must be recreated to attach to it again.
+    private static async void OnTaskbarContentHostTaskbarWindowRecreated(object sender, EventArgs args)
+    {
+        if (!TaskbarHelper.IsWindows11OrGreater()) return;
+
+        var taskbarWidgetWindow = s_taskbarWidgetWindow;
+        if (taskbarWidgetWindow is not null) ReleaseTaskbarWidgetWindow(taskbarWidgetWindow);
+
+        try
+        {
+            // Wait for the taskbar to be ready before recreating the widget window.
+            await Task.Delay(1000);
+            await InitializeTaskbarWidgetWindowAsync();
+        }
+        catch (Exception exception) { WriteException(exception); }
+    }
+
+    private static void ReleaseTaskbarWidgetWindow(TaskbarWidgetWindow taskbarWidgetWindow)
+    {
+        taskbarWidgetWindow.Closed -= OnTaskbarWidgetWindowClosed;
+        if (TaskbarHelper.IsWindows11OrGreater()) taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated -= OnTaskbarContentHostTaskbarWindowRecreated;
+        if (ReferenceEquals(s_taskbarWidgetWindow, taskbarWidgetWindow)) s_taskbarWidgetWindow = null;
     }
 }

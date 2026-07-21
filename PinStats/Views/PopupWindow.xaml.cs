@@ -10,11 +10,12 @@ using PinStats.Services;
 using PinStats.ViewModels;
 using WinUIEx;
 
-namespace PinStats;
+namespace PinStats.Views;
 
 public sealed partial class PopupWindow : IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
+	private const int ReportWindowHorizontalOffset = 220;
 
 	public static event EventHandler OnCurrentGpuChanged;
 
@@ -30,6 +31,40 @@ public sealed partial class PopupWindow : IDisposable
 	private string _latestGpuBaseText = string.Empty;
 	private Arm64PowerMeterValues _cachedArm64PowerMeterValues;
 	private int _powerFetchInProgress;
+
+	// Show the popup window near the taskbar. (eg: above the taskbar when the taskbar is at the bottom)
+	public static PopupWindow ShowNearTaskbar()
+	{
+		var reportWindow = new PopupWindow();
+		var scale = (double)reportWindow.GetDpiForWindow() / 96; // 96 is the default DPI of Windows.
+
+		var taskbarRect = TaskbarHelper.GetTaskbarRect();
+		var taskbarPosition = TaskbarHelper.GetTaskbarPosition();
+
+		// Default position is bottom.
+		var positionX = taskbarRect.Right - ((reportWindow.Width + ReportWindowHorizontalOffset) * scale);
+		var positionY = taskbarRect.Top - (reportWindow.Height * scale);
+
+		switch (taskbarPosition)
+		{
+			case TaskbarPosition.Top:
+				positionX = taskbarRect.Right - (reportWindow.Width + ReportWindowHorizontalOffset) * scale;
+				positionY = taskbarRect.Bottom;
+				break;
+			case TaskbarPosition.Left:
+				positionX = taskbarRect.Right;
+				positionY = taskbarRect.Bottom - reportWindow.Height * scale;
+				break;
+			case TaskbarPosition.Right:
+				positionX = taskbarRect.Left - reportWindow.Width * scale;
+				positionY = taskbarRect.Bottom - reportWindow.Height * scale;
+				break;
+		}
+
+		reportWindow.Move((int)positionX, (int)positionY);
+		reportWindow.Activate();
+		return reportWindow;
+	}
 
     public PopupWindow()
 	{
@@ -338,7 +373,10 @@ public sealed partial class PopupWindow : IDisposable
     private void OnActivated(object sender, WindowActivatedEventArgs args)
 	{
 		// Close the window when the window lost its focus.
-		if (args.WindowActivationState == WindowActivationState.Deactivated) Close();
+		if (args.WindowActivationState == WindowActivationState.Deactivated)
+		{
+		    Close();
+		}
 	}
 
 	private void OnRadioButtonClicked(object sender, RoutedEventArgs e)

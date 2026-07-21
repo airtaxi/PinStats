@@ -109,6 +109,12 @@
   <data name="Menu.RemoveFromStartup" xml:space="preserve">
     <value>从启动项移除</value>
   </data>
+  <data name="Menu.TaskbarWidgetMonitorPrimary" xml:space="preserve">
+    <value>主显示器</value>
+  </data>
+  <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
+    <value>显示器 {0}</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>版本 {0}</value>
   </data>
@@ -138,6 +144,36 @@
   </data>
   <data name="Menu_ShowHardwareMonitor.Text" xml:space="preserve">
     <value>显示硬件监控</value>
+  </data>
+  <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
+    <value>任务栏小组件</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
+    <value>电池电量</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
+    <value>电池充放电功率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
+    <value>CPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
+    <value>GPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
+    <value>内存使用量</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
+    <value>小组件显示器</value>
+  </data>
+  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
+    <value>网络上传/下载</value>
+  </data>
+  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
+    <value>存储读取/写入</value>
+  </data>
+  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
+    <value>虚拟内存使用量</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>电池</value>

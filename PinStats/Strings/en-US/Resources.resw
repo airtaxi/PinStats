@@ -109,6 +109,12 @@
   <data name="Menu.RemoveFromStartup" xml:space="preserve">
     <value>Remove from Startup</value>
   </data>
+  <data name="Menu.TaskbarWidgetMonitorPrimary" xml:space="preserve">
+    <value>Primary monitor</value>
+  </data>
+  <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
+    <value>Monitor {0}</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>Version {0}</value>
   </data>
@@ -138,6 +144,36 @@
   </data>
   <data name="Menu_ShowHardwareMonitor.Text" xml:space="preserve">
     <value>Show Hardware Monitor</value>
+  </data>
+  <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
+    <value>Taskbar Widget</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
+    <value>Battery Percentage</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
+    <value>Battery Charge/Discharge Power</value>
+  </data>
+  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
+    <value>CPU Usage</value>
+  </data>
+  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
+    <value>GPU Usage</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
+    <value>Memory Usage</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
+    <value>Widget Monitor</value>
+  </data>
+  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
+    <value>Network Up/Down</value>
+  </data>
+  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
+    <value>Storage Read/Write</value>
+  </data>
+  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
+    <value>Virtual Memory Usage</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>Battery</value>

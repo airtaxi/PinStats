@@ -109,6 +109,12 @@
   <data name="Menu.RemoveFromStartup" xml:space="preserve">
     <value>시작 프로그램에서 제거</value>
   </data>
+  <data name="Menu.TaskbarWidgetMonitorPrimary" xml:space="preserve">
+    <value>주 모니터</value>
+  </data>
+  <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
+    <value>모니터 {0}</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>버전 {0}</value>
   </data>
@@ -138,6 +144,36 @@
   </data>
   <data name="Menu_ShowHardwareMonitor.Text" xml:space="preserve">
     <value>하드웨어 모니터 표시</value>
+  </data>
+  <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
+    <value>작업 표시줄 위젯</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
+    <value>배터리 잔량</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
+    <value>배터리 충방전 전력</value>
+  </data>
+  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
+    <value>CPU 사용량</value>
+  </data>
+  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
+    <value>GPU 사용량</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
+    <value>메모리 사용량</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
+    <value>위젯 표시 모니터</value>
+  </data>
+  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
+    <value>네트워크 업/다운</value>
+  </data>
+  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
+    <value>저장소 읽기/쓰기</value>
+  </data>
+  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
+    <value>가상 메모리 사용량</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>배터리</value>

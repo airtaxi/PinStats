@@ -1,6 +1,7 @@
 ﻿using PinStats.Enums;
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace PinStats.Helpers;
 
@@ -58,6 +59,7 @@ public static partial class TaskbarHelper
 		};
 	}
 
+	[SupportedOSPlatformGuard("windows10.0.22000.0")]
 	public static bool IsWindows11OrGreater()
 	{
 		OperatingSystem os = Environment.OSVersion;

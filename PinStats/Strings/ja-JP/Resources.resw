@@ -109,6 +109,12 @@
   <data name="Menu.RemoveFromStartup" xml:space="preserve">
     <value>スタートアップから削除</value>
   </data>
+  <data name="Menu.TaskbarWidgetMonitorPrimary" xml:space="preserve">
+    <value>プライマリモニター</value>
+  </data>
+  <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
+    <value>モニター {0}</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>バージョン {0}</value>
   </data>
@@ -138,6 +144,36 @@
   </data>
   <data name="Menu_ShowHardwareMonitor.Text" xml:space="preserve">
     <value>ハードウェアモニターを表示</value>
+  </data>
+  <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
+    <value>タスクバーウィジェット</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
+    <value>バッテリー残量</value>
+  </data>
+  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
+    <value>バッテリー充放電電力</value>
+  </data>
+  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
+    <value>CPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
+    <value>GPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
+    <value>メモリ使用量</value>
+  </data>
+  <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
+    <value>ウィジェット表示モニター</value>
+  </data>
+  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
+    <value>ネットワーク上り/下り</value>
+  </data>
+  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
+    <value>ストレージ読み/書き</value>
+  </data>
+  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
+    <value>仮想メモリ使用量</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>バッテリー</value>
