@@ -20,15 +20,7 @@
 		<Version>2.6.0</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Remove="Assets\Cpu.png" />
-		<None Remove="Controls\TaskbarWidgetControl.xaml" />
-		<None Remove="Fonts\Pretendard-Thin.ttf" />
-		<None Remove="Views\MonitorWindow.xaml" />
-		<None Remove="Views\PopupWindow.xaml" />
-		<None Remove="Views\TaskbarWidgetWindow.xaml" />
-		<None Remove="Views\TaskbarIconHostWindow.xaml" />
-	</ItemGroup>
+	
 	<ItemGroup>
 		<Content Include="Fonts\Pretendard-ExtraLight.ttf">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -70,40 +62,12 @@
 		</ProjectReference>
 	</ItemGroup>
 	<ItemGroup>
-		<Content Update="Assets\Cpu.png">
+		<Content Update="Assets\**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="Assets\Cpu_White.png">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="icon.ico">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
-		<Page Update="Views\MonitorWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Views\PopupWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Views\TaskbarWidgetWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Controls\TaskbarWidgetControl.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Page Update="Views\TaskbarIconHostWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 	</ItemGroup>
 
 	<!-- 
