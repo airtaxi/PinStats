@@ -1,6 +1,7 @@
 # PC의 맥박을 작업표시줄에.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/airtaxi/PinStats)](https://github.com/airtaxi/PinStats/releases/latest)
 
 🌐 [English](README.md) | 한국어
 

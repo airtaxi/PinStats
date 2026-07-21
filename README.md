@@ -1,6 +1,7 @@
 # Your PC's pulse, pinned to the taskbar.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/airtaxi/PinStats)](https://github.com/airtaxi/PinStats/releases/latest)
 
 🌐 English | [한국어](README.ko.md)
 
