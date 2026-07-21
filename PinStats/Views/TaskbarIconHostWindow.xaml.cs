@@ -22,7 +22,6 @@ using PopupWindow = PinStats.Views.PopupWindow;
 
 namespace PinStats.Views;
 
-[SupportedOSPlatform("windows10.0.22000.0")]
 public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorListRefreshRequested>, IRecipient<LanguageListRefreshRequested>, IRecipient<TaskbarWidgetMonitorListRefreshRequested>, IRecipient<PopupBackgroundImageSelectionRequested>, IRecipient<HardwareMonitorBackgroundImageSelectionRequested>
 {
 	private const int UpdateTimerInterval = 250;
