@@ -119,7 +119,7 @@
     <value>Version {0}</value>
   </data>
   <data name="Menu_Author.Text" xml:space="preserve">
-    <value>Author: Howon Lee</value>
+    <value>Author: Howon Lee (airtaxi)</value>
   </data>
   <data name="Menu_Close.Text" xml:space="preserve">
     <value>Close</value>

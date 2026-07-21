@@ -119,7 +119,7 @@
     <value>버전 {0}</value>
   </data>
   <data name="Menu_Author.Text" xml:space="preserve">
-    <value>제작자: Howon Lee</value>
+    <value>제작자: 이호원 (airtaxi)</value>
   </data>
   <data name="Menu_Close.Text" xml:space="preserve">
     <value>닫기</value>

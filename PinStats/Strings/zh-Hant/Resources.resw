@@ -119,7 +119,7 @@
     <value>版本 {0}</value>
   </data>
   <data name="Menu_Author.Text" xml:space="preserve">
-    <value>作者: Howon Lee</value>
+    <value>作者: Howon Lee (airtaxi)</value>
   </data>
   <data name="Menu_Close.Text" xml:space="preserve">
     <value>關閉</value>
