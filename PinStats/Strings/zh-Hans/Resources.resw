@@ -64,9 +64,6 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Dialog.ImageFileFilter" xml:space="preserve">
-    <value>图片文件</value>
-  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} 个</value>
   </data>

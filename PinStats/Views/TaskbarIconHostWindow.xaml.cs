@@ -6,7 +6,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.Windows.Storage.Pickers;
 using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.Services;
@@ -236,16 +236,19 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		return _localizationService.GetFormattedString("Menu.TaskbarWidgetMonitorSecondaryFormat", identity);
 	}
 
-	private void ShowBackgroundImagePicker(BackgroundImageType backgroundImageType)
+	private async Task ShowBackgroundImagePickerAsync(BackgroundImageType backgroundImageType)
 	{
-		// WinUI's FileOpenPicker won't work with elevated application binary for now
-		// Use WindowsAPICodePack's CommonOpenFileDialog instead
-		var dialog = new CommonOpenFileDialog();
-		dialog.Filters.Add(new CommonFileDialogFilter(App.Localization.GetLocalizedString("Dialog.ImageFileFilter"), "*.png;*.jpg;*.jpeg"));
-		if (dialog.ShowDialog() != CommonFileDialogResult.Ok) return;
+		var xamlRoot = TaskbarIconCpuUsage.XamlRoot;
+		var fileOpenPicker = new FileOpenPicker(xamlRoot.ContentIslandEnvironment.AppWindowId);
+		fileOpenPicker.FileTypeFilter.Add(".png");
+		fileOpenPicker.FileTypeFilter.Add(".jpg");
+		fileOpenPicker.FileTypeFilter.Add(".jpeg");
+
+		var storageFile = await fileOpenPicker.PickSingleFileAsync();
+		if (storageFile is null) return;
 
 		// Configure background image path with prefix string
-		var path = dialog.FileName;
+		var path = storageFile.Path;
 		Configuration.SetValue(backgroundImageType.ToString() + "BackgroundImagePath", path);
 
 		ViewModel.RefreshBackgroundImageMenuItemEnabledState();
@@ -259,9 +262,9 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 
 	public void Receive(TaskbarWidgetMonitorListRefreshRequested message) => _dispatcherQueue.TryEnqueue(RefreshTaskbarWidgetMonitorMenuItems);
 
-	public void Receive(PopupBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(() => ShowBackgroundImagePicker(BackgroundImageType.Popup));
+	public void Receive(PopupBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(async () => await ShowBackgroundImagePickerAsync(BackgroundImageType.Popup));
 
-	public void Receive(HardwareMonitorBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(() => ShowBackgroundImagePicker(BackgroundImageType.HardwareMonitor));
+	public void Receive(HardwareMonitorBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(async () => await ShowBackgroundImagePickerAsync(BackgroundImageType.HardwareMonitor));
 
 	public void Receive(IconColorChangedMessage message) => _dispatcherQueue.TryEnqueue(UpdateIconImageByIconColor);
 }

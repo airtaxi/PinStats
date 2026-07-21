@@ -64,9 +64,6 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}초</value>
   </data>
-  <data name="Dialog.ImageFileFilter" xml:space="preserve">
-    <value>이미지 파일</value>
-  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} 외 {1}개</value>
   </data>

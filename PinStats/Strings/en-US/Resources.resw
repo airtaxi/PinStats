@@ -64,9 +64,6 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}s</value>
   </data>
-  <data name="Dialog.ImageFileFilter" xml:space="preserve">
-    <value>Image File</value>
-  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} more</value>
   </data>
