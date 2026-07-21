@@ -26,6 +26,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 	public static void RaiseHardwareMonitorBackgroundImageSet() => HardwareMonitorBackgroundImageSet?.Invoke(null, EventArgs.Empty);
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
+	private readonly ManualSlotPriorityService _manualSlotPriorityService = App.Services.GetRequiredService<ManualSlotPriorityService>();
 
 	static TaskbarIconHostWindowViewModel()
 	{
@@ -193,6 +194,9 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		TaskbarWidgetSettings.PreferredMonitorIdentity = identity;
 		App.RelaunchTaskbarWidgetWindow();
 	}
+
+	[RelayCommand]
+	private async Task ChangeManualSlotPriorityAsync() => await _manualSlotPriorityService.ShowAndApplyAsync();
 
 	[RelayCommand]
 	private void ToggleTaskbarWidgetItem(TaskbarWidgetItemType itemType)

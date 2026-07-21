@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application
     x:Class="PinStats.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///DevWinUI/Themes/Generic.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->

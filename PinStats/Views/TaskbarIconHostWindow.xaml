@@ -122,6 +122,11 @@
                         IsChecked="{x:Bind ViewModel.IsTaskbarWidgetBatteryPowerChecked, Mode=OneWay}"
                         Visibility="{x:Bind ViewModel.IsBatteryPowerItemVisible, Mode=OneWay}" />
                     <MenuFlyoutSeparator />
+                    <MenuFlyoutItem
+                        x:Name="MenuFlyoutItemTaskbarWidgetManualSlotPriority"
+                        x:Uid="Menu_TaskbarWidgetManualSlotPriority"
+                        x:FieldModifier="public"
+                        Command="{x:Bind ViewModel.ChangeManualSlotPriorityCommand, Mode=OneTime}" />
                     <MenuFlyoutSubItem
                         x:Name="MenuFlyoutSubItemTaskbarWidgetMonitor"
                         x:Uid="Menu_TaskbarWidgetMonitor"

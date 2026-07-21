@@ -64,6 +64,18 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}秒</value>
   </data>
+  <data name="Dialog.Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityDescription" xml:space="preserve">
+    <value>0 から 65535 の値を入力してください。複数のウィジェットが同時に表示される場合、値が小さいほどタスクバー ボタンから離れた位置に配置されます。</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityTitle" xml:space="preserve">
+    <value>表示優先度</value>
+  </data>
+  <data name="Dialog.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} 他 {1} 個</value>
   </data>
@@ -150,6 +162,9 @@
   </data>
   <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
     <value>GPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
+    <value>表示優先度の変更</value>
   </data>
   <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
     <value>メモリ使用量</value>

@@ -64,6 +64,18 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}초</value>
   </data>
+  <data name="Dialog.Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityDescription" xml:space="preserve">
+    <value>0에서 65535 사이의 값을 입력하세요. 여러 위젯이 함께 표시될 때 낮은 값일수록 작업 표시줄 버튼에서 멀리 배치됩니다.</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityTitle" xml:space="preserve">
+    <value>표시 우선 순위</value>
+  </data>
+  <data name="Dialog.Ok" xml:space="preserve">
+    <value>확인</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} 외 {1}개</value>
   </data>
@@ -150,6 +162,9 @@
   </data>
   <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
     <value>GPU 사용량</value>
+  </data>
+  <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
+    <value>표시 우선 순위 변경</value>
   </data>
   <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
     <value>메모리 사용량</value>

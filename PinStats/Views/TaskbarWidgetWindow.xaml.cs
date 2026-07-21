@@ -12,7 +12,7 @@ public sealed partial class TaskbarWidgetWindow : Window
 	public TaskbarWidgetWindow()
 	{
 		InitializeComponent();
-		TaskbarContentHost = new TaskbarContentHost(this, (FrameworkElement)Content, new() { PreferredWidth = TaskbarWidgetSettings.GetPreferredWidth(), PreferredMonitorIdentity = TaskbarWidgetSettings.PreferredMonitorIdentity });
+		TaskbarContentHost = new TaskbarContentHost(this, (FrameworkElement)Content, new() { PreferredWidth = TaskbarWidgetSettings.GetPreferredWidth(), PreferredMonitorIdentity = TaskbarWidgetSettings.PreferredMonitorIdentity, ManualSlotPriority = TaskbarWidgetSettings.ManualSlotPriority });
 	}
 
 	public async Task PrepareTaskbarContentAsync() => await TaskbarContentHost.AttachWhenLayoutReadyAsync();

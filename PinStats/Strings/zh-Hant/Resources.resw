@@ -64,6 +64,18 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}秒</value>
   </data>
+  <data name="Dialog.Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityDescription" xml:space="preserve">
+    <value>請輸入 0 到 65535 之間的值。多個小工具同時顯示時，數值越小，小工具離工作列按鈕越遠。</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityTitle" xml:space="preserve">
+    <value>顯示優先順序</value>
+  </data>
+  <data name="Dialog.Ok" xml:space="preserve">
+    <value>確定</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} 個</value>
   </data>
@@ -150,6 +162,9 @@
   </data>
   <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
     <value>GPU 使用率</value>
+  </data>
+  <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
+    <value>變更顯示優先順序</value>
   </data>
   <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
     <value>記憶體使用量</value>

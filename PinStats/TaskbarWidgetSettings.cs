@@ -17,6 +17,7 @@ public static class TaskbarWidgetSettings
 
 	private const string ConfigurationKeyPrefix = "TaskbarWidget.";
 	private const string MonitorIdentityConfigurationKey = ConfigurationKeyPrefix + "MonitorIdentity";
+	private const string ManualSlotPriorityConfigurationKey = ConfigurationKeyPrefix + "ManualSlotPriority";
 
 	private static readonly TaskbarWidgetItemType[] s_defaultEnabledItemTypes = [TaskbarWidgetItemType.CpuUsage, TaskbarWidgetItemType.MemoryUsage];
 
@@ -26,6 +27,15 @@ public static class TaskbarWidgetSettings
 	{
 		get => Configuration.GetValue<int?>(MonitorIdentityConfigurationKey) ?? 0;
 		set => Configuration.SetValue(MonitorIdentityConfigurationKey, value);
+	}
+
+	// Must match the default value of TaskbarContentHostOptions.ManualSlotPriority.
+	public const ushort DefaultManualSlotPriority = 65535;
+
+	public static ushort ManualSlotPriority
+	{
+		get => Configuration.GetValue<ushort?>(ManualSlotPriorityConfigurationKey) ?? DefaultManualSlotPriority;
+		set => Configuration.SetValue(ManualSlotPriorityConfigurationKey, value);
 	}
 
 	public static bool HasAnyItemEnabled => GetEnabledItemTypes().Count > 0;

@@ -64,6 +64,18 @@
   <data name="Chart.SecondsAgoFormat" xml:space="preserve">
     <value>{0}s</value>
   </data>
+  <data name="Dialog.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityDescription" xml:space="preserve">
+    <value>Enter a value between 0 and 65535. When multiple widgets share the taskbar, a lower value places the widget farther from the taskbar buttons.</value>
+  </data>
+  <data name="Dialog.ManualSlotPriorityTitle" xml:space="preserve">
+    <value>Display Priority</value>
+  </data>
+  <data name="Dialog.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} more</value>
   </data>
@@ -150,6 +162,9 @@
   </data>
   <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
     <value>GPU Usage</value>
+  </data>
+  <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
+    <value>Change Display Priority</value>
   </data>
   <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
     <value>Memory Usage</value>
