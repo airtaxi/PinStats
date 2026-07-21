@@ -18,7 +18,7 @@ The Windows 11 taskbar widget keeps a compact strip of usage rings and speed rea
 - **Windows 11 taskbar widget.** A compact strip of usage rings and speed readouts pinned straight into the Windows 11 taskbar — a capability almost no other system monitor offers. Toggle each of the eight items on or off individually.
 - **Live tray icon.** The current CPU or GPU usage number is drawn directly onto the system-tray icon every 0.25 seconds, so your system's state is visible without opening anything.
 - **Four display surfaces.** System-tray icon, quick popup, fullscreen hardware-monitor dashboard, and a Windows 11 taskbar widget — pick what suits your workflow.
-- **Comprehensive telemetry.** CPU, GPU, memory (physical + virtual), network, storage, battery (with health), and motherboard, including temperatures and power draw.
+- **Comprehensive telemetry.** CPU, GPU, memory (physical + virtual), network, storage, and battery (with health) with usage, temperatures, and power draw, plus the motherboard name.
 - **Multi-GPU and multi-monitor.** Choose which GPU to monitor when more than one is present, and open the fullscreen dashboard on any connected monitor.
 - **30-second live charts.** The popup and the dashboard show a rolling 30-second CPU/GPU line chart.
 - **Automatic update checks.** Shows a toast notification when a new version is available.
