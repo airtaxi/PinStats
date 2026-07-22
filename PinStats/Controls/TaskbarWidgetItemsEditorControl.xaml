@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="PinStats.Controls.TaskbarWidgetItemsEditorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewmodels="using:PinStats.ViewModels">
+    <ItemsRepeater x:Name="ItemsRepeater" ItemsSource="{x:Bind ViewModel.Items, Mode=OneTime}">
+        <ItemsRepeater.Layout>
+            <StackLayout Spacing="4" />
+        </ItemsRepeater.Layout>
+        <ItemsRepeater.ItemTemplate>
+            <DataTemplate x:DataType="viewmodels:TaskbarWidgetEditableItemViewModel">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox
+                        VerticalAlignment="Center"
+                        Content="{x:Bind DisplayName, Mode=OneTime}"
+                        IsChecked="{x:Bind IsEnabled, Mode=TwoWay}" />
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="2">
+                        <Button
+                            Width="28"
+                            Height="22"
+                            MinWidth="0"
+                            MinHeight="0"
+                            Padding="0"
+                            Command="{x:Bind MoveUpCommand, Mode=OneTime}"
+                            IsEnabled="{x:Bind CanMoveUp, Mode=OneWay}">
+                            <FontIcon FontSize="10" Glyph="&#xE96D;" />
+                        </Button>
+                        <Button
+                            Width="28"
+                            Height="22"
+                            MinWidth="0"
+                            MinHeight="0"
+                            Padding="0"
+                            Command="{x:Bind MoveDownCommand, Mode=OneTime}"
+                            IsEnabled="{x:Bind CanMoveDown, Mode=OneWay}">
+                            <FontIcon FontSize="10" Glyph="&#xE96E;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+    </ItemsRepeater>
+</UserControl>

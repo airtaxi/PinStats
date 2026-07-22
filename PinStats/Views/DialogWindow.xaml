@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<winuiex:WindowEx
+    x:Class="PinStats.Views.DialogWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:winuiex="using:WinUIEx"
+    IsMaximizable="False"
+    IsMinimizable="False"
+    IsResizable="False">
+    <Grid x:Name="RootGrid" KeyboardAcceleratorPlacementMode="Hidden">
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Escape" Invoked="OnEscapeKeyboardAcceleratorInvoked" />
+        </Grid.KeyboardAccelerators>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid
+            Grid.Row="0"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ContentDialogViewSeparatorBorderBrush}"
+            BorderThickness="{ThemeResource ContentDialogSeparatorThickness}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Padding="{ThemeResource ContentDialogViewTitlePadding}">
+                <ContentControl
+                    x:Name="HeaderContentControl"
+                    Margin="{ThemeResource ContentDialogTitleMargin}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    FontFamily="{ThemeResource ContentControlThemeFontFamily}"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    IsTabStop="True">
+                    <ContentControl.Template>
+                        <ControlTemplate TargetType="ContentControl">
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                ContentTransitions="{TemplateBinding ContentTransitions}"
+                                MaxLines="2"
+                                TextWrapping="Wrap" />
+                        </ControlTemplate>
+                    </ContentControl.Template>
+                </ContentControl>
+            </Border>
+            <ContentPresenter
+                x:Name="DialogContentPresenter"
+                Grid.Row="1"
+                Padding="{ThemeResource ContentDialogViewContentPadding}"
+                FontFamily="{ThemeResource ContentControlThemeFontFamily}"
+                FontSize="{ThemeResource ControlContentThemeFontSize}"
+                TextWrapping="Wrap" />
+        </Grid>
+
+        <Border
+            Grid.Row="1"
+            Padding="{ThemeResource ContentDialogPadding}"
+            Background="{ThemeResource ContentDialogViewCommandSpaceBackgroundBrush}">
+            <Grid ColumnSpacing="{ThemeResource ContentDialogViewButtonSpacing}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="PrimaryButtonColumn" Width="*" />
+                    <ColumnDefinition x:Name="SecondaryButtonColumn" Width="*" />
+                    <ColumnDefinition x:Name="CloseButtonColumn" Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="PrimaryButton"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    Click="OnPrimaryButtonClick"
+                    Style="{ThemeResource AccentButtonStyle}"
+                    Visibility="Collapsed" />
+                <Button
+                    x:Name="SecondaryButton"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    Visibility="Collapsed" />
+                <Button
+                    x:Name="CloseButton"
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    Click="OnCloseButtonClick"
+                    Visibility="Collapsed">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Escape" />
+                    </Button.KeyboardAccelerators>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</winuiex:WindowEx>

@@ -76,6 +76,12 @@
   <data name="Dialog.Ok" xml:space="preserve">
     <value>確定</value>
   </data>
+  <data name="Dialog.ResetToDefault" xml:space="preserve">
+    <value>重設為預設值</value>
+  </data>
+  <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
+    <value>工作列小工具項目</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} 個</value>
   </data>
@@ -151,35 +157,14 @@
   <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
     <value>工作列小工具</value>
   </data>
-  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
-    <value>電池電量</value>
-  </data>
-  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
-    <value>電池充放電功率</value>
-  </data>
-  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
-    <value>CPU 使用率</value>
-  </data>
-  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
-    <value>GPU 使用率</value>
+  <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
+    <value>編輯項目</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>變更顯示優先順序</value>
   </data>
-  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
-    <value>記憶體使用量</value>
-  </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>小工具顯示器</value>
-  </data>
-  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
-    <value>網路上傳/下載</value>
-  </data>
-  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
-    <value>儲存讀取/寫入</value>
-  </data>
-  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
-    <value>虛擬記憶體使用量</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>電池</value>
@@ -198,6 +183,30 @@
   </data>
   <data name="MonitorSection_VirtualMemory.Text" xml:space="preserve">
     <value>虛擬記憶體</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPercent" xml:space="preserve">
+    <value>電池電量</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPower" xml:space="preserve">
+    <value>電池充放電功率</value>
+  </data>
+  <data name="TaskbarWidgetItem.CpuUsage" xml:space="preserve">
+    <value>CPU 使用率</value>
+  </data>
+  <data name="TaskbarWidgetItem.GpuUsage" xml:space="preserve">
+    <value>GPU 使用率</value>
+  </data>
+  <data name="TaskbarWidgetItem.MemoryUsage" xml:space="preserve">
+    <value>記憶體使用量</value>
+  </data>
+  <data name="TaskbarWidgetItem.NetworkSpeed" xml:space="preserve">
+    <value>網路上傳/下載</value>
+  </data>
+  <data name="TaskbarWidgetItem.StorageSpeed" xml:space="preserve">
+    <value>儲存讀取/寫入</value>
+  </data>
+  <data name="TaskbarWidgetItem.VirtualMemoryUsage" xml:space="preserve">
+    <value>虛擬記憶體使用量</value>
   </data>
   <data name="Tooltip.UsageFormat" xml:space="preserve">
     <value>{0} 使用率: {1}%</value>

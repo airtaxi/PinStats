@@ -76,6 +76,12 @@
   <data name="Dialog.Ok" xml:space="preserve">
     <value>확인</value>
   </data>
+  <data name="Dialog.ResetToDefault" xml:space="preserve">
+    <value>기본값으로 초기화</value>
+  </data>
+  <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
+    <value>작업 표시줄 위젯 항목</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} 외 {1}개</value>
   </data>
@@ -151,35 +157,14 @@
   <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
     <value>작업 표시줄 위젯</value>
   </data>
-  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
-    <value>배터리 잔량</value>
-  </data>
-  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
-    <value>배터리 충방전 전력</value>
-  </data>
-  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
-    <value>CPU 사용량</value>
-  </data>
-  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
-    <value>GPU 사용량</value>
+  <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
+    <value>항목 편집</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>표시 우선 순위 변경</value>
   </data>
-  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
-    <value>메모리 사용량</value>
-  </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>위젯 표시 모니터</value>
-  </data>
-  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
-    <value>네트워크 업/다운</value>
-  </data>
-  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
-    <value>저장소 읽기/쓰기</value>
-  </data>
-  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
-    <value>가상 메모리 사용량</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>배터리</value>
@@ -198,6 +183,30 @@
   </data>
   <data name="MonitorSection_VirtualMemory.Text" xml:space="preserve">
     <value>가상 메모리</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPercent" xml:space="preserve">
+    <value>배터리 잔량</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPower" xml:space="preserve">
+    <value>배터리 충방전 전력</value>
+  </data>
+  <data name="TaskbarWidgetItem.CpuUsage" xml:space="preserve">
+    <value>CPU 사용량</value>
+  </data>
+  <data name="TaskbarWidgetItem.GpuUsage" xml:space="preserve">
+    <value>GPU 사용량</value>
+  </data>
+  <data name="TaskbarWidgetItem.MemoryUsage" xml:space="preserve">
+    <value>메모리 사용량</value>
+  </data>
+  <data name="TaskbarWidgetItem.NetworkSpeed" xml:space="preserve">
+    <value>네트워크 업/다운</value>
+  </data>
+  <data name="TaskbarWidgetItem.StorageSpeed" xml:space="preserve">
+    <value>저장소 읽기/쓰기</value>
+  </data>
+  <data name="TaskbarWidgetItem.VirtualMemoryUsage" xml:space="preserve">
+    <value>가상 메모리 사용량</value>
   </data>
   <data name="Tooltip.UsageFormat" xml:space="preserve">
     <value>{0} 사용량: {1}%</value>

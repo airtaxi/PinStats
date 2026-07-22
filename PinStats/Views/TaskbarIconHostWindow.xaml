@@ -3,7 +3,6 @@
     x:Class="PinStats.Views.TaskbarIconHostWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:enums="using:PinStats.Enums"
     xmlns:tb="using:H.NotifyIcon"
     Closed="OnClosed">
     <tb:TaskbarIcon
@@ -63,64 +62,11 @@
                     x:Uid="Menu_TaskbarWidget"
                     x:FieldModifier="public"
                     Visibility="{x:Bind ViewModel.IsTaskbarWidgetMenuVisible, Mode=OneWay}">
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetCpuUsage"
-                        x:Uid="Menu_TaskbarWidgetCpuUsage"
+                    <MenuFlyoutItem
+                        x:Name="MenuFlyoutItemTaskbarWidgetEditItems"
+                        x:Uid="Menu_TaskbarWidgetEditItems"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.CpuUsage}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetCpuUsageChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetGpuUsage"
-                        x:Uid="Menu_TaskbarWidgetGpuUsage"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.GpuUsage}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetGpuUsageChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetMemoryUsage"
-                        x:Uid="Menu_TaskbarWidgetMemoryUsage"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.MemoryUsage}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetMemoryUsageChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetVirtualMemoryUsage"
-                        x:Uid="Menu_TaskbarWidgetVirtualMemoryUsage"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.VirtualMemoryUsage}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetVirtualMemoryUsageChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetNetworkSpeed"
-                        x:Uid="Menu_TaskbarWidgetNetworkSpeed"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.NetworkSpeed}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetNetworkSpeedChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetStorageSpeed"
-                        x:Uid="Menu_TaskbarWidgetStorageSpeed"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.StorageSpeed}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetStorageSpeedChecked, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetBatteryPercent"
-                        x:Uid="Menu_TaskbarWidgetBatteryPercent"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.BatteryPercent}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetBatteryPercentChecked, Mode=OneWay}"
-                        Visibility="{x:Bind ViewModel.IsBatteryPercentItemVisible, Mode=OneWay}" />
-                    <ToggleMenuFlyoutItem
-                        x:Name="ToggleMenuFlyoutItemTaskbarWidgetBatteryPower"
-                        x:Uid="Menu_TaskbarWidgetBatteryPower"
-                        x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ToggleTaskbarWidgetItemCommand, Mode=OneTime}"
-                        CommandParameter="{x:Bind enums:TaskbarWidgetItemType.BatteryPower}"
-                        IsChecked="{x:Bind ViewModel.IsTaskbarWidgetBatteryPowerChecked, Mode=OneWay}"
-                        Visibility="{x:Bind ViewModel.IsBatteryPowerItemVisible, Mode=OneWay}" />
+                        Command="{x:Bind ViewModel.EditTaskbarWidgetItemsCommand, Mode=OneTime}" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem
                         x:Name="MenuFlyoutItemTaskbarWidgetManualSlotPriority"

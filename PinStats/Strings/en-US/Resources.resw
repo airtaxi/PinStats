@@ -76,6 +76,12 @@
   <data name="Dialog.Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="Dialog.ResetToDefault" xml:space="preserve">
+    <value>Reset Default</value>
+  </data>
+  <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
+    <value>Taskbar Widget Items</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} more</value>
   </data>
@@ -151,35 +157,14 @@
   <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
     <value>Taskbar Widget</value>
   </data>
-  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
-    <value>Battery Percentage</value>
-  </data>
-  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
-    <value>Battery Charge/Discharge Power</value>
-  </data>
-  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
-    <value>CPU Usage</value>
-  </data>
-  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
-    <value>GPU Usage</value>
+  <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
+    <value>Edit Items</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>Change Display Priority</value>
   </data>
-  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
-    <value>Memory Usage</value>
-  </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>Widget Monitor</value>
-  </data>
-  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
-    <value>Network Up/Down</value>
-  </data>
-  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
-    <value>Storage Read/Write</value>
-  </data>
-  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
-    <value>Virtual Memory Usage</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>Battery</value>
@@ -198,6 +183,30 @@
   </data>
   <data name="MonitorSection_VirtualMemory.Text" xml:space="preserve">
     <value>Virtual Memory</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPercent" xml:space="preserve">
+    <value>Battery Percentage</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPower" xml:space="preserve">
+    <value>Battery Charge/Discharge Power</value>
+  </data>
+  <data name="TaskbarWidgetItem.CpuUsage" xml:space="preserve">
+    <value>CPU Usage</value>
+  </data>
+  <data name="TaskbarWidgetItem.GpuUsage" xml:space="preserve">
+    <value>GPU Usage</value>
+  </data>
+  <data name="TaskbarWidgetItem.MemoryUsage" xml:space="preserve">
+    <value>Memory Usage</value>
+  </data>
+  <data name="TaskbarWidgetItem.NetworkSpeed" xml:space="preserve">
+    <value>Network Up/Down</value>
+  </data>
+  <data name="TaskbarWidgetItem.StorageSpeed" xml:space="preserve">
+    <value>Storage Read/Write</value>
+  </data>
+  <data name="TaskbarWidgetItem.VirtualMemoryUsage" xml:space="preserve">
+    <value>Virtual Memory Usage</value>
   </data>
   <data name="Tooltip.UsageFormat" xml:space="preserve">
     <value>{0} Usage: {1}%</value>

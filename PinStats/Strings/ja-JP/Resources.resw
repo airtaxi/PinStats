@@ -76,6 +76,12 @@
   <data name="Dialog.Ok" xml:space="preserve">
     <value>OK</value>
   </data>
+  <data name="Dialog.ResetToDefault" xml:space="preserve">
+    <value>デフォルトにリセット</value>
+  </data>
+  <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
+    <value>タスクバー ウィジェット項目</value>
+  </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} 他 {1} 個</value>
   </data>
@@ -151,35 +157,14 @@
   <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
     <value>タスクバーウィジェット</value>
   </data>
-  <data name="Menu_TaskbarWidgetBatteryPercent.Text" xml:space="preserve">
-    <value>バッテリー残量</value>
-  </data>
-  <data name="Menu_TaskbarWidgetBatteryPower.Text" xml:space="preserve">
-    <value>バッテリー充放電電力</value>
-  </data>
-  <data name="Menu_TaskbarWidgetCpuUsage.Text" xml:space="preserve">
-    <value>CPU 使用率</value>
-  </data>
-  <data name="Menu_TaskbarWidgetGpuUsage.Text" xml:space="preserve">
-    <value>GPU 使用率</value>
+  <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
+    <value>項目の編集</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>表示優先度の変更</value>
   </data>
-  <data name="Menu_TaskbarWidgetMemoryUsage.Text" xml:space="preserve">
-    <value>メモリ使用量</value>
-  </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>ウィジェット表示モニター</value>
-  </data>
-  <data name="Menu_TaskbarWidgetNetworkSpeed.Text" xml:space="preserve">
-    <value>ネットワーク上り/下り</value>
-  </data>
-  <data name="Menu_TaskbarWidgetStorageSpeed.Text" xml:space="preserve">
-    <value>ストレージ読み/書き</value>
-  </data>
-  <data name="Menu_TaskbarWidgetVirtualMemoryUsage.Text" xml:space="preserve">
-    <value>仮想メモリ使用量</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>バッテリー</value>
@@ -198,6 +183,30 @@
   </data>
   <data name="MonitorSection_VirtualMemory.Text" xml:space="preserve">
     <value>仮想メモリ</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPercent" xml:space="preserve">
+    <value>バッテリー残量</value>
+  </data>
+  <data name="TaskbarWidgetItem.BatteryPower" xml:space="preserve">
+    <value>バッテリー充放電電力</value>
+  </data>
+  <data name="TaskbarWidgetItem.CpuUsage" xml:space="preserve">
+    <value>CPU 使用率</value>
+  </data>
+  <data name="TaskbarWidgetItem.GpuUsage" xml:space="preserve">
+    <value>GPU 使用率</value>
+  </data>
+  <data name="TaskbarWidgetItem.MemoryUsage" xml:space="preserve">
+    <value>メモリ使用量</value>
+  </data>
+  <data name="TaskbarWidgetItem.NetworkSpeed" xml:space="preserve">
+    <value>ネットワーク上り/下り</value>
+  </data>
+  <data name="TaskbarWidgetItem.StorageSpeed" xml:space="preserve">
+    <value>ストレージ読み/書き</value>
+  </data>
+  <data name="TaskbarWidgetItem.VirtualMemoryUsage" xml:space="preserve">
+    <value>仮想メモリ使用量</value>
   </data>
   <data name="Tooltip.UsageFormat" xml:space="preserve">
     <value>{0} 使用率: {1}%</value>

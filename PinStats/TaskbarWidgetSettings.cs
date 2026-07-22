@@ -18,8 +18,21 @@ public static class TaskbarWidgetSettings
 	private const string ConfigurationKeyPrefix = "TaskbarWidget.";
 	private const string MonitorIdentityConfigurationKey = ConfigurationKeyPrefix + "MonitorIdentity";
 	private const string ManualSlotPriorityConfigurationKey = ConfigurationKeyPrefix + "ManualSlotPriority";
+	private const string ItemOrderConfigurationKey = ConfigurationKeyPrefix + "ItemOrder";
 
 	private static readonly TaskbarWidgetItemType[] s_defaultEnabledItemTypes = [TaskbarWidgetItemType.CpuUsage, TaskbarWidgetItemType.MemoryUsage];
+
+	private static readonly TaskbarWidgetItemType[] s_defaultItemOrder =
+	[
+		TaskbarWidgetItemType.CpuUsage,
+		TaskbarWidgetItemType.GpuUsage,
+		TaskbarWidgetItemType.MemoryUsage,
+		TaskbarWidgetItemType.VirtualMemoryUsage,
+		TaskbarWidgetItemType.NetworkSpeed,
+		TaskbarWidgetItemType.StorageSpeed,
+		TaskbarWidgetItemType.BatteryPercent,
+		TaskbarWidgetItemType.BatteryPower
+	];
 
 	public static bool IsSupported => TaskbarHelper.IsWindows11OrGreater();
 
@@ -44,8 +57,35 @@ public static class TaskbarWidgetSettings
 
 	public static void SetItemEnabled(TaskbarWidgetItemType itemType, bool isEnabled) => Configuration.SetValue(GetItemConfigurationKey(itemType), isEnabled);
 
+	public static bool IsItemDefaultEnabled(TaskbarWidgetItemType itemType) => s_defaultEnabledItemTypes.Contains(itemType);
+
+	public static IReadOnlyList<TaskbarWidgetItemType> GetDefaultItemOrder() => s_defaultItemOrder;
+
 	public static List<TaskbarWidgetItemType> GetEnabledItemTypes() =>
 	[.. Enum.GetValues<TaskbarWidgetItemType>().Where(IsItemEnabled)];
+
+	public static IReadOnlyList<TaskbarWidgetItemType> GetItemOrder()
+	{
+		var storedItemNames = Configuration.GetValue<List<string>>(ItemOrderConfigurationKey);
+		var itemOrder = new List<TaskbarWidgetItemType>(s_defaultItemOrder.Length);
+		foreach (var itemName in storedItemNames ?? [])
+		{
+			if (Enum.TryParse<TaskbarWidgetItemType>(itemName, out var itemType) && Enum.IsDefined(itemType) && !itemOrder.Contains(itemType))
+			{
+				itemOrder.Add(itemType);
+			}
+		}
+		foreach (var defaultItemType in s_defaultItemOrder)
+		{
+			if (!itemOrder.Contains(defaultItemType))
+			{
+				itemOrder.Add(defaultItemType);
+			}
+		}
+		return itemOrder;
+	}
+
+	public static void SetItemOrder(IReadOnlyList<TaskbarWidgetItemType> itemOrder) => Configuration.SetValue(ItemOrderConfigurationKey, itemOrder.Select(itemType => itemType.ToString()).ToList());
 
 	public static double GetPreferredWidth()
 	{
@@ -57,7 +97,7 @@ public static class TaskbarWidgetSettings
 		return preferredWidth;
 	}
 
-	private static double GetItemWidth(TaskbarWidgetItemType itemType) => itemType switch
+	public static double GetItemWidth(TaskbarWidgetItemType itemType) => itemType switch
 	{
 		TaskbarWidgetItemType.NetworkSpeed or TaskbarWidgetItemType.StorageSpeed => SpeedItemWidth,
 		TaskbarWidgetItemType.BatteryPower => BatteryPowerItemWidth,

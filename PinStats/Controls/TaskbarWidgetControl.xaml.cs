@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PinStats.Enums;
 using PinStats.Services;
+using PinStats.ViewModels;
 using PinStats.Views;
 
 namespace PinStats.Controls;
@@ -17,6 +18,9 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 	private readonly Timer _usageRefreshTimer;
 	private bool _disposed;
 
+	// Must be initialized before InitializeComponent() runs since the ItemsRepeater binds to it.
+	private List<TaskbarWidgetItemViewModel> WidgetItems { get; } = CreateWidgetItems();
+
 	public TaskbarWidgetControl()
 	{
 		InitializeComponent();
@@ -27,26 +31,16 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		_usageRefreshTimer = new(UsageRefreshTimerCallback, null, 0, Timeout.Infinite);
 	}
 
+	private static List<TaskbarWidgetItemViewModel> CreateWidgetItems() =>
+	[.. TaskbarWidgetSettings.GetItemOrder().Where(TaskbarWidgetSettings.IsItemEnabled).Select(itemType => new TaskbarWidgetItemViewModel(itemType))];
+
+	private TaskbarWidgetItemViewModel GetWidgetItem(TaskbarWidgetItemType itemType) => WidgetItems.FirstOrDefault(widgetItem => widgetItem.ItemType == itemType);
+
 	private void ApplyConfiguredLayout()
 	{
 		RootButton.Margin = new Thickness(TaskbarWidgetSettings.RootHorizontalMargin, TaskbarWidgetSettings.RootVerticalMargin, TaskbarWidgetSettings.RootHorizontalMargin, TaskbarWidgetSettings.RootVerticalMargin);
 		RootButton.Padding = new Thickness(TaskbarWidgetSettings.RootHorizontalPadding, TaskbarWidgetSettings.RootVerticalPadding, TaskbarWidgetSettings.RootHorizontalPadding, TaskbarWidgetSettings.RootVerticalPadding);
-		ItemsPanel.Spacing = TaskbarWidgetSettings.ItemSpacing;
-
-		SetupItemLayout(ItemCpuUsage, TaskbarWidgetItemType.CpuUsage, TaskbarWidgetSettings.PercentItemWidth);
-		SetupItemLayout(ItemGpuUsage, TaskbarWidgetItemType.GpuUsage, TaskbarWidgetSettings.PercentItemWidth);
-		SetupItemLayout(ItemMemoryUsage, TaskbarWidgetItemType.MemoryUsage, TaskbarWidgetSettings.PercentItemWidth);
-		SetupItemLayout(ItemVirtualMemoryUsage, TaskbarWidgetItemType.VirtualMemoryUsage, TaskbarWidgetSettings.PercentItemWidth);
-		SetupItemLayout(ItemNetworkSpeed, TaskbarWidgetItemType.NetworkSpeed, TaskbarWidgetSettings.SpeedItemWidth);
-		SetupItemLayout(ItemStorageSpeed, TaskbarWidgetItemType.StorageSpeed, TaskbarWidgetSettings.SpeedItemWidth);
-		SetupItemLayout(ItemBatteryPercent, TaskbarWidgetItemType.BatteryPercent, TaskbarWidgetSettings.PercentItemWidth);
-		SetupItemLayout(ItemBatteryPower, TaskbarWidgetItemType.BatteryPower, TaskbarWidgetSettings.BatteryPowerItemWidth);
-	}
-
-	private static void SetupItemLayout(FrameworkElement itemElement, TaskbarWidgetItemType itemType, double itemWidth)
-	{
-		itemElement.Width = itemWidth;
-		itemElement.Visibility = TaskbarWidgetSettings.IsItemEnabled(itemType) ? Visibility.Visible : Visibility.Collapsed;
+		ItemsLayout.Spacing = TaskbarWidgetSettings.ItemSpacing;
 	}
 
 	private void RefreshTimerCallback(object state)
@@ -94,8 +88,8 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		{
 			if (_disposed) return;
 
-			UpdatePercentUsageItem(ProgressRingCpuUsage, TextBlockCpuUsage, cpuUsage);
-			UpdatePercentUsageItem(ProgressRingGpuUsage, TextBlockGpuUsage, gpuUsage);
+			UpdatePercentUsageItem(GetWidgetItem(TaskbarWidgetItemType.CpuUsage), cpuUsage);
+			UpdatePercentUsageItem(GetWidgetItem(TaskbarWidgetItemType.GpuUsage), gpuUsage);
 		});
 	}
 
@@ -129,16 +123,14 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		{
 			if (_disposed) return;
 
-			UpdatePercentUsageItem(ProgressRingMemoryUsage, TextBlockMemoryUsage, memoryUsagePercent);
-			UpdatePercentUsageItem(ProgressRingVirtualMemoryUsage, TextBlockVirtualMemoryUsage, virtualMemoryUsagePercent);
+			UpdatePercentUsageItem(GetWidgetItem(TaskbarWidgetItemType.MemoryUsage), memoryUsagePercent);
+			UpdatePercentUsageItem(GetWidgetItem(TaskbarWidgetItemType.VirtualMemoryUsage), virtualMemoryUsagePercent);
 
-			TextBlockNetworkUploadSpeed.Text = networkUploadSpeedText;
-			TextBlockNetworkDownloadSpeed.Text = networkDownloadSpeedText;
-			TextBlockStorageReadSpeed.Text = storageReadSpeedText;
-			TextBlockStorageWriteSpeed.Text = storageWriteSpeedText;
+			UpdateSpeedUsageItem(GetWidgetItem(TaskbarWidgetItemType.NetworkSpeed), networkUploadSpeedText, networkDownloadSpeedText);
+			UpdateSpeedUsageItem(GetWidgetItem(TaskbarWidgetItemType.StorageSpeed), storageReadSpeedText, storageWriteSpeedText);
 
-			UpdatePercentUsageItem(ProgressRingBatteryPercent, TextBlockBatteryPercent, batteryPercent);
-			TextBlockBatteryPower.Text = batteryChargeRate is null ? _localizationService.GetLocalizedString("Info.NotAvailable") : FormatBatteryChargeRate(batteryChargeRate.Value);
+			UpdatePercentUsageItem(GetWidgetItem(TaskbarWidgetItemType.BatteryPercent), batteryPercent);
+			UpdateBatteryPowerItem(batteryChargeRate);
 		});
 	}
 
@@ -151,17 +143,35 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		return usedMemory / totalMemory * 100;
 	}
 
-	private void UpdatePercentUsageItem(ProgressRing progressRing, TextBlock textBlock, float? usagePercent)
+	private void UpdatePercentUsageItem(TaskbarWidgetItemViewModel itemViewModel, float? usagePercent)
 	{
+		if (itemViewModel is null) return;
+
 		if (usagePercent is null)
 		{
-			progressRing.Value = 0;
-			textBlock.Text = _localizationService.GetLocalizedString("Info.NotAvailable");
+			itemViewModel.Value = 0;
+			itemViewModel.Text = _localizationService.GetLocalizedString("Info.NotAvailable");
 			return;
 		}
 
-		progressRing.Value = Math.Clamp(usagePercent.Value, 0, 100);
-		textBlock.Text = $"{usagePercent.Value:N0}%";
+		itemViewModel.Value = Math.Clamp(usagePercent.Value, 0, 100);
+		itemViewModel.Text = $"{usagePercent.Value:N0}%";
+	}
+
+	private static void UpdateSpeedUsageItem(TaskbarWidgetItemViewModel itemViewModel, string primaryText, string secondaryText)
+	{
+		if (itemViewModel is null) return;
+
+		itemViewModel.PrimaryText = primaryText;
+		itemViewModel.SecondaryText = secondaryText;
+	}
+
+	private void UpdateBatteryPowerItem(float? batteryChargeRate)
+	{
+		var batteryPowerItem = GetWidgetItem(TaskbarWidgetItemType.BatteryPower);
+		if (batteryPowerItem is null) return;
+
+		batteryPowerItem.Text = batteryChargeRate is null ? _localizationService.GetLocalizedString("Info.NotAvailable") : FormatBatteryChargeRate(batteryChargeRate.Value);
 	}
 
 	private static string FormatBatteryChargeRate(float batteryChargeRate)

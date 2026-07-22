@@ -5,7 +5,6 @@ using Deskband11Lib.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.Win32;
-using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.Services;
 using PinStats.ViewModels.Messages;
@@ -27,6 +26,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
 	private readonly ManualSlotPriorityService _manualSlotPriorityService = App.Services.GetRequiredService<ManualSlotPriorityService>();
+	private readonly TaskbarWidgetItemsEditorService _taskbarWidgetItemsEditorService = App.Services.GetRequiredService<TaskbarWidgetItemsEditorService>();
 
 	static TaskbarIconHostWindowViewModel()
 	{
@@ -69,36 +69,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 
 	[ObservableProperty]
 	public partial Visibility IsTaskbarWidgetMenuVisible { get; set; } = Visibility.Visible;
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetCpuUsageChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetGpuUsageChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetMemoryUsageChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetVirtualMemoryUsageChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetNetworkSpeedChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetStorageSpeedChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetBatteryPercentChecked { get; set; }
-
-	[ObservableProperty]
-	public partial bool IsTaskbarWidgetBatteryPowerChecked { get; set; }
-
-	[ObservableProperty]
-	public partial Visibility IsBatteryPercentItemVisible { get; set; } = Visibility.Visible;
-
-	[ObservableProperty]
-	public partial Visibility IsBatteryPowerItemVisible { get; set; } = Visibility.Visible;
 
 	private void UpdateVersionNameMenuItem()
 	{
@@ -169,20 +139,6 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		// The taskbar widget menu is only available on Windows 11 and later.
 		if (!TaskbarHelper.IsWindows11OrGreater()) return;
 
-		IsTaskbarWidgetCpuUsageChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.CpuUsage);
-		IsTaskbarWidgetGpuUsageChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.GpuUsage);
-		IsTaskbarWidgetMemoryUsageChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.MemoryUsage);
-		IsTaskbarWidgetVirtualMemoryUsageChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.VirtualMemoryUsage);
-		IsTaskbarWidgetNetworkSpeedChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.NetworkSpeed);
-		IsTaskbarWidgetStorageSpeedChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.StorageSpeed);
-		IsTaskbarWidgetBatteryPercentChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPercent);
-		IsTaskbarWidgetBatteryPowerChecked = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPower);
-
-		// Battery related items are only visible when the device has a battery.
-		var batteryItemsVisibility = HardwareMonitor.HasBattery() ? Visibility.Visible : Visibility.Collapsed;
-		IsBatteryPercentItemVisible = batteryItemsVisibility;
-		IsBatteryPowerItemVisible = batteryItemsVisibility;
-
 		WeakReferenceMessenger.Default.Send(new TaskbarWidgetMonitorListRefreshRequested());
 	}
 
@@ -199,12 +155,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 	private async Task ChangeManualSlotPriorityAsync() => await _manualSlotPriorityService.ShowAndApplyAsync();
 
 	[RelayCommand]
-	private void ToggleTaskbarWidgetItem(TaskbarWidgetItemType itemType)
-	{
-		// The menu item has already flipped its checked state when the command is executed, so flip the stored state as well.
-		TaskbarWidgetSettings.SetItemEnabled(itemType, !TaskbarWidgetSettings.IsItemEnabled(itemType));
-		App.RelaunchTaskbarWidgetWindow();
-	}
+	private async Task EditTaskbarWidgetItemsAsync() => await _taskbarWidgetItemsEditorService.ShowAndApplyAsync();
 
 	[RelayCommand]
 	private void CloseProgram() => Environment.Exit(0);

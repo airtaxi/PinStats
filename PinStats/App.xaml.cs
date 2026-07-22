@@ -146,6 +146,7 @@ public partial class App : Application
         serviceCollection.AddSingleton<LocalizationService>(_ => new LocalizationService(Configuration.GetValue<string>("LanguageOverride") ?? string.Empty));
         serviceCollection.AddSingleton<SystemThemeService>();
         serviceCollection.AddSingleton<ManualSlotPriorityService>();
+        serviceCollection.AddSingleton<TaskbarWidgetItemsEditorService>();
     }
 
     private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);
