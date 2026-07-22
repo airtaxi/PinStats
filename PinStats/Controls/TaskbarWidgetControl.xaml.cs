@@ -10,9 +10,11 @@ namespace PinStats.Controls;
 public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
+	private const int UsageRefreshTimerIntervalInMilliseconds = 250;
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
 	private readonly Timer _refreshTimer;
+	private readonly Timer _usageRefreshTimer;
 	private bool _disposed;
 
 	public TaskbarWidgetControl()
@@ -20,8 +22,9 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		InitializeComponent();
 		ApplyConfiguredLayout();
 
-		// Setup the timer to refresh the hardware information
+		// Setup the timers to refresh the hardware information
 		_refreshTimer = new(RefreshTimerCallback, null, 0, Timeout.Infinite);
+		_usageRefreshTimer = new(UsageRefreshTimerCallback, null, 0, Timeout.Infinite);
 	}
 
 	private void ApplyConfiguredLayout()
@@ -53,12 +56,47 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		finally { RestartRefreshTimer(); }
 	}
 
+	private void UsageRefreshTimerCallback(object state)
+	{
+		try { RefreshUsageInformation(); }
+		catch { } // Ignore. Hardware is unpredictable.
+		finally { RestartUsageRefreshTimer(); }
+	}
+
 	private void RestartRefreshTimer()
 	{
 		if (_disposed) return;
 
 		try { _refreshTimer.Change(RefreshTimerIntervalInMilliseconds, Timeout.Infinite); }
 		catch (ObjectDisposedException) { }
+	}
+
+	private void RestartUsageRefreshTimer()
+	{
+		if (_disposed) return;
+
+		try { _usageRefreshTimer.Change(UsageRefreshTimerIntervalInMilliseconds, Timeout.Infinite); }
+		catch (ObjectDisposedException) { }
+	}
+
+	private void RefreshUsageInformation()
+	{
+		if (_disposed) return;
+
+		// If the system is in sleep or hibernate mode, don't update the hardware information.
+		if (!HardwareMonitor.ShouldUpdate) return;
+
+		// CPU and GPU usages are updated by their own timers in HardwareMonitor.
+		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
+		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
+
+		DispatcherQueue.TryEnqueue(() =>
+		{
+			if (_disposed) return;
+
+			UpdatePercentUsageItem(ProgressRingCpuUsage, TextBlockCpuUsage, cpuUsage);
+			UpdatePercentUsageItem(ProgressRingGpuUsage, TextBlockGpuUsage, gpuUsage);
+		});
 	}
 
 	private void RefreshWidgetInformation()
@@ -69,15 +107,11 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		if (!HardwareMonitor.ShouldUpdate) return;
 
 		var updatesMemory = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.MemoryUsage) || TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.VirtualMemoryUsage);
-        if (updatesMemory) HardwareMonitor.UpdateMemoryHardware();
+		if (updatesMemory) HardwareMonitor.UpdateMemoryHardware();
 
 		var updatesBattery = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPercent) || TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPower);
 		var hasBattery = updatesBattery && HardwareMonitor.HasBattery();
 		if (hasBattery) HardwareMonitor.UpdateBatteryHardware();
-
-		// CPU and GPU usages are updated by their own timers in HardwareMonitor.
-		var cpuUsage = HardwareMonitor.GetAverageCpuUsage();
-		var gpuUsage = HardwareMonitor.GetCurrentGpuUsage();
 
 		var memoryUsagePercent = GetMemoryUsagePercent(false);
 		var virtualMemoryUsagePercent = GetMemoryUsagePercent(true);
@@ -95,8 +129,6 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		{
 			if (_disposed) return;
 
-			UpdatePercentUsageItem(ProgressRingCpuUsage, TextBlockCpuUsage, cpuUsage);
-			UpdatePercentUsageItem(ProgressRingGpuUsage, TextBlockGpuUsage, gpuUsage);
 			UpdatePercentUsageItem(ProgressRingMemoryUsage, TextBlockMemoryUsage, memoryUsagePercent);
 			UpdatePercentUsageItem(ProgressRingVirtualMemoryUsage, TextBlockVirtualMemoryUsage, virtualMemoryUsagePercent);
 
@@ -159,7 +191,11 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 		try { _refreshTimer.Change(Timeout.Infinite, Timeout.Infinite); }
 		catch (ObjectDisposedException) { }
 
+		try { _usageRefreshTimer.Change(Timeout.Infinite, Timeout.Infinite); }
+		catch (ObjectDisposedException) { }
+
 		_refreshTimer.Dispose();
+		_usageRefreshTimer.Dispose();
 		GC.SuppressFinalize(this);
 	}
 }
