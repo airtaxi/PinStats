@@ -9,10 +9,10 @@
         x:Name="TaskbarIconCpuUsage"
         x:FieldModifier="public"
         ContextMenuMode="SecondWindow"
-        LeftClickCommand="{x:Bind ViewModel.ShowPopupCommand, Mode=OneTime}"
+        LeftClickCommand="{x:Bind ViewModel.ShowPopupCommand}"
         Loaded="OnLoaded"
         NoLeftClickDelay="True"
-        RightClickCommand="{x:Bind ViewModel.RefreshTaskbarWidgetMenuStatesCommand, Mode=OneTime}">
+        RightClickCommand="{x:Bind ViewModel.RefreshTaskbarWidgetMenuStatesCommand}">
         <tb:TaskbarIcon.IconSource>
             <tb:GeneratedIconSource BackgroundSource="ms-appx:///Assets/Cpu.png" />
         </tb:TaskbarIcon.IconSource>
@@ -30,12 +30,12 @@
                         x:Name="MenuFlyoutItemSelectPopupBackgroundImage"
                         x:Uid="Menu_SelectImage"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.SelectPopupBackgroundImageCommand, Mode=OneTime}" />
+                        Command="{x:Bind ViewModel.SelectPopupBackgroundImageCommand}" />
                     <MenuFlyoutItem
                         x:Name="MenuFlyoutItemResetPopupBackgroundImage"
                         x:Uid="Menu_Reset"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ResetPopupBackgroundImageCommand, Mode=OneTime}"
+                        Command="{x:Bind ViewModel.ResetPopupBackgroundImageCommand}"
                         IsEnabled="{x:Bind ViewModel.IsResetPopupBackgroundImageMenuItemEnabled, Mode=OneWay}" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="Menu_HardwareMonitorBackgroundImage">
@@ -43,12 +43,12 @@
                         x:Name="MenuFlyoutItemSelectHardwareMonitorBackgroundImage"
                         x:Uid="Menu_SelectImage"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.SelectHardwareMonitorBackgroundImageCommand, Mode=OneTime}" />
+                        Command="{x:Bind ViewModel.SelectHardwareMonitorBackgroundImageCommand}" />
                     <MenuFlyoutItem
                         x:Name="MenuFlyoutItemResetHardwareMonitorBackgroundImage"
                         x:Uid="Menu_Reset"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ResetHardwareMonitorBackgroundImageCommand, Mode=OneTime}"
+                        Command="{x:Bind ViewModel.ResetHardwareMonitorBackgroundImageCommand}"
                         IsEnabled="{x:Bind ViewModel.IsResetHardwareMonitorBackgroundImageMenuItemEnabled, Mode=OneWay}" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
@@ -66,13 +66,13 @@
                         x:Name="MenuFlyoutItemTaskbarWidgetEditItems"
                         x:Uid="Menu_TaskbarWidgetEditItems"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.EditTaskbarWidgetItemsCommand, Mode=OneTime}" />
+                        Command="{x:Bind ViewModel.EditTaskbarWidgetItemsCommand}" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem
                         x:Name="MenuFlyoutItemTaskbarWidgetManualSlotPriority"
                         x:Uid="Menu_TaskbarWidgetManualSlotPriority"
                         x:FieldModifier="public"
-                        Command="{x:Bind ViewModel.ChangeManualSlotPriorityCommand, Mode=OneTime}" />
+                        Command="{x:Bind ViewModel.ChangeManualSlotPriorityCommand}" />
                     <MenuFlyoutSubItem
                         x:Name="MenuFlyoutSubItemTaskbarWidgetMonitor"
                         x:Uid="Menu_TaskbarWidgetMonitor"
@@ -88,18 +88,18 @@
                     x:Name="MenuFlyoutItemRefreshHardwares"
                     x:Uid="Menu_RefreshHardwares"
                     x:FieldModifier="public"
-                    Command="{x:Bind ViewModel.RefreshHardwaresCommand, Mode=OneTime}" />
+                    Command="{x:Bind ViewModel.RefreshHardwaresCommand}" />
                 <MenuFlyoutItem
                     x:Name="MenuFlyoutItemSetupStartupProgram"
                     x:FieldModifier="public"
-                    Command="{x:Bind ViewModel.SetupStartupProgramCommand, Mode=OneTime}"
+                    Command="{x:Bind ViewModel.SetupStartupProgramCommand}"
                     IsEnabled="{x:Bind ViewModel.IsSetupStartupProgramMenuItemEnabled, Mode=OneWay}"
                     Text="{x:Bind ViewModel.SetupStartupProgramMenuItemText, Mode=OneWay}" />
                 <MenuFlyoutItem
                     x:Name="MenuFlyoutItemClose"
                     x:Uid="Menu_Close"
                     x:FieldModifier="public"
-                    Command="{x:Bind ViewModel.CloseProgramCommand, Mode=OneTime}" />
+                    Command="{x:Bind ViewModel.CloseProgramCommand}" />
             </MenuFlyout>
         </tb:TaskbarIcon.ContextFlyout>
     </tb:TaskbarIcon>

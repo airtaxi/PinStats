@@ -15,7 +15,7 @@
     <UserControl.Resources>
         <!--  Shared by all percentage based items (CPU, GPU, memory, virtual memory, battery percent).  -->
         <DataTemplate x:Key="PercentItemTemplate" x:DataType="viewmodels:TaskbarWidgetItemViewModel">
-            <Grid Width="{x:Bind Width, Mode=OneTime}">
+            <Grid Width="{x:Bind Width}">
                 <StackPanel
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -40,13 +40,13 @@
 
         <!--  Shared by the network and storage speed items.  -->
         <DataTemplate x:Key="SpeedItemTemplate" x:DataType="viewmodels:TaskbarWidgetItemViewModel">
-            <Grid Width="{x:Bind Width, Mode=OneTime}">
+            <Grid Width="{x:Bind Width}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <FontIcon
                             VerticalAlignment="Center"
                             FontSize="10"
-                            Glyph="{x:Bind PrimaryGlyph, Mode=OneTime}" />
+                            Glyph="{x:Bind PrimaryGlyph}" />
                         <TextBlock
                             Width="46"
                             VerticalAlignment="Center"
@@ -57,7 +57,7 @@
                         <FontIcon
                             VerticalAlignment="Center"
                             FontSize="10"
-                            Glyph="{x:Bind SecondaryGlyph, Mode=OneTime}" />
+                            Glyph="{x:Bind SecondaryGlyph}" />
                         <TextBlock
                             Width="46"
                             VerticalAlignment="Center"
@@ -69,7 +69,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="BatteryPowerItemTemplate" x:DataType="viewmodels:TaskbarWidgetItemViewModel">
-            <Grid Width="{x:Bind Width, Mode=OneTime}">
+            <Grid Width="{x:Bind Width}">
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
@@ -101,7 +101,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch"
             ItemTemplate="{StaticResource ItemTemplateSelector}"
-            ItemsSource="{x:Bind WidgetItems, Mode=OneTime}">
+            ItemsSource="{x:Bind WidgetItems}">
             <ItemsRepeater.Layout>
                 <StackLayout x:Name="ItemsLayout" Orientation="Horizontal" />
             </ItemsRepeater.Layout>
