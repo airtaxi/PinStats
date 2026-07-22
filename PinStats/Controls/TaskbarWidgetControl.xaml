@@ -17,8 +17,8 @@
         <DataTemplate x:Key="PercentItemTemplate" x:DataType="viewmodels:TaskbarWidgetItemViewModel">
             <Grid Width="{x:Bind Width}">
                 <ProgressRing
-                    Width="38"
-                    Height="38"
+                    Width="36"
+                    Height="36"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="{ThemeResource ControlStrokeColorSecondaryBrush}"
