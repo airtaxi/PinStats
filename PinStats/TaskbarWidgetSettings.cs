@@ -6,13 +6,13 @@ namespace PinStats;
 public static class TaskbarWidgetSettings
 {
 	// Item widths must match the layout of TaskbarWidgetControl.
-	public const double PercentItemWidth = 36;
+	public const double PercentItemWidth = 40;
 	public const double SpeedItemWidth = 64;
 	public const double BatteryPowerItemWidth = 44;
 	public const double ItemSpacing = 4;
 	public const double RootVerticalMargin = 4;
 	public const double RootHorizontalMargin = 4;
-	public const double RootVerticalPadding = 2;
+	public const double RootVerticalPadding = 0;
 	public const double RootHorizontalPadding = 2;
 
 	private const string ConfigurationKeyPrefix = "TaskbarWidget.";
