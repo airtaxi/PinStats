@@ -124,6 +124,18 @@
   <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
     <value>モニター {0}</value>
   </data>
+  <data name="Menu.TaskbarWidgetPlacementAuto" xml:space="preserve">
+    <value>自動</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeNotificationArea" xml:space="preserve">
+    <value>通知領域の前</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeStartButton" xml:space="preserve">
+    <value>スタートボタンの前</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementLeftEdge" xml:space="preserve">
+    <value>左端</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>バージョン {0}</value>
   </data>
@@ -165,6 +177,9 @@
   </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>ウィジェット表示モニター</value>
+  </data>
+  <data name="Menu_TaskbarWidgetPlacement.Text" xml:space="preserve">
+    <value>優先表示位置</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>バッテリー</value>

@@ -140,6 +140,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		if (!TaskbarHelper.IsWindows11OrGreater()) return;
 
 		WeakReferenceMessenger.Default.Send(new TaskbarWidgetMonitorListRefreshRequested());
+		WeakReferenceMessenger.Default.Send(new TaskbarWidgetPlacementListRefreshRequested());
 	}
 
 	[RelayCommand]
@@ -148,6 +149,15 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 		if (TaskbarWidgetSettings.PreferredMonitorIdentity == identity) return;
 
 		TaskbarWidgetSettings.PreferredMonitorIdentity = identity;
+		App.RelaunchTaskbarWidgetWindow();
+	}
+
+	[RelayCommand]
+	private void SelectTaskbarWidgetPlacement(TaskbarContentPlacement placement)
+	{
+		if (TaskbarWidgetSettings.PreferredPlacement == placement) return;
+
+		TaskbarWidgetSettings.PreferredPlacement = placement;
 		App.RelaunchTaskbarWidgetWindow();
 	}
 

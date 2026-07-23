@@ -77,6 +77,10 @@
                         x:Name="MenuFlyoutSubItemTaskbarWidgetMonitor"
                         x:Uid="Menu_TaskbarWidgetMonitor"
                         x:FieldModifier="public" />
+                    <MenuFlyoutSubItem
+                        x:Name="MenuFlyoutSubItemTaskbarWidgetPlacement"
+                        x:Uid="Menu_TaskbarWidgetPlacement"
+                        x:FieldModifier="public" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem

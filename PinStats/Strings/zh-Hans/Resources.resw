@@ -124,6 +124,18 @@
   <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
     <value>显示器 {0}</value>
   </data>
+  <data name="Menu.TaskbarWidgetPlacementAuto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeNotificationArea" xml:space="preserve">
+    <value>通知区域前</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeStartButton" xml:space="preserve">
+    <value>开始按钮前</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementLeftEdge" xml:space="preserve">
+    <value>左边缘</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>版本 {0}</value>
   </data>
@@ -165,6 +177,9 @@
   </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>小组件显示器</value>
+  </data>
+  <data name="Menu_TaskbarWidgetPlacement.Text" xml:space="preserve">
+    <value>首选显示位置</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>电池</value>

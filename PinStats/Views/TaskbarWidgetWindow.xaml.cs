@@ -17,6 +17,7 @@ public sealed partial class TaskbarWidgetWindow : Window
 			PreferredWidth = TaskbarWidgetSettings.GetPreferredWidth(),
 			PreferredMonitorIdentity = TaskbarWidgetSettings.PreferredMonitorIdentity,
 			ManualSlotPriority = TaskbarWidgetSettings.ManualSlotPriority,
+			Placement = TaskbarWidgetSettings.PreferredPlacement,
 			AllowFixedSlotResize = false
 		});
 	}

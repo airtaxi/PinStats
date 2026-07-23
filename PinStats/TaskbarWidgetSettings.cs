@@ -1,4 +1,5 @@
-﻿using PinStats.Enums;
+﻿using Deskband11Lib.Core;
+using PinStats.Enums;
 using PinStats.Helpers;
 
 namespace PinStats;
@@ -18,6 +19,7 @@ public static class TaskbarWidgetSettings
 	private const string ConfigurationKeyPrefix = "TaskbarWidget.";
 	private const string MonitorIdentityConfigurationKey = ConfigurationKeyPrefix + "MonitorIdentity";
 	private const string ManualSlotPriorityConfigurationKey = ConfigurationKeyPrefix + "ManualSlotPriority";
+	private const string PlacementConfigurationKey = ConfigurationKeyPrefix + "Placement";
 	private const string ItemOrderConfigurationKey = ConfigurationKeyPrefix + "ItemOrder";
 
 	private static readonly TaskbarWidgetItemType[] s_defaultEnabledItemTypes = [TaskbarWidgetItemType.CpuUsage, TaskbarWidgetItemType.MemoryUsage];
@@ -49,6 +51,20 @@ public static class TaskbarWidgetSettings
 	{
 		get => Configuration.GetValue<ushort?>(ManualSlotPriorityConfigurationKey) ?? DefaultManualSlotPriority;
 		set => Configuration.SetValue(ManualSlotPriorityConfigurationKey, value);
+	}
+
+	// Must match the default value of TaskbarContentHostOptions.Placement.
+	public const TaskbarContentPlacement DefaultPlacement = TaskbarContentPlacement.Auto;
+
+	public static TaskbarContentPlacement PreferredPlacement
+	{
+		get
+		{
+			var storedValue = Configuration.GetValue<string>(PlacementConfigurationKey);
+			if (Enum.TryParse(storedValue, out TaskbarContentPlacement placement) && Enum.IsDefined(placement)) return placement;
+			return DefaultPlacement;
+		}
+		set => Configuration.SetValue(PlacementConfigurationKey, value.ToString());
 	}
 
 	public static bool HasAnyItemEnabled => GetEnabledItemTypes().Count > 0;

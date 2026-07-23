@@ -124,6 +124,18 @@
   <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
     <value>모니터 {0}</value>
   </data>
+  <data name="Menu.TaskbarWidgetPlacementAuto" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeNotificationArea" xml:space="preserve">
+    <value>알림 영역 앞</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeStartButton" xml:space="preserve">
+    <value>시작 버튼 앞</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementLeftEdge" xml:space="preserve">
+    <value>왼쪽 끝</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>버전 {0}</value>
   </data>
@@ -165,6 +177,9 @@
   </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>위젯 표시 모니터</value>
+  </data>
+  <data name="Menu_TaskbarWidgetPlacement.Text" xml:space="preserve">
+    <value>선호 표시 위치</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>배터리</value>

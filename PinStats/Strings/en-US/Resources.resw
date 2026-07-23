@@ -124,6 +124,18 @@
   <data name="Menu.TaskbarWidgetMonitorSecondaryFormat" xml:space="preserve">
     <value>Monitor {0}</value>
   </data>
+  <data name="Menu.TaskbarWidgetPlacementAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeNotificationArea" xml:space="preserve">
+    <value>Before Notification Area</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementBeforeStartButton" xml:space="preserve">
+    <value>Before Start Button</value>
+  </data>
+  <data name="Menu.TaskbarWidgetPlacementLeftEdge" xml:space="preserve">
+    <value>Left Edge</value>
+  </data>
   <data name="Menu.Version" xml:space="preserve">
     <value>Version {0}</value>
   </data>
@@ -165,6 +177,9 @@
   </data>
   <data name="Menu_TaskbarWidgetMonitor.Text" xml:space="preserve">
     <value>Widget Monitor</value>
+  </data>
+  <data name="Menu_TaskbarWidgetPlacement.Text" xml:space="preserve">
+    <value>Preferred Display Location</value>
   </data>
   <data name="MonitorSection_Battery.Text" xml:space="preserve">
     <value>Battery</value>

@@ -22,7 +22,7 @@ using PopupWindow = PinStats.Views.PopupWindow;
 
 namespace PinStats.Views;
 
-public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorListRefreshRequested>, IRecipient<LanguageListRefreshRequested>, IRecipient<TaskbarWidgetMonitorListRefreshRequested>, IRecipient<PopupBackgroundImageSelectionRequested>, IRecipient<HardwareMonitorBackgroundImageSelectionRequested>
+public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorListRefreshRequested>, IRecipient<LanguageListRefreshRequested>, IRecipient<TaskbarWidgetMonitorListRefreshRequested>, IRecipient<TaskbarWidgetPlacementListRefreshRequested>, IRecipient<PopupBackgroundImageSelectionRequested>, IRecipient<HardwareMonitorBackgroundImageSelectionRequested>
 {
 	private const int UpdateTimerInterval = 250;
 	private const int TrayIconImageSize = 64;
@@ -73,6 +73,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		RefreshMonitorListMenuItems();
 		RefreshLanguageMenuItems();
 		RefreshTaskbarWidgetMonitorMenuItems();
+		RefreshTaskbarWidgetPlacementMenuItems();
 
 		// Setup the icon image based on the current system theme and keep it in sync with system theme changes.
 		UpdateIconImageBySystemTheme();
@@ -243,6 +244,31 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		return _localizationService.GetFormattedString("Menu.TaskbarWidgetMonitorSecondaryFormat", identity);
 	}
 
+	private void RefreshTaskbarWidgetPlacementMenuItems()
+	{
+		// TaskbarMonitor is only supported on Windows 11 and later.
+		if (!TaskbarHelper.IsWindows11OrGreater()) return;
+
+		MenuFlyoutSubItemTaskbarWidgetPlacement.Items.Clear();
+
+		var currentPlacement = TaskbarWidgetSettings.PreferredPlacement;
+		foreach (var placement in Enum.GetValues<TaskbarContentPlacement>())
+		{
+			var radioItem = new RadioMenuFlyoutItem { Text = GetPlacementDisplayName(placement), IsChecked = placement == currentPlacement };
+			radioItem.Click += (_, _) => ViewModel.SelectTaskbarWidgetPlacementCommand.Execute(placement);
+			MenuFlyoutSubItemTaskbarWidgetPlacement.Items.Add(radioItem);
+		}
+	}
+
+	private string GetPlacementDisplayName(TaskbarContentPlacement placement) => placement switch
+	{
+		TaskbarContentPlacement.Auto => _localizationService.GetLocalizedString("Menu.TaskbarWidgetPlacementAuto"),
+		TaskbarContentPlacement.LeftEdge => _localizationService.GetLocalizedString("Menu.TaskbarWidgetPlacementLeftEdge"),
+		TaskbarContentPlacement.BeforeNotificationArea => _localizationService.GetLocalizedString("Menu.TaskbarWidgetPlacementBeforeNotificationArea"),
+		TaskbarContentPlacement.BeforeStartButton => _localizationService.GetLocalizedString("Menu.TaskbarWidgetPlacementBeforeStartButton"),
+		_ => placement.ToString()
+	};
+
 	private async Task ShowBackgroundImagePickerAsync(BackgroundImageType backgroundImageType)
 	{
 		var xamlRoot = TaskbarIconCpuUsage.XamlRoot;
@@ -268,6 +294,8 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 	public void Receive(LanguageListRefreshRequested message) => _dispatcherQueue.TryEnqueue(RefreshLanguageMenuItems);
 
 	public void Receive(TaskbarWidgetMonitorListRefreshRequested message) => _dispatcherQueue.TryEnqueue(RefreshTaskbarWidgetMonitorMenuItems);
+
+	public void Receive(TaskbarWidgetPlacementListRefreshRequested message) => _dispatcherQueue.TryEnqueue(RefreshTaskbarWidgetPlacementMenuItems);
 
 	public void Receive(PopupBackgroundImageSelectionRequested message) => _dispatcherQueue.TryEnqueue(async () => await ShowBackgroundImagePickerAsync(BackgroundImageType.Popup));
 
