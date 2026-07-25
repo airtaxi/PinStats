@@ -205,6 +205,8 @@ public sealed partial class PopupWindow : IDisposable
 
 	private void OnUsageInformationAdded(object sender, UsageInformation usageInformation)
 	{
+		if (_disposed) return;
+
 		DispatcherQueue.TryEnqueue(() =>
 		{
 			if (_disposed) return;
@@ -367,6 +369,7 @@ public sealed partial class PopupWindow : IDisposable
 					var gpuPowerText = powerMeterValues.GetGpuPowerInformationText();
 					var latestCpuBaseText = _latestCpuBaseText;
 					var latestGpuBaseText = _latestGpuBaseText;
+					if (_disposed) return;
 					DispatcherQueue.TryEnqueue(() =>
 					{
 						if (_disposed) return;
