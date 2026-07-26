@@ -711,8 +711,8 @@ public static class HardwareMonitor
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
 		else if (e.Mode == PowerModes.Resume)
         {
-            Task.Run(RefreshComputerHardwareAsync);
             ShouldUpdate = true;
+            Task.Run(RefreshComputerHardwareAsync);
 		}
 		else if (e.Mode == PowerModes.StatusChange) Task.Run(RefreshComputerHardwareAsync);
     }
