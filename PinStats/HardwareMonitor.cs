@@ -709,12 +709,13 @@ public static class HardwareMonitor
 	{
 		// If the system is in sleep or hibernate mode, don't update the hardware information.
 		if (e.Mode == PowerModes.Suspend) ShouldUpdate = false;
-		else if (e.Mode == PowerModes.Resume) ShouldUpdate = true;
-		else if (e.Mode == PowerModes.StatusChange)
-		{
-			Task.Run(RefreshComputerHardwareAsync);
+		else if (e.Mode == PowerModes.Resume)
+        {
+            Task.Run(RefreshComputerHardwareAsync);
+            ShouldUpdate = true;
 		}
-	}
+		else if (e.Mode == PowerModes.StatusChange) Task.Run(RefreshComputerHardwareAsync);
+    }
 
 	private static void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
 	{
