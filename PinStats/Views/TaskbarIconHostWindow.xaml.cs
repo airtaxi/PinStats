@@ -225,7 +225,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		var currentIdentity = TaskbarWidgetSettings.PreferredMonitorIdentity;
 		foreach (var identity in availableIdentities)
 		{
-			var radioItem = new RadioMenuFlyoutItem { Text = GetMonitorIdentityDisplayName(identity), IsChecked = identity == currentIdentity };
+			var radioItem = new ToggleMenuFlyoutItem { Text = GetMonitorIdentityDisplayName(identity), IsChecked = identity == currentIdentity };
 			radioItem.Click += (_, _) => ViewModel.SelectTaskbarWidgetMonitorIdentityCommand.Execute(identity);
 			MenuFlyoutSubItemTaskbarWidgetMonitor.Items.Add(radioItem);
 		}
@@ -233,7 +233,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		// Show the current identity as a disabled item if it is not available anymore. (eg: the monitor has been disconnected)
 		if (!availableIdentities.Contains(currentIdentity))
 		{
-			var radioItem = new RadioMenuFlyoutItem { Text = GetMonitorIdentityDisplayName(currentIdentity), IsChecked = true, IsEnabled = false };
+			var radioItem = new ToggleMenuFlyoutItem { Text = GetMonitorIdentityDisplayName(currentIdentity), IsChecked = true, IsEnabled = false };
 			MenuFlyoutSubItemTaskbarWidgetMonitor.Items.Add(radioItem);
 		}
 	}
@@ -254,7 +254,7 @@ public sealed partial class TaskbarIconHostWindow : Window, IRecipient<MonitorLi
 		var currentPlacement = TaskbarWidgetSettings.PreferredPlacement;
 		foreach (var placement in Enum.GetValues<TaskbarContentPlacement>())
 		{
-			var radioItem = new RadioMenuFlyoutItem { Text = GetPlacementDisplayName(placement), IsChecked = placement == currentPlacement };
+			var radioItem = new ToggleMenuFlyoutItem { Text = GetPlacementDisplayName(placement), IsChecked = placement == currentPlacement };
 			radioItem.Click += (_, _) => ViewModel.SelectTaskbarWidgetPlacementCommand.Execute(placement);
 			MenuFlyoutSubItemTaskbarWidgetPlacement.Items.Add(radioItem);
 		}
