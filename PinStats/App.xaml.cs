@@ -240,7 +240,8 @@ public partial class App : Application
         var taskbarWidgetWindow = new TaskbarWidgetWindow();
         s_taskbarWidgetWindow = taskbarWidgetWindow;
         taskbarWidgetWindow.Closed += OnTaskbarWidgetWindowClosed;
-        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated += OnTaskbarContentHostTaskbarWindowRecreated;
+        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated += OnTaskbarContentHostTaskbarWindowChanged;
+        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowDisappeared += OnTaskbarContentHostTaskbarWindowChanged;
 
         try
         {
@@ -277,8 +278,9 @@ public partial class App : Application
         }
     }
 
-    // The taskbar window is recreated when Explorer restarts, so the widget window must be recreated to attach to it again.
-    private static async void OnTaskbarContentHostTaskbarWindowRecreated(object sender, EventArgs args)
+    // The taskbar window is recreated when Explorer restarts or destroyed when a monitor is disconnected,
+    // so the widget window must be recreated to attach to the new taskbar and fall back to the primary monitor.
+    private static async void OnTaskbarContentHostTaskbarWindowChanged(object sender, EventArgs args)
     {
         if (!TaskbarHelper.IsWindows11OrGreater()) return;
 
@@ -297,7 +299,11 @@ public partial class App : Application
     private static void ReleaseTaskbarWidgetWindow(TaskbarWidgetWindow taskbarWidgetWindow)
     {
         taskbarWidgetWindow.Closed -= OnTaskbarWidgetWindowClosed;
-        if (TaskbarHelper.IsWindows11OrGreater()) taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated -= OnTaskbarContentHostTaskbarWindowRecreated;
+        if (TaskbarHelper.IsWindows11OrGreater())
+        {
+            taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated -= OnTaskbarContentHostTaskbarWindowChanged;
+            taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowDisappeared -= OnTaskbarContentHostTaskbarWindowChanged;
+        }
         if (ReferenceEquals(s_taskbarWidgetWindow, taskbarWidgetWindow)) s_taskbarWidgetWindow = null;
     }
 }
