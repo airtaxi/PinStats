@@ -267,7 +267,13 @@ public partial class App : Application
 
         try { await InitializeTaskbarWidgetWindowAsync(); }
         catch (Exception exception) { WriteException(exception); }
-        finally { oldTaskbarWidgetWindow?.Close(); }
+        finally
+        {
+            if (WindowHelper.IsWindowAlive(oldTaskbarWidgetWindow))
+            {
+                oldTaskbarWidgetWindow?.Close();
+            }
+        }
     }
 
     private static void OnTaskbarWidgetWindowClosed(object sender, WindowEventArgs args)
@@ -294,6 +300,8 @@ public partial class App : Application
             await InitializeTaskbarWidgetWindowAsync();
         }
         catch (Exception exception) { WriteException(exception); }
+
+        if (WindowHelper.IsWindowAlive(taskbarWidgetWindow)) taskbarWidgetWindow?.Close();
     }
 
     private static void ReleaseTaskbarWidgetWindow(TaskbarWidgetWindow taskbarWidgetWindow)

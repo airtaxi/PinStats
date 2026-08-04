@@ -34,6 +34,9 @@ public static partial class WindowHelper
     [DllImport("kernel32.dll")]
     public static extern uint GetCurrentThreadId();
 
+    [DllImport("user32.dll")]
+    private static extern bool IsWindow(IntPtr windowHandle);
+
     [LibraryImport("dwmapi.dll")]
 	private static partial int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, ref uint pvAttribute, uint cbAttribute);
 
@@ -57,6 +60,18 @@ public static partial class WindowHelper
         uint darkMode = 1;
 
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(uint));
+    }
+
+    public static bool IsWindowAlive(Window? window)
+    {
+        if (window is null) return false;
+
+        try
+        {
+            var windowHandle = window.GetWindowHandle();
+            return windowHandle != 0 && IsWindow(windowHandle);
+        }
+        catch { return false; }
     }
 
 }
