@@ -1,4 +1,5 @@
-﻿using H.NotifyIcon;
+﻿using Deskband11Lib.WinUI;
+using H.NotifyIcon;
 using H.NotifyIcon.EfficiencyMode;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -239,9 +240,7 @@ public partial class App : Application
 
         var taskbarWidgetWindow = new TaskbarWidgetWindow();
         s_taskbarWidgetWindow = taskbarWidgetWindow;
-        taskbarWidgetWindow.Closed += OnTaskbarWidgetWindowClosed;
-        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated += OnTaskbarContentHostTaskbarWindowChanged;
-        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowDisappeared += OnTaskbarContentHostTaskbarWindowChanged;
+        taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreationRequired += OnTaskbarContentHostTaskbarWindowRecreationRequired;
 
         try
         {
@@ -269,24 +268,16 @@ public partial class App : Application
         catch (Exception exception) { WriteException(exception); }
         finally
         {
-            if (WindowHelper.IsWindowAlive(oldTaskbarWidgetWindow))
+            if (oldTaskbarWidgetWindow?.IsWindowAlive() == true)
             {
-                oldTaskbarWidgetWindow?.Close();
+                oldTaskbarWidgetWindow.Close();
             }
         }
     }
 
-    private static void OnTaskbarWidgetWindowClosed(object sender, WindowEventArgs args)
-    {
-        if (sender is TaskbarWidgetWindow taskbarWidgetWindow)
-        {
-            ReleaseTaskbarWidgetWindow(taskbarWidgetWindow);
-        }
-    }
-
-    // The taskbar window is recreated when Explorer restarts or destroyed when a monitor is disconnected,
+    // The hosted window is recreated when Explorer restarts, the monitor is disconnected, or the system DPI changes,
     // so the widget window must be recreated to attach to the new taskbar and fall back to the primary monitor.
-    private static async void OnTaskbarContentHostTaskbarWindowChanged(object sender, EventArgs args)
+    private static async void OnTaskbarContentHostTaskbarWindowRecreationRequired(object sender, EventArgs args)
     {
         if (!TaskbarHelper.IsWindows11OrGreater()) return;
 
@@ -301,17 +292,12 @@ public partial class App : Application
         }
         catch (Exception exception) { WriteException(exception); }
 
-        if (WindowHelper.IsWindowAlive(taskbarWidgetWindow)) taskbarWidgetWindow?.Close();
+        if (taskbarWidgetWindow?.IsWindowAlive() == true) taskbarWidgetWindow.Close();
     }
 
     private static void ReleaseTaskbarWidgetWindow(TaskbarWidgetWindow taskbarWidgetWindow)
     {
-        taskbarWidgetWindow.Closed -= OnTaskbarWidgetWindowClosed;
-        if (TaskbarHelper.IsWindows11OrGreater())
-        {
-            taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowRecreated -= OnTaskbarContentHostTaskbarWindowChanged;
-            taskbarWidgetWindow.TaskbarContentHost.TaskbarWindowDisappeared -= OnTaskbarContentHostTaskbarWindowChanged;
-        }
+        if (TaskbarHelper.IsWindows11OrGreater()) taskbarWidgetWindow.TaskbarContentHost.Dispose();
         if (ReferenceEquals(s_taskbarWidgetWindow, taskbarWidgetWindow)) s_taskbarWidgetWindow = null;
     }
 }
