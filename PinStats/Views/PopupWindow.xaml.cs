@@ -1,5 +1,4 @@
-using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -8,6 +7,9 @@ using PinStats.Enums;
 using PinStats.Helpers;
 using PinStats.Services;
 using PinStats.ViewModels;
+using System.Diagnostics;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using WinUIEx;
 
 namespace PinStats.Views;
@@ -298,13 +300,11 @@ public sealed partial class PopupWindow : IDisposable
 		var batteryHealthInformationText = default(string);
 
 		// If the device has a battery, update the battery information.
-		if (HardwareMonitor.HasBattery())
+		var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent();
+		if (batteryPercentage.HasValue)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			HardwareMonitor.UpdateBatteryHardware();
-			cancellationToken.ThrowIfCancellationRequested();
 
-			var batteryPercentage = HardwareMonitor.GetTotalBatteryPercent().Value; // Assume that the device has a battery due to the if statement above.
 			var batteryChargeRate = HardwareMonitor.GetTotalBatteryChargeRate();
 			var batteryEstimatedTime = HardwareMonitor.GetTotalBatteryEstimatedTime();
 
@@ -320,7 +320,7 @@ public sealed partial class PopupWindow : IDisposable
 			if (batteryEstimatedTime.HasValue) batteryEstimatedTimeText = _localizationService.GetFormattedString("Info.BatteryTimeLeft", batteryEstimatedTime.Value.ToString(@"hh\:mm\:ss"));
 
 			// Battery information text
-			batteryInformationText = $"{batteryPercentage:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
+			batteryInformationText = $"{batteryPercentage.Value:N0}%" + batteryChargeRateText + batteryEstimatedTimeText;
 
 			// Battery health information text
 			var batteryHealthPercent = HardwareMonitor.GetAverageBatteryHealthPercent();
@@ -425,7 +425,10 @@ public sealed partial class PopupWindow : IDisposable
 		// Close the window when the window lost its focus.
 		if (args.WindowActivationState == WindowActivationState.Deactivated)
 		{
-		    Close();
+			if (PInvoke.IsWindow((HWND)this.GetWindowHandle()))
+			{
+				Close();
+			}
 		}
 	}
 

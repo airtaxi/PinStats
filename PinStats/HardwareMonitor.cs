@@ -26,7 +26,7 @@ public sealed class UpdateVisitor : IVisitor
     public void VisitParameter(IParameter parameter) => _ = parameter; // Do nothing. Parameters are not used in this application.
 }
 
-public static class HardwareMonitor
+public static partial class HardwareMonitor
 {
 	private const int UsageCacheCount = 20;
 	private const int UsageTimerIntervalInMilliseconds = 50;
@@ -41,14 +41,12 @@ public static class HardwareMonitor
 	private static IHardware[] s_networkHardwares = [];
 	private static IHardware[] s_storageHardwares = [];
 	private static IHardware[] s_memoryHardwares = [];
-	private static IHardware[] s_batteryHardwares = [];
 	private static int s_refreshComputerHardwareInProgress;
 	private static int s_cpuHardwareUpdateInProgress;
 	private static int s_gpuHardwareUpdateInProgress;
 	private static int s_networkHardwareUpdateInProgress;
 	private static int s_storageHardwareUpdateInProgress;
 	private static int s_memoryHardwareUpdateInProgress;
-	private static int s_batteryHardwareUpdateInProgress;
 	private static int s_networkTimerInProgress;
 	private static int s_storageTimerInProgress;
 	private static int s_cpuUsageTimerInProgress;
@@ -83,7 +81,6 @@ public static class HardwareMonitor
 	private static IHardware[] NetworkHardwares => Volatile.Read(ref s_networkHardwares);
 	private static IHardware[] StorageHardwares => Volatile.Read(ref s_storageHardwares);
 	private static IHardware[] MemoryHardwares => Volatile.Read(ref s_memoryHardwares);
-	private static IHardware[] BatteryHardwares => Volatile.Read(ref s_batteryHardwares);
 
 	static HardwareMonitor()
 	{
@@ -128,7 +125,7 @@ public static class HardwareMonitor
 				IsGpuEnabled = IsX86OrX64Architecture,
 				IsMemoryEnabled = true,
 				IsNetworkEnabled = true,
-				IsBatteryEnabled = true,
+				IsBatteryEnabled = false, // Battery is sourced from OS-level APIs.
 				IsStorageEnabled = true,
 				IsMotherboardEnabled = true,
 			};
@@ -211,7 +208,6 @@ public static class HardwareMonitor
 			var networkHardwares = new List<IHardware>();
 			var storageHardwares = new List<IHardware>();
 			var memoryHardwares = new List<IHardware>();
-			var batteryHardwares = new List<IHardware>();
 
 			foreach (var hardware in computer.Hardware)
 			{
@@ -240,11 +236,6 @@ public static class HardwareMonitor
 					memoryHardwares.Add(hardware);
 					continue;
 				}
-				else if (hardware.HardwareType == HardwareType.Battery)
-				{
-					batteryHardwares.Add(hardware);
-					continue;
-				}
 			}
 			gpuHardwares.Reverse();
 
@@ -253,7 +244,6 @@ public static class HardwareMonitor
 			Volatile.Write(ref s_networkHardwares, networkHardwares.ToArray());
 			Volatile.Write(ref s_storageHardwares, storageHardwares.ToArray());
 			Volatile.Write(ref s_memoryHardwares, memoryHardwares.ToArray());
-			Volatile.Write(ref s_batteryHardwares, batteryHardwares.ToArray());
 		}
 		catch (Exception exception) { App.WriteException(exception); }
 	}
@@ -416,74 +406,17 @@ public static class HardwareMonitor
 		return gpuHardware.Name;
 	}
 
-	// PC with no battery often has Battery Hardware with no sensors.
-	// So we need to check if there are any sensors.
-	// This method checks if there are any sensors by checking battery percentage.
+	// Battery is sourced from the battery driver via IOCTL.
+	// Desktops report no battery percentage, so HasBattery() returns false there.
 	public static bool HasBattery() => GetTotalBatteryPercent() != null;
 
-	public static float? GetTotalBatteryPercent(bool update = false)
-	{
-		var batteryHardwares = BatteryHardwares;
-		if (batteryHardwares.Length == 0) return null;
-		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
+	public static float? GetTotalBatteryPercent() => BatteryStatusHelper.GetTotalBatteryPercent();
 
-		var batterySensors = GetSensors(batteryHardwares);
-		var fullyChargedCapacity = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity").Sum(x => x.Value) ?? 0;
-		if (fullyChargedCapacity == 0) return null;
+	public static float? GetTotalBatteryChargeRate() => BatteryStatusHelper.GetTotalBatteryChargeRateInWatts();
 
-		var remainingCapacity = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Remaining Capacity").Sum(x => x.Value) ?? 0;
+	public static TimeSpan? GetTotalBatteryEstimatedTime() => BatteryStatusHelper.GetTotalBatteryEstimatedTime();
 
-		return remainingCapacity / fullyChargedCapacity * 100;
-	}
-
-	public static float? GetTotalBatteryChargeRate(bool update = false)
-	{
-		var batteryHardwares = BatteryHardwares;
-		if (batteryHardwares.Length == 0) return null;
-		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
-
-		var batterySensors = GetSensors(batteryHardwares);
-		var dischargeRateSensors = batterySensors.Where(x => x.SensorType == SensorType.Power && x.Name == "Discharge Rate");
-		var chargeRateSensors = batterySensors.Where(x => x.SensorType == SensorType.Power && x.Name == "Charge Rate");
-
-		var chargeRate = chargeRateSensors.Sum(x => x.Value) ?? 0;
-		var dischargeRate = dischargeRateSensors.Sum(x => x.Value * -1) ?? 0;
-
-		var result = chargeRate + dischargeRate;
-		return result;
-	}
-
-	public static TimeSpan? GetTotalBatteryEstimatedTime(bool update = false)
-	{
-		var batteryHardwares = BatteryHardwares;
-		if (batteryHardwares.Length == 0) return null;
-		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
-
-		var sensors = GetSensors(batteryHardwares).Where(x => x.SensorType == SensorType.TimeSpan);
-		var remainingSeconds = sensors.Sum(x => x.Value) ?? 0;
-		if (remainingSeconds == 0) return null;
-
-		var result = TimeSpan.FromSeconds(remainingSeconds);
-		return result;
-	}
-
-	public static float? GetAverageBatteryHealthPercent(bool update = false)
-	{
-		var batteryHardwares = BatteryHardwares;
-		if (batteryHardwares.Length == 0) return null;
-		if (update) TryUpdateHardware(batteryHardwares, ref s_batteryHardwareUpdateInProgress);
-
-		var batterySensors = GetSensors(batteryHardwares);
-		var designedCapacitySensors = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Designed Capacity");
-		var fullyChargedCapacitySensors = batterySensors.Where(x => x.SensorType == SensorType.Energy && x.Name == "Fully-Charged Capacity");
-
-		var designedCapacitySum = designedCapacitySensors.Sum(x => x.Value) ?? 0;
-		var fullyChargedCapacitySum = fullyChargedCapacitySensors.Sum(x => x.Value) ?? 0;
-		if (designedCapacitySum == 0 || fullyChargedCapacitySum == 0) return null;
-
-		var percent = fullyChargedCapacitySum / designedCapacitySum * 100;
-		return percent;
-	}
+	public static float? GetAverageBatteryHealthPercent() => BatteryStatusHelper.GetAverageBatteryHealthPercent();
 
 	private static IHardware GetCurrentGpuHardware()
 	{
@@ -593,8 +526,6 @@ public static class HardwareMonitor
 	public static void UpdateStorageHardware() => TryUpdateHardware(StorageHardwares, ref s_storageHardwareUpdateInProgress);
 
 	public static void UpdateMemoryHardware() => TryUpdateHardware(MemoryHardwares, ref s_memoryHardwareUpdateInProgress);
-
-	public static void UpdateBatteryHardware() => TryUpdateHardware(BatteryHardwares, ref s_batteryHardwareUpdateInProgress);
 
 	public static void UpdateCurrentGpuHardware()
 	{

@@ -105,7 +105,6 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 
 		var updatesBattery = TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPercent) || TaskbarWidgetSettings.IsItemEnabled(TaskbarWidgetItemType.BatteryPower);
 		var hasBattery = updatesBattery && HardwareMonitor.HasBattery();
-		if (hasBattery) HardwareMonitor.UpdateBatteryHardware();
 
 		var memoryUsagePercent = GetMemoryUsagePercent(false);
 		var virtualMemoryUsagePercent = GetMemoryUsagePercent(true);
