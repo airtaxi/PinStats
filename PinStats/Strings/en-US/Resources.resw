@@ -79,6 +79,12 @@
   <data name="Dialog.ResetToDefault" xml:space="preserve">
     <value>Reset Default</value>
   </data>
+  <data name="Dialog.TaskbarWidgetItemColorsDescription" xml:space="preserve">
+    <value>Colors apply to the progress rings of percentage items. Items without a custom color use the system accent color.</value>
+  </data>
+  <data name="Dialog.TaskbarWidgetItemColorsTitle" xml:space="preserve">
+    <value>Item Colors</value>
+  </data>
   <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
     <value>Taskbar Widget Items</value>
   </data>
@@ -171,6 +177,9 @@
   </data>
   <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
     <value>Edit Items</value>
+  </data>
+  <data name="Menu_TaskbarWidgetItemColors.Text" xml:space="preserve">
+    <value>Edit Colors</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>Change Display Priority</value>

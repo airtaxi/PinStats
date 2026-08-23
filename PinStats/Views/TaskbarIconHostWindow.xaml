@@ -67,6 +67,11 @@
                         x:Uid="Menu_TaskbarWidgetEditItems"
                         x:FieldModifier="public"
                         Command="{x:Bind ViewModel.EditTaskbarWidgetItemsCommand}" />
+                    <MenuFlyoutItem
+                        x:Name="MenuFlyoutItemTaskbarWidgetItemColors"
+                        x:Uid="Menu_TaskbarWidgetItemColors"
+                        x:FieldModifier="public"
+                        Command="{x:Bind ViewModel.EditTaskbarWidgetItemColorsCommand}" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem
                         x:Name="MenuFlyoutItemTaskbarWidgetManualSlotPriority"

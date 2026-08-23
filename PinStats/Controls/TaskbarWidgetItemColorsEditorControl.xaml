@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="PinStats.Controls.TaskbarWidgetItemColorsEditorControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewmodels="using:PinStats.ViewModels">
+    <StackPanel Spacing="8">
+        <TextBlock
+            FontSize="12"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind ViewModel.DescriptionText, Mode=OneWay}"
+            TextWrapping="Wrap" />
+        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Items}">
+            <ItemsRepeater.Layout>
+                <StackLayout Spacing="4" />
+            </ItemsRepeater.Layout>
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:TaskbarWidgetEditableColorItemViewModel">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind DisplayName}" />
+                        <Button
+                            Grid.Column="1"
+                            MinWidth="0"
+                            Padding="6"
+                            VerticalAlignment="Center">
+                            <Button.Flyout>
+                                <Flyout ShouldConstrainToRootBounds="False">
+                                    <ColorPicker
+                                        IsAlphaEnabled="False"
+                                        IsHexInputVisible="True"
+                                        Color="{x:Bind SelectedColor, Mode=TwoWay}" />
+                                </Flyout>
+                            </Button.Flyout>
+                            <Border
+                                Width="20"
+                                Height="20"
+                                Background="{x:Bind SwatchBrush, Mode=OneWay}"
+                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10" />
+                        </Button>
+                        <Button
+                            Grid.Column="2"
+                            Width="36"
+                            Height="36"
+                            MinWidth="0"
+                            MinHeight="0"
+                            Padding="6"
+                            VerticalAlignment="Center"
+                            Command="{x:Bind ResetColorCommand}"
+                            Visibility="{x:Bind IsResetColorButtonVisible, Mode=OneWay}">
+                            <FontIcon FontSize="14" Glyph="&#xE7A7;" />
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </StackPanel>
+</UserControl>

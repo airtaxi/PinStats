@@ -1,6 +1,8 @@
 ﻿using Deskband11Lib.Core;
 using PinStats.Enums;
 using PinStats.Helpers;
+using System.Globalization;
+using Windows.UI;
 
 namespace PinStats;
 
@@ -21,6 +23,7 @@ public static class TaskbarWidgetSettings
 	private const string ManualSlotPriorityConfigurationKey = ConfigurationKeyPrefix + "ManualSlotPriority";
 	private const string PlacementConfigurationKey = ConfigurationKeyPrefix + "Placement";
 	private const string ItemOrderConfigurationKey = ConfigurationKeyPrefix + "ItemOrder";
+	private const string ItemColorConfigurationKeyPrefix = ConfigurationKeyPrefix + "ItemColor.";
 
 	private static readonly TaskbarWidgetItemType[] s_defaultEnabledItemTypes = [TaskbarWidgetItemType.CpuUsage, TaskbarWidgetItemType.MemoryUsage];
 
@@ -102,6 +105,26 @@ public static class TaskbarWidgetSettings
 	}
 
 	public static void SetItemOrder(IReadOnlyList<TaskbarWidgetItemType> itemOrder) => Configuration.SetValue(ItemOrderConfigurationKey, itemOrder.Select(itemType => itemType.ToString()).ToList());
+
+	// Custom item colors are stored as "#RRGGBB" strings. Items without a custom color fall back to the default accent brush.
+	public static string GetItemColorHex(TaskbarWidgetItemType itemType) => Configuration.GetValue<string>(ItemColorConfigurationKeyPrefix + itemType);
+
+	public static void SetItemColorHex(TaskbarWidgetItemType itemType, string colorHex) => Configuration.SetValue(ItemColorConfigurationKeyPrefix + itemType, colorHex);
+
+	public static bool TryGetItemColor(TaskbarWidgetItemType itemType, out Color color)
+	{
+		color = default;
+		var colorHex = GetItemColorHex(itemType);
+		if (colorHex is not { Length: 7 } || colorHex[0] != '#') return false;
+		if (!uint.TryParse(colorHex.AsSpan(1, 2), NumberStyles.HexNumber, null, out var red)) return false;
+		if (!uint.TryParse(colorHex.AsSpan(3, 2), NumberStyles.HexNumber, null, out var green)) return false;
+		if (!uint.TryParse(colorHex.AsSpan(5, 2), NumberStyles.HexNumber, null, out var blue)) return false;
+
+		color = Color.FromArgb(255, (byte)red, (byte)green, (byte)blue);
+		return true;
+	}
+
+	public static string ToItemColorHex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
 	public static double GetPreferredWidth()
 	{

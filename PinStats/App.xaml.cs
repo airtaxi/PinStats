@@ -148,6 +148,7 @@ public partial class App : Application
         serviceCollection.AddSingleton<SystemThemeService>();
         serviceCollection.AddSingleton<ManualSlotPriorityService>();
         serviceCollection.AddSingleton<TaskbarWidgetItemsEditorService>();
+        serviceCollection.AddSingleton<TaskbarWidgetItemColorsEditorService>();
     }
 
     private void OnTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) => WriteException(e.Exception);

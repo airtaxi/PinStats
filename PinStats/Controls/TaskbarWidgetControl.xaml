@@ -22,7 +22,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="{ThemeResource ControlStrokeColorSecondaryBrush}"
-                    Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                    Foreground="{x:Bind Foreground, Mode=OneWay, TargetNullValue={ThemeResource AccentFillColorDefaultBrush}}"
                     IsIndeterminate="False"
                     Maximum="100"
                     Minimum="0"
