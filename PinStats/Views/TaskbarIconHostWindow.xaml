@@ -63,8 +63,8 @@
                     x:FieldModifier="public"
                     Visibility="{x:Bind ViewModel.IsTaskbarWidgetMenuVisible, Mode=OneWay}">
                     <MenuFlyoutItem
-                        x:Name="MenuFlyoutItemTaskbarWidgetItemRearrange"
-                        x:Uid="Menu_TaskbarWidgetItemRearrange"
+                        x:Name="MenuFlyoutItemTaskbarWidgetEditItems"
+                        x:Uid="Menu_TaskbarWidgetEditItems"
                         x:FieldModifier="public"
                         Command="{x:Bind ViewModel.EditTaskbarWidgetItemsCommand}" />
                     <MenuFlyoutItem

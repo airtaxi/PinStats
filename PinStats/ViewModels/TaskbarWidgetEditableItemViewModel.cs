@@ -4,7 +4,7 @@ using PinStats.Enums;
 
 namespace PinStats.ViewModels;
 
-public partial class TaskbarWidgetItemRearrangeEditableItemViewModel(TaskbarWidgetItemType itemType, string displayName, bool isEnabled, Action<TaskbarWidgetItemRearrangeEditableItemViewModel, int> requestMoveAction) : ObservableObject
+public partial class TaskbarWidgetEditableItemViewModel(TaskbarWidgetItemType itemType, string displayName, bool isEnabled, Action<TaskbarWidgetEditableItemViewModel, int> requestMoveAction) : ObservableObject
 {
 	public TaskbarWidgetItemType ItemType { get; } = itemType;
 
