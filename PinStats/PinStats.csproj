@@ -19,7 +19,6 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<Version>2.6.12</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 	
 	<ItemGroup>
