@@ -143,6 +143,10 @@ public sealed partial class DialogWindow : WindowEx
 
 		var dpiScale = RootGrid.XamlRoot.RasterizationScale;
 		var desiredWidth = double.IsNormal(Width) && double.IsPositive(Width) ? Width : RootGrid.DesiredSize.Width;
+
+		// Re-measure at the final width so wrap-sensitive content (e.g. a TextBlock with TextWrapping) reports its actual height.
+		RootGrid.Measure(new Windows.Foundation.Size(desiredWidth, double.PositiveInfinity));
+
 		var desiredHeight = double.IsNormal(Height) && double.IsPositive(Height) ? Height : RootGrid.DesiredSize.Height;
 		if (ExtendsContentIntoTitleBar) desiredHeight -= 30;
 
