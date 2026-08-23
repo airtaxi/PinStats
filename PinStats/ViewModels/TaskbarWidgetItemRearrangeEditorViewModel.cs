@@ -7,16 +7,16 @@ using System.ComponentModel;
 
 namespace PinStats.ViewModels;
 
-public partial class TaskbarWidgetItemsEditorViewModel : ObservableObject
+public partial class TaskbarWidgetItemRearrangeEditorViewModel : ObservableObject
 {
 	private static readonly TaskbarWidgetItemType[] s_batteryItemTypes = [TaskbarWidgetItemType.BatteryPercent, TaskbarWidgetItemType.BatteryPower];
 
 	// Battery items hidden on devices without a battery keep their stored relative order and are appended after the edited items when applied.
 	private readonly List<TaskbarWidgetItemType> _hiddenItemTypes = [];
 
-	public ObservableCollection<TaskbarWidgetEditableItemViewModel> Items { get; } = [];
+	public ObservableCollection<TaskbarWidgetItemRearrangeEditableItemViewModel> Items { get; } = [];
 
-	public TaskbarWidgetItemsEditorViewModel(LocalizationService localizationService)
+	public TaskbarWidgetItemRearrangeEditorViewModel(LocalizationService localizationService)
 	{
 		var hasBattery = HardwareMonitor.HasBattery();
 		foreach (var itemType in TaskbarWidgetSettings.GetItemOrder())
@@ -28,7 +28,7 @@ public partial class TaskbarWidgetItemsEditorViewModel : ObservableObject
 			}
 
 			var displayName = localizationService.GetLocalizedString($"TaskbarWidgetItem.{itemType}");
-			var item = new TaskbarWidgetEditableItemViewModel(itemType, displayName, TaskbarWidgetSettings.IsItemEnabled(itemType), MoveItem);
+			var item = new TaskbarWidgetItemRearrangeEditableItemViewModel(itemType, displayName, TaskbarWidgetSettings.IsItemEnabled(itemType), MoveItem);
 			item.PropertyChanged += OnItemPropertyChanged;
 			Items.Add(item);
 		}
@@ -36,7 +36,7 @@ public partial class TaskbarWidgetItemsEditorViewModel : ObservableObject
 	}
 
 	// Native drag and drop based reordering is unavailable since the app always runs elevated, so items are moved with explicit up/down commands instead.
-	private void MoveItem(TaskbarWidgetEditableItemViewModel item, int direction)
+	private void MoveItem(TaskbarWidgetItemRearrangeEditableItemViewModel item, int direction)
 	{
 		var currentIndex = Items.IndexOf(item);
 		var newIndex = currentIndex + direction;
@@ -49,7 +49,7 @@ public partial class TaskbarWidgetItemsEditorViewModel : ObservableObject
 
 	private void OnItemPropertyChanged(object sender, PropertyChangedEventArgs e)
 	{
-		if (e.PropertyName == nameof(TaskbarWidgetEditableItemViewModel.IsEnabled))
+		if (e.PropertyName == nameof(TaskbarWidgetItemRearrangeEditableItemViewModel.IsEnabled))
 		{
 		    ResetToDefaultCommand.NotifyCanExecuteChanged();
 		}

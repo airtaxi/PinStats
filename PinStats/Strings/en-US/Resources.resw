@@ -85,8 +85,8 @@
   <data name="Dialog.TaskbarWidgetItemColorsTitle" xml:space="preserve">
     <value>Item Colors</value>
   </data>
-  <data name="Dialog.TaskbarWidgetItemsEditorTitle" xml:space="preserve">
-    <value>Taskbar Widget Items</value>
+  <data name="Dialog.TaskbarWidgetItemRearrangeEditorTitle" xml:space="preserve">
+    <value>Taskbar Widget Item Order</value>
   </data>
   <data name="Hardware.MultiCpuFormat" xml:space="preserve">
     <value>{0} + {1} more</value>
@@ -175,11 +175,11 @@
   <data name="Menu_TaskbarWidget.Text" xml:space="preserve">
     <value>Taskbar Widget</value>
   </data>
-  <data name="Menu_TaskbarWidgetEditItems.Text" xml:space="preserve">
-    <value>Edit Items</value>
-  </data>
   <data name="Menu_TaskbarWidgetItemColors.Text" xml:space="preserve">
     <value>Edit Colors</value>
+  </data>
+  <data name="Menu_TaskbarWidgetItemRearrange.Text" xml:space="preserve">
+    <value>Rearrange Items</value>
   </data>
   <data name="Menu_TaskbarWidgetManualSlotPriority.Text" xml:space="preserve">
     <value>Change Display Priority</value>

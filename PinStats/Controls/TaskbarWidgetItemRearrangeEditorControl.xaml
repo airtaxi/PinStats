@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="PinStats.Controls.TaskbarWidgetItemsEditorControl"
+    x:Class="PinStats.Controls.TaskbarWidgetItemRearrangeEditorControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewmodels="using:PinStats.ViewModels">
@@ -9,7 +9,7 @@
             <StackLayout Spacing="4" />
         </ItemsRepeater.Layout>
         <ItemsRepeater.ItemTemplate>
-            <DataTemplate x:DataType="viewmodels:TaskbarWidgetEditableItemViewModel">
+            <DataTemplate x:DataType="viewmodels:TaskbarWidgetItemRearrangeEditableItemViewModel">
                 <Grid ColumnSpacing="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

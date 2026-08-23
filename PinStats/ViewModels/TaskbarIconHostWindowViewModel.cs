@@ -26,7 +26,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
 	private readonly ManualSlotPriorityService _manualSlotPriorityService = App.Services.GetRequiredService<ManualSlotPriorityService>();
-	private readonly TaskbarWidgetItemsEditorService _taskbarWidgetItemsEditorService = App.Services.GetRequiredService<TaskbarWidgetItemsEditorService>();
+	private readonly TaskbarWidgetItemRearrangeEditorService _taskbarWidgetItemRearrangeEditorService = App.Services.GetRequiredService<TaskbarWidgetItemRearrangeEditorService>();
 	private readonly TaskbarWidgetItemColorsEditorService _taskbarWidgetItemColorsEditorService = App.Services.GetRequiredService<TaskbarWidgetItemColorsEditorService>();
 
 	static TaskbarIconHostWindowViewModel()
@@ -166,7 +166,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 	private async Task ChangeManualSlotPriorityAsync() => await _manualSlotPriorityService.ShowAndApplyAsync();
 
 	[RelayCommand]
-	private async Task EditTaskbarWidgetItemsAsync() => await _taskbarWidgetItemsEditorService.ShowAndApplyAsync();
+	private async Task EditTaskbarWidgetItemsAsync() => await _taskbarWidgetItemRearrangeEditorService.ShowAndApplyAsync();
 
 	[RelayCommand]
 	private async Task EditTaskbarWidgetItemColorsAsync() => await _taskbarWidgetItemColorsEditorService.ShowAndApplyAsync();

@@ -147,7 +147,7 @@ public partial class App : Application
         serviceCollection.AddSingleton<LocalizationService>(_ => new LocalizationService(Configuration.GetValue<string>("LanguageOverride") ?? string.Empty));
         serviceCollection.AddSingleton<SystemThemeService>();
         serviceCollection.AddSingleton<ManualSlotPriorityService>();
-        serviceCollection.AddSingleton<TaskbarWidgetItemsEditorService>();
+        serviceCollection.AddSingleton<TaskbarWidgetItemRearrangeEditorService>();
         serviceCollection.AddSingleton<TaskbarWidgetItemColorsEditorService>();
     }
 

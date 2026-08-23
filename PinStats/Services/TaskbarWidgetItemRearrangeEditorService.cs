@@ -5,19 +5,19 @@ using PinStats.Views;
 
 namespace PinStats.Services;
 
-public sealed class TaskbarWidgetItemsEditorService(LocalizationService localizationService)
+public sealed class TaskbarWidgetItemRearrangeEditorService(LocalizationService localizationService)
 {
 	public async Task ShowAndApplyAsync()
 	{
-		var viewModel = new TaskbarWidgetItemsEditorViewModel(localizationService);
+		var viewModel = new TaskbarWidgetItemRearrangeEditorViewModel(localizationService);
 		var dialog = new DialogWindow
 		{
-			Header = localizationService.GetLocalizedString("Dialog.TaskbarWidgetItemsEditorTitle"),
+			Header = localizationService.GetLocalizedString("Dialog.TaskbarWidgetItemRearrangeEditorTitle"),
 			PrimaryButtonContent = localizationService.GetLocalizedString("Dialog.Ok"),
 			SecondaryButtonContent = localizationService.GetLocalizedString("Dialog.ResetToDefault"),
 			SecondaryButtonCommand = viewModel.ResetToDefaultCommand,
 			CloseButtonContent = localizationService.GetLocalizedString("Dialog.Cancel"),
-			Content = new TaskbarWidgetItemsEditorControl(viewModel),
+			Content = new TaskbarWidgetItemRearrangeEditorControl(viewModel),
             Width = 560,
         };
 
