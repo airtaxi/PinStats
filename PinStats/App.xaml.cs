@@ -27,6 +27,7 @@ public partial class App : Application
 
     private static readonly HttpClient UpdateCheckHttpClient = CreateUpdateCheckHttpClient();
     private static readonly Timer UpdateCheckTimer;
+    private static Mutex s_singleInstanceMutex;
 
     public static IServiceProvider Services { get; private set; } = null!;
     public static LocalizationService Localization { get; private set; } = null!;
@@ -89,6 +90,15 @@ public partial class App : Application
 
     public App()
     {
+        // Exit if another PinStats process is already running to enforce a single instance.
+        // The mutex is named and shared across processes, and the first instance owns it.
+        s_singleInstanceMutex = new Mutex(false, "PinStats.SingleInstance.9C6FE531-4D45-4F9A-9E52-5E7CA05D6E0E", out var isFirstInstance);
+
+        if (!isFirstInstance)
+        {
+            Environment.Exit(0);
+        }
+
         // Setup dependency injection container.
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection);
