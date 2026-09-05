@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PinStats.Enums;
@@ -12,6 +12,11 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 {
 	private const int RefreshTimerIntervalInMilliseconds = 1000;
 	private const int UsageRefreshTimerIntervalInMilliseconds = 250;
+	private const double CompactHeightThreshold = 48;
+	private const double DefaultProgressRingSize = 36;
+	private const double CompactProgressRingSize = 30;
+	private const double DefaultPercentFontSize = 10;
+	private const double CompactPercentFontSize = 9;
 
 	private readonly LocalizationService _localizationService = App.Services.GetRequiredService<LocalizationService>();
 	private readonly Timer _refreshTimer;
@@ -191,6 +196,36 @@ public sealed partial class TaskbarWidgetControl : UserControl, IDisposable
 	}
 
 	private void OnRootButtonClicked(object sender, RoutedEventArgs e) => PopupWindow.ShowNearTaskbar(anchorToCursor: true);
+
+	private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+	{
+		if (sender is not UserControl usageControl) return;
+
+		ApplyCompactLayout(usageControl.ActualHeight < CompactHeightThreshold);
+	}
+
+	private void ApplyCompactLayout(bool isCompact)
+	{
+		var horizontalMargin = TaskbarWidgetSettings.RootHorizontalMargin;
+		var verticalMargin = isCompact ? 0 : TaskbarWidgetSettings.RootVerticalMargin;
+		RootButton.Margin = new Thickness(horizontalMargin, verticalMargin, horizontalMargin, verticalMargin);
+
+		var horizontalPadding = TaskbarWidgetSettings.RootHorizontalPadding;
+		var verticalPadding = isCompact ? 0 : TaskbarWidgetSettings.RootVerticalPadding;
+		RootButton.Padding = new Thickness(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
+
+		var progressRingSize = isCompact ? CompactProgressRingSize : DefaultProgressRingSize;
+		var fontSize = isCompact ? CompactPercentFontSize : DefaultPercentFontSize;
+		foreach (var widgetItem in WidgetItems)
+		{
+			if (!IsPercentUsageItem(widgetItem.ItemType)) continue;
+
+			widgetItem.ProgressRingSize = progressRingSize;
+			widgetItem.FontSize = fontSize;
+		}
+	}
+
+	private static bool IsPercentUsageItem(TaskbarWidgetItemType itemType) => itemType is not (TaskbarWidgetItemType.NetworkSpeed or TaskbarWidgetItemType.StorageSpeed or TaskbarWidgetItemType.BatteryPower);
 
 	public void Dispose()
 	{

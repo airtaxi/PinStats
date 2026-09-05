@@ -18,7 +18,7 @@ public partial class TaskbarWidgetItemViewModel : ObservableObject, IRecipient<T
     public Brush Foreground => TaskbarWidgetSettings.TryGetItemColor(ItemType, out var color) ? new SolidColorBrush(color) : null;
 
     [ObservableProperty]
-	public partial double Value { get; set; }
+    public partial double Value { get; set; }
 
     [ObservableProperty]
     public partial string Text { get; set; }
@@ -28,6 +28,12 @@ public partial class TaskbarWidgetItemViewModel : ObservableObject, IRecipient<T
 
     [ObservableProperty]
     public partial string SecondaryText { get; set; } = "0 KB/s";
+
+    [ObservableProperty]
+    public partial double ProgressRingSize { get; set; } = 36;
+
+    [ObservableProperty]
+    public partial double FontSize { get; set; } = 10;
 
     public TaskbarWidgetItemViewModel(TaskbarWidgetItemType itemType)
     {
@@ -41,18 +47,18 @@ public partial class TaskbarWidgetItemViewModel : ObservableObject, IRecipient<T
     }
 
     private static string GetPrimaryGlyph(TaskbarWidgetItemType itemType) => itemType switch
-	{
-		TaskbarWidgetItemType.NetworkSpeed => "\uE74A",
-		TaskbarWidgetItemType.StorageSpeed => "\uE896",
-		_ => string.Empty
-	};
+    {
+        TaskbarWidgetItemType.NetworkSpeed => "\uE74A",
+        TaskbarWidgetItemType.StorageSpeed => "\uE896",
+        _ => string.Empty
+    };
 
-	private static string GetSecondaryGlyph(TaskbarWidgetItemType itemType) => itemType switch
-	{
-		TaskbarWidgetItemType.NetworkSpeed => "\uE74B",
-		TaskbarWidgetItemType.StorageSpeed => "\uE898",
-		_ => string.Empty
-	};
+    private static string GetSecondaryGlyph(TaskbarWidgetItemType itemType) => itemType switch
+    {
+        TaskbarWidgetItemType.NetworkSpeed => "\uE74B",
+        TaskbarWidgetItemType.StorageSpeed => "\uE898",
+        _ => string.Empty
+    };
 
     public void Receive(TaskbarWidgetItemColorChangedMessage message) => OnPropertyChanged(nameof(Foreground));
 }

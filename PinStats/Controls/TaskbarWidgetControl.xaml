@@ -10,6 +10,7 @@
     d:DesignHeight="48"
     d:DesignWidth="300"
     CornerRadius="4"
+    SizeChanged="OnSizeChanged"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -17,8 +18,8 @@
         <DataTemplate x:Key="PercentItemTemplate" x:DataType="viewmodels:TaskbarWidgetItemViewModel">
             <Grid Width="{x:Bind Width}">
                 <ProgressRing
-                    Width="36"
-                    Height="36"
+                    Width="{x:Bind ProgressRingSize, Mode=OneWay}"
+                    Height="{x:Bind ProgressRingSize, Mode=OneWay}"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Background="{ThemeResource ControlStrokeColorSecondaryBrush}"
@@ -30,7 +31,7 @@
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="10"
+                    FontSize="{x:Bind FontSize, Mode=OneWay}"
                     HorizontalTextAlignment="Center"
                     Text="{x:Bind Text, Mode=OneWay}" />
             </Grid>
