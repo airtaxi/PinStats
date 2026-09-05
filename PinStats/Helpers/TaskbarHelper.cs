@@ -68,9 +68,6 @@ public static partial class TaskbarHelper
 
 	public static TaskbarPosition GetTaskbarPosition()
 	{
-		// Windows 11 is currently not support to change the task bar position. fallback to bottom.
-		if (IsWindows11OrGreater()) return TaskbarPosition.Bottom;
-
 		var appBarData = GetAppbarData();
 		return appBarData.uEdge switch
 		{
