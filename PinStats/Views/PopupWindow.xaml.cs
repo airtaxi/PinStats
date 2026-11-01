@@ -250,8 +250,6 @@ public sealed partial class PopupWindow : IDisposable
 		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateMemoryHardware();
 		cancellationToken.ThrowIfCancellationRequested();
-		HardwareMonitor.UpdateNetworkHardware();
-		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateStorageHardware();
 		cancellationToken.ThrowIfCancellationRequested();
 		HardwareMonitor.UpdateCurrentGpuHardware();

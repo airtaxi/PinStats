@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using PinStats.Helpers;
 using System.Diagnostics;
 using System.Management;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -38,13 +39,11 @@ public static partial class HardwareMonitor
 	private static Computer s_computer;
 	private static IHardware[] s_cpuHardwares = [];
 	private static IHardware[] s_gpuHardwares = [];
-	private static IHardware[] s_networkHardwares = [];
 	private static IHardware[] s_storageHardwares = [];
 	private static IHardware[] s_memoryHardwares = [];
 	private static int s_refreshComputerHardwareInProgress;
 	private static int s_cpuHardwareUpdateInProgress;
 	private static int s_gpuHardwareUpdateInProgress;
-	private static int s_networkHardwareUpdateInProgress;
 	private static int s_storageHardwareUpdateInProgress;
 	private static int s_memoryHardwareUpdateInProgress;
 	private static int s_networkTimerInProgress;
@@ -61,6 +60,7 @@ public static partial class HardwareMonitor
 	private static readonly Timer s_networkTimer = new() { Interval = NetworkTimerInMilliseconds };
 	private static long s_downloadSpeedInBytes;
 	private static long s_uploadSpeedInBytes;
+	private static Dictionary<string, (long BytesSent, long BytesReceived)> s_lastNetworkInterfaceStatistics = [];
 
 	private static readonly Timer s_cpuUsageTimer = new() { Interval = UsageTimerIntervalInMilliseconds };
 	private static readonly List<float> s_lastCpuUsages = [];
@@ -78,7 +78,6 @@ public static partial class HardwareMonitor
 
 	private static IHardware[] CpuHardwares => Volatile.Read(ref s_cpuHardwares);
 	private static IHardware[] GpuHardwares => Volatile.Read(ref s_gpuHardwares);
-	private static IHardware[] NetworkHardwares => Volatile.Read(ref s_networkHardwares);
 	private static IHardware[] StorageHardwares => Volatile.Read(ref s_storageHardwares);
 	private static IHardware[] MemoryHardwares => Volatile.Read(ref s_memoryHardwares);
 
@@ -124,7 +123,7 @@ public static partial class HardwareMonitor
 				IsCpuEnabled = IsX86OrX64Architecture,
 				IsGpuEnabled = IsX86OrX64Architecture,
 				IsMemoryEnabled = true,
-				IsNetworkEnabled = true,
+				IsNetworkEnabled = false, // Network traffic is sourced from OS-level APIs.
 				IsBatteryEnabled = false, // Battery is sourced from OS-level APIs.
 				IsStorageEnabled = true,
 				IsMotherboardEnabled = true,
@@ -205,7 +204,6 @@ public static partial class HardwareMonitor
 
 			var cpuHardwares = new List<IHardware>();
 			var gpuHardwares = new List<IHardware>();
-			var networkHardwares = new List<IHardware>();
 			var storageHardwares = new List<IHardware>();
 			var memoryHardwares = new List<IHardware>();
 
@@ -219,11 +217,6 @@ public static partial class HardwareMonitor
 				else if (hardware.HardwareType == HardwareType.GpuAmd || hardware.HardwareType == HardwareType.GpuNvidia || hardware.HardwareType == HardwareType.GpuIntel)
 				{
 					gpuHardwares.Add(hardware);
-					continue;
-				}
-				else if (hardware.HardwareType == HardwareType.Network)
-				{
-					networkHardwares.Add(hardware);
 					continue;
 				}
 				else if (hardware.HardwareType == HardwareType.Storage)
@@ -241,7 +234,6 @@ public static partial class HardwareMonitor
 
 			Volatile.Write(ref s_cpuHardwares, cpuHardwares.ToArray());
 			Volatile.Write(ref s_gpuHardwares, gpuHardwares.ToArray());
-			Volatile.Write(ref s_networkHardwares, networkHardwares.ToArray());
 			Volatile.Write(ref s_storageHardwares, storageHardwares.ToArray());
 			Volatile.Write(ref s_memoryHardwares, memoryHardwares.ToArray());
 		}
@@ -501,27 +493,9 @@ public static partial class HardwareMonitor
 	public static long GetNetworkTotalUploadSpeedInBytes() => s_uploadSpeedInBytes;
 	public static long GetNetworkTotalDownloadSpeedInBytes() => s_downloadSpeedInBytes;
 
-	private static long GetNetworkTotalUploadedInBytes()
-	{
-		var sensors = GetSensors(NetworkHardwares).Where(x => x.Name == "Data Uploaded");
-
-		var total = sensors.Sum(x => x.Value) ?? 0;
-		return (long)(total * (double)0x40000000);
-	}
-
-	private static long GetNetworkTotalDownloadedInBytes()
-	{
-		var sensors = GetSensors(NetworkHardwares).Where(x => x.Name == "Data Downloaded");
-
-		var total = sensors.Sum(x => x.Value) ?? 0;
-		return (long)(total * (double)0x40000000);
-	}
-
 	public static void UpdateCpuHardware() => TryUpdateHardware(CpuHardwares, ref s_cpuHardwareUpdateInProgress);
 
 	public static void UpdateGpuHardware() => TryUpdateHardware(GpuHardwares, ref s_gpuHardwareUpdateInProgress);
-
-	public static void UpdateNetworkHardware() => TryUpdateHardware(NetworkHardwares, ref s_networkHardwareUpdateInProgress);
 
 	public static void UpdateStorageHardware() => TryUpdateHardware(StorageHardwares, ref s_storageHardwareUpdateInProgress);
 
@@ -533,36 +507,58 @@ public static partial class HardwareMonitor
 		if (gpuHardware != null) TryUpdateHardware(gpuHardware, ref s_gpuHardwareUpdateInProgress);
 	}
 
-	private static long s_bytesUploaded;
-	private static long s_bytesDownloaded;
-
 	private static void OnNetworkTimerElapsed(object sender, ElapsedEventArgs e)
 	{
 		if (Interlocked.Exchange(ref s_networkTimerInProgress, 1) == 1) return;
 		try
 		{
 			// If the system is in sleep or hibernate mode, don't update the hardware information.
-			if (!ShouldUpdate) return;
-
-			UpdateNetworkHardware();
-			var totalUploadedBytes = GetNetworkTotalUploadedInBytes();
-			var totalDownloadedBytes = GetNetworkTotalDownloadedInBytes();
-
-			// Values can reset back at zero (eg: after waking from sleep).
-			if (totalUploadedBytes < s_bytesUploaded || totalDownloadedBytes < s_bytesDownloaded)
+			// The last statistics are discarded so that the traffic during the pause is not reported as the speed of a single interval.
+			if (!ShouldUpdate)
 			{
-				s_bytesUploaded = 0;
-				s_bytesDownloaded = 0;
+				s_lastNetworkInterfaceStatistics = [];
+				return;
 			}
 
-			s_uploadSpeedInBytes = totalUploadedBytes - s_bytesUploaded;
-			s_downloadSpeedInBytes = totalDownloadedBytes - s_bytesDownloaded;
+			var uploadedBytes = 0L;
+			var downloadedBytes = 0L;
+			var networkInterfaceStatistics = new Dictionary<string, (long BytesSent, long BytesReceived)>();
+			foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+			{
+				if (!TryGetNetworkInterfaceStatistics(networkInterface, out var statistics)) continue;
 
-			s_bytesUploaded = totalUploadedBytes;
-			s_bytesDownloaded = totalDownloadedBytes;
+				networkInterfaceStatistics[networkInterface.Id] = statistics;
+				if (!s_lastNetworkInterfaceStatistics.TryGetValue(networkInterface.Id, out var lastStatistics)) continue;
+
+				// Values can reset back at zero (eg: after waking from sleep).
+				if (statistics.BytesSent >= lastStatistics.BytesSent) uploadedBytes += statistics.BytesSent - lastStatistics.BytesSent;
+				if (statistics.BytesReceived >= lastStatistics.BytesReceived) downloadedBytes += statistics.BytesReceived - lastStatistics.BytesReceived;
+			}
+
+			s_lastNetworkInterfaceStatistics = networkInterfaceStatistics;
+			s_uploadSpeedInBytes = uploadedBytes;
+			s_downloadSpeedInBytes = downloadedBytes;
 		}
 		catch (Exception exception) { App.WriteException(exception); }
 		finally { Volatile.Write(ref s_networkTimerInProgress, 0); }
+	}
+
+	private static bool TryGetNetworkInterfaceStatistics(NetworkInterface networkInterface, out (long BytesSent, long BytesReceived) statistics)
+	{
+		statistics = default;
+		if (networkInterface.NetworkInterfaceType is NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel or NetworkInterfaceType.Unknown) return false;
+
+		try
+		{
+			// Lightweight filter drivers (eg: QoS Packet Scheduler) are exposed as separate interfaces that mirror the traffic counters of the adapter they are bound to.
+			// They have no IP address, so only interfaces with an IP address are measured to avoid counting the same traffic multiple times.
+			if (networkInterface.GetIPProperties().UnicastAddresses.Count == 0) return false;
+
+			var interfaceStatistics = networkInterface.GetIPv4Statistics();
+			statistics = (interfaceStatistics.BytesSent, interfaceStatistics.BytesReceived);
+			return true;
+		}
+		catch (NetworkInformationException) { return false; } // The interface can disappear between the enumeration and the statistics query.
 	}
 
 	private static void OnStorageTimerElapsed(object sender, ElapsedEventArgs e)

@@ -123,7 +123,6 @@ public sealed partial class MonitorWindow : IDisposable
 
         HardwareMonitor.UpdateCpuHardware();
         HardwareMonitor.UpdateMemoryHardware();
-        HardwareMonitor.UpdateNetworkHardware();
         HardwareMonitor.UpdateStorageHardware();
         HardwareMonitor.UpdateCurrentGpuHardware();
 
