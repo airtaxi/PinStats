@@ -73,7 +73,7 @@ public partial class TaskbarIconHostWindowViewModel : ObservableObject
 
 	private void UpdateVersionNameMenuItem()
 	{
-		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString()[..5];
+		var localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 		VersionNameText = _localizationService.GetFormattedString("Menu.Version", localVersion);
 	}
 
