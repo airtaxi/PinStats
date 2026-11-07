@@ -227,9 +227,8 @@ public partial class App : Application
         var xamlRoot = s_iconHostWindow.Content.XamlRoot;
         MainWindowRasterizationScale = (float)xamlRoot.RasterizationScale;
 
-        await CheckForUpdateAsync();
-
         // Attach the taskbar widget window if any widget items are enabled.
+        // This runs before the update check so that a network that is not ready yet (eg: right after sign-in) does not delay the widget.
         try { await InitializeTaskbarWidgetWindowAsync(); }
         catch (Exception exception) { WriteException(exception); }
 
@@ -238,6 +237,8 @@ public partial class App : Application
 
         // Set the process priority to high to improve performance.
         Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+
+        await CheckForUpdateAsync();
     }
 
     private static TaskbarWidgetWindow s_taskbarWidgetWindow;
